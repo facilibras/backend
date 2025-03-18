@@ -10,5 +10,11 @@ select = ["I", "F", "E", "W", "N", "S", "B", "A", "FBT", "C4", "DTZ", "ASYNC", "
 ignore = ["PLC0414", "PLC0415", "S311"]
 
 [tool.pytest.ini_options]
-addopts = -v
-pythonpath = facilibras
+addopts = "-v"
+pythonpath = "facilibras"
+
+[tool.pyright]
+exclude = ["venv"]
+venvPath = "."
+venv = "venv"
+typeCheckingMode = "basic"
