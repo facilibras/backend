@@ -1,11 +1,13 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, registry
 
 from facilibras.config.env import get_variavel_ambiente
 
-CAMINHO_DB = get_variavel_ambiente("CAMINHO_DB")
+URL_DB = get_variavel_ambiente("URL_DB")
 
-engine = create_engine(CAMINHO_DB)
+registro_tabelas = registry()
+
+engine = create_engine(URL_DB)
 
 
 def get_db_session():
