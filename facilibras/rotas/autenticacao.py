@@ -1,39 +1,33 @@
-from http import HTTPStatus
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select
+from fastapi import APIRouter, Depends
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from facilibras.config.db import get_db_session
-from facilibras.modelos import Usuario
-from facilibras.schemas import CriarUsuario, UsuarioSchema
+from facilibras.controladores import AutenticacaoControle
+from facilibras.schemas import CriarUsuario, LoginSchema, Token, UsuarioSchema
 
 router = APIRouter(tags=["autenticação"])
 
 
+OAuth2 = Annotated[OAuth2PasswordRequestForm, Depends(OAuth2PasswordRequestForm)]
+T_AutenticacaoControle = Annotated[AutenticacaoControle, Depends(AutenticacaoControle)]
 T_Session = Annotated[Session, Depends(get_db_session)]
 
 
-@router.post("/login")
-def login(): ...
+@router.post("/login", response_model=Token)
+def login(
+    dados: OAuth2,
+    controlador: T_AutenticacaoControle,
+    session: T_Session,
+):
+    dados_login = LoginSchema(nome=dados.username, senha=dados.password)
+    return controlador.autenticar_usuario(dados_login, session)
 
 
 @router.post("/registrar", response_model=UsuarioSchema)
-def registrar(usuario: CriarUsuario, session: T_Session): 
-    # TODO: Mover para controlador e usar hash na senha
-    # Checa se o usuário já está cadastrado
-    mesmo_nome = session.scalar(select(Usuario).where(Usuario.nome == usuario.nome))
-    if mesmo_nome:
-        raise HTTPException(
-            status_code=HTTPStatus.CONFLICT,
-            detail='Usuário já registrado, utilize outro nome',
-        )
-    
-    # Registra usuário no banco de dados
-    novo_usuario = Usuario(nome=usuario.nome, senha=usuario.senha)
-    session.add(novo_usuario)
-    session.commit()
-    session.refresh(novo_usuario)
-
-    return novo_usuario
+def registrar(
+    usuario: CriarUsuario, controlador: T_AutenticacaoControle, session: T_Session
+):
+    return controlador.registrar_usuario(usuario, session)

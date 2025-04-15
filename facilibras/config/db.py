@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session, registry
 
 from facilibras.config.env import get_variavel_ambiente
 
-URL_DB = get_variavel_ambiente("URL_DB")
+URL_DB = get_variavel_ambiente("URL_DB", str)
 
 registro_tabelas = registry()
 

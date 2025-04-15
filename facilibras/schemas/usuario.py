@@ -11,3 +11,8 @@ class UsuarioSchema(BaseModel):
 class CriarUsuario(BaseModel):
     nome: str
     senha: str
+
+
+class LoginSchema(BaseModel):
+    nome: str
+    senha: str
