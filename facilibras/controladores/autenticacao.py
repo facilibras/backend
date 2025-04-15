@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from http import HTTPStatus
 from typing import Annotated
 from zoneinfo import ZoneInfo
@@ -37,9 +37,7 @@ class AutenticacaoControle:
         """Cria o JWT baseados nos dados junto com a expiração"""
 
         copia_dados = dados.copy()
-        expiracao = datetime.now(tz=ZoneInfo("UTC")) + timedelta(
-            minutes=EXPIRACAO_MINUTOS
-        )
+        expiracao = datetime.now(timezone.utc) + timedelta(minutes=EXPIRACAO_MINUTOS)
         copia_dados.update({"exp": expiracao})
         return encode(copia_dados, CHAVE)
 
