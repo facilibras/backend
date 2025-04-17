@@ -17,6 +17,7 @@ class Usuario:
         init=False, server_default=func.now()
     )
 
+
 @registro_tabelas.mapped_as_dataclass
 class Tarefas:
     __tablename__ = "tarefas"
@@ -27,6 +28,7 @@ class Tarefas:
     descricao: Mapped[str]
     id_prox_tarefa: Mapped[int] = mapped_column(init=False, default=None)
 
+
 @registro_tabelas.mapped_as_dataclass
 class Secoes:
     __tablename__ = "secoes"
@@ -35,12 +37,14 @@ class Secoes:
     titulo: Mapped[str]
     descricao: Mapped[str]
 
+
 @registro_tabelas.mapped_as_dataclass
 class Palavras:
     __tablename__ = "palavras"
 
     id_palavra: Mapped[int] = mapped_column(init=False, primary_key=True)
     nome: Mapped[str]
+
 
 @registro_tabelas.mapped_as_dataclass
 class Acoes:
@@ -51,6 +55,7 @@ class Acoes:
     nome: Mapped[str]
     funcoes: Mapped[str]
 
+
 @registro_tabelas.mapped_as_dataclass
 class AcoesPalavras:
     __tablename__ = "acoes_palavras"
@@ -59,6 +64,7 @@ class AcoesPalavras:
     id_acao: Mapped[int]
     id_palavra: Mapped[int]
 
+
 @registro_tabelas.mapped_as_dataclass
 class PalavrasTarefas:
     __tablename__ = "palavras_tarefas"
@@ -66,6 +72,7 @@ class PalavrasTarefas:
     id_palavra_tarefa: Mapped[int] = mapped_column(init=False, primary_key=True)
     id_palavra: Mapped[int]
     id_tarefa: Mapped[int]
+
 
 @registro_tabelas.mapped_as_dataclass
 class TarefasUsuario:

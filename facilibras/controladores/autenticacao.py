@@ -1,25 +1,19 @@
 from datetime import datetime, timedelta, timezone
 from http import HTTPStatus
-from typing import Annotated
-from zoneinfo import ZoneInfo
 
-from fastapi import Depends, HTTPException
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi import HTTPException
 from jwt import DecodeError, decode, encode
 from pwdlib import PasswordHash
-from sqlalchemy import select
-from sqlalchemy.orm import Session
 
 from facilibras.config.env import get_variavel_ambiente
+from facilibras.dependencias.autenticacao import T_Token
+from facilibras.dependencias.dal import T_UsuarioDAO
 from facilibras.modelos import Usuario
 from facilibras.schemas import CriarUsuario, LoginSchema, Token
 
 CHAVE = get_variavel_ambiente("CHAVE", str)
 EXPIRACAO_MINUTOS = get_variavel_ambiente("EXPIRACAO_TOKEN", int)
 hasher = PasswordHash.recommended()
-
-# Injeção de dependência do JWT
-T_Token = Annotated[HTTPAuthorizationCredentials, Depends(HTTPBearer())]
 
 
 def usuario_autenticado(token: T_Token):
@@ -33,6 +27,9 @@ def super_usuario(usuario: dict):
 
 
 class AutenticacaoControle:
+    def __init__(self, dao: T_UsuarioDAO) -> None:
+        self.dao = dao
+
     def criar_token(self, dados: dict) -> str:
         """Cria o JWT baseados nos dados junto com a expiração"""
 
@@ -66,42 +63,29 @@ class AutenticacaoControle:
 
         return {"id": id_usuario, "nome": nome, "super": super}
 
-    def registrar_usuario(self, usuario: CriarUsuario, session: Session) -> Usuario:
+    def registrar_usuario(self, dados_usuario: CriarUsuario) -> Usuario:
         # Checa se o usuário já está cadastrado
-        mesmo_nome = session.scalar(select(Usuario).where(Usuario.nome == usuario.nome))
-        if mesmo_nome:
+        usuario = self.dao.buscar_por_nome(dados_usuario.nome)
+        if usuario:
             raise HTTPException(
                 status_code=HTTPStatus.CONFLICT,
                 detail="Usuário já registrado, utilize outro nome",
             )
 
         # Criar hash da senha
-        hash_senha = self._gerar_hash_senha(usuario.senha)
+        hash_senha = self.gerar_hash_senha(dados_usuario.senha)
 
         # Registra usuário no banco de dados
-        novo_usuario = Usuario(nome=usuario.nome, senha=hash_senha)
-        session.add(novo_usuario)
-        session.commit()
-        session.refresh(novo_usuario)
+        novo_usuario = Usuario(nome=dados_usuario.nome, senha=hash_senha)
+        return self.dao.criar(novo_usuario)
 
-        return novo_usuario
+    def autenticar_usuario(self, dados_login: LoginSchema) -> Token:
+        usuario = self.dao.buscar_por_nome(dados_login.nome)
 
-    def _gerar_hash_senha(self, senha_pura: str) -> str:
-        return hasher.hash(senha_pura)
-
-    def _validar_senha(self, senha_pura: str, senha_hash: str) -> bool:
-        return hasher.verify(senha_pura, senha_hash)
-
-    def autenticar_usuario(self, dados_login: LoginSchema, session: Session) -> Token:
-        exc = HTTPException(
-            status_code=HTTPStatus.UNAUTHORIZED, detail="Nome e/ou senha inválidos."
-        )
-        usuario = session.scalar(
-            select(Usuario).where((Usuario.nome == dados_login.nome))
-        )
-
-        if not usuario or not self._validar_senha(dados_login.senha, usuario.senha):
-            raise exc
+        if not usuario or not self.validar_senha(dados_login.senha, usuario.senha):
+            raise HTTPException(
+                status_code=HTTPStatus.UNAUTHORIZED, detail="Nome e/ou senha inválidos."
+            )
 
         dados = {
             "nome_usuario": usuario.nome,
@@ -110,3 +94,9 @@ class AutenticacaoControle:
         }
 
         return Token(token=self.criar_token(dados), tipo="Bearer")
+
+    def gerar_hash_senha(self, senha_pura: str) -> str:
+        return hasher.hash(senha_pura)
+
+    def validar_senha(self, senha_pura: str, senha_hash: str) -> bool:
+        return hasher.verify(senha_pura, senha_hash)
