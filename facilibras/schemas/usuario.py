@@ -5,11 +5,12 @@ from pydantic import BaseModel
 
 class UsuarioSchema(BaseModel):
     nome: str
-    data_registro: datetime
+    registro_em: datetime
 
 
 class CriarUsuario(BaseModel):
     nome: str
+    email: str
     senha: str
 
 

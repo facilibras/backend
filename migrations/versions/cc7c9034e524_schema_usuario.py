@@ -1,8 +1,8 @@
-"""tabela usuarios
+"""Schema Usuario
 
-Revision ID: 7ef37eee5eb4
+Revision ID: cc7c9034e524
 Revises: 
-Create Date: 2025-03-18 00:47:35.259768
+Create Date: 2025-04-20 16:40:26.300013
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '7ef37eee5eb4'
+revision: str = 'cc7c9034e524'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -24,10 +24,18 @@ def upgrade() -> None:
     op.create_table('usuarios',
     sa.Column('id_usuario', sa.Integer(), nullable=False),
     sa.Column('nome', sa.String(), nullable=False),
-    sa.Column('senha', sa.String(), nullable=False),
-    sa.Column('data_registro', sa.DateTime(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
+    sa.Column('email', sa.String(), nullable=False),
+    sa.Column('hash_senha', sa.String(), nullable=False),
+    sa.Column('apelido', sa.String(), nullable=True),
+    sa.Column('img_url_perfil', sa.String(), nullable=True),
+    sa.Column('img_url_fundo', sa.String(), nullable=True),
+    sa.Column('registro_em', sa.DateTime(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
+    sa.Column('atualizado_em', sa.DateTime(), nullable=True),
+    sa.Column('inativo_em', sa.DateTime(), nullable=True),
+    sa.Column('ultimo_login', sa.DateTime(), nullable=True),
     sa.PrimaryKeyConstraint('id_usuario'),
-    sa.UniqueConstraint('nome')
+    sa.UniqueConstraint('apelido'),
+    sa.UniqueConstraint('email')
     )
     # ### end Alembic commands ###
 

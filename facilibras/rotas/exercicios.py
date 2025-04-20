@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, File, UploadFile 
+from fastapi import APIRouter, File, UploadFile
 
 from facilibras.dependencias.controladores import T_ExercicioControle
 
@@ -16,7 +16,7 @@ def pagina_exercicio(exercicio: str, controle: T_ExercicioControle):
 
 @router.post("/{exercicio}/reconhecer")
 def reconhecer_exercicio(
-    exercicio: str, 
+    exercicio: str,
     controle: T_ExercicioControle,
     video: UploadFile = File(...),
 ):

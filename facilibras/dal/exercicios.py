@@ -16,8 +16,8 @@ class ExercicioDAO:
     def listar(self) -> Sequence[Usuario]:
         return self.session.scalars(select(Usuario)).all()
 
-    def listar_por_categoria(self, categoria: str, usuario: str) -> Sequence[Usuario]: 
+    def listar_por_categoria(self, categoria: str, usuario: str) -> Sequence[Usuario]:
         ...
 
-    def listar_categorias(self) -> Sequence[Usuario]: 
+    def listar_categorias(self) -> Sequence[Usuario]:
         ...

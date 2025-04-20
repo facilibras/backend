@@ -7,7 +7,7 @@ class ExercicioControle:
 
     def listar_exercicios(self):
         return self.dao.listar()
-    
+
     def listar_exercicios_por_categoria(self):
         ...
 
