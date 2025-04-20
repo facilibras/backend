@@ -10,11 +10,11 @@ def listar_exercicios(controle: T_ExercicioControle):
     return controle.listar_exercicios()
 
 
-@router.get("/exercicio/{exercicio}")
+@router.get("/{exercicio}")
 def pagina_exercicio(exercicio: str, controle: T_ExercicioControle):
     ...
 
-@router.post("/exercicio/{exercicio}/reconhecer")
+@router.post("/{exercicio}/reconhecer")
 def reconhecer_exercicio(
     exercicio: str, 
     controle: T_ExercicioControle,
