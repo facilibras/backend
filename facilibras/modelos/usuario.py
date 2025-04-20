@@ -8,18 +8,11 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from facilibras.config.db import registro_tabelas
 
 
-class ExercicioStatus(str, Enum):
-    aberto = "A"
-    completo = "C"
-
-
 @registro_tabelas.mapped_as_dataclass
 class Usuario:
     __tablename__ = "usuarios"
 
     id_usuario: Mapped[int] = mapped_column(init=False, primary_key=True)
-
-    # Login
     nome: Mapped[str]
     email: Mapped[str] = mapped_column(unique=True)
     hash_senha: Mapped[str]
@@ -30,12 +23,15 @@ class Usuario:
     img_url_fundo: Mapped[Optional[str]] = mapped_column(default=None)
 
     # Controle
-    registro_em: Mapped[datetime] = mapped_column(
-        init=False, server_default=func.now()
-    )
+    registro_em: Mapped[datetime] = mapped_column(init=False, server_default=func.now())
     atualizado_em: Mapped[Optional[datetime]] = mapped_column(default=None)
     inativo_em: Mapped[Optional[datetime]] = mapped_column(default=None)
     ultimo_login: Mapped[Optional[datetime]] = mapped_column(default=None)
+
+    # Acesso Reverso
+    exercicio_progressos: Mapped[list["ExercicioUsuario"]] = relationship(
+        back_populates="usuario", default_factory=list, cascade="all, delete-orphan"
+    )
 
 
 @registro_tabelas.mapped_as_dataclass
@@ -46,6 +42,12 @@ class Secao:
     titulo: Mapped[str]
     descricao: Mapped[str]
 
+    exercicios: Mapped[list["Exercicio"]] = relationship(
+        init=False,
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
+
 
 @registro_tabelas.mapped_as_dataclass
 class Palavra:
@@ -55,6 +57,11 @@ class Palavra:
     nome: Mapped[str]
     url_video: Mapped[str]
 
+    # Acesso reverso
+    exercicios: Mapped[list["PalavraExercicio"]] = relationship(
+        back_populates="palavra", default_factory=list, cascade="all, delete-orphan"
+    )
+
 
 @registro_tabelas.mapped_as_dataclass
 class Exercicio:
@@ -62,9 +69,18 @@ class Exercicio:
 
     id_exercicio: Mapped[int] = mapped_column(init=False, primary_key=True)
     id_secao: Mapped[int] = mapped_column(ForeignKey("secoes.id_secao"))
+
     titulo: Mapped[str]
     descricao: Mapped[str]
     id_prox_tarefa: Mapped[Optional[int]] = mapped_column(init=False, default=None)
+
+    # Acesso reverso
+    palavras: Mapped[list["PalavraExercicio"]] = relationship(
+        back_populates="exercicio", default_factory=list, cascade="all, delete-orphan"
+    )
+    usuario_progressos: Mapped[list["ExercicioUsuario"]] = relationship(
+        back_populates="exercicio", default_factory=list, cascade="all, delete-orphan"
+    )
 
 
 @registro_tabelas.mapped_as_dataclass
@@ -78,8 +94,13 @@ class PalavraExercicio:
         ForeignKey("exercicios.id_exercicio"), init=False, primary_key=True
     )
 
-    palavras: Mapped[list[Palavra]] = relationship(back_populates="palavras")
-    exercicios: Mapped[list[Exercicio]] = relationship(back_populates="exercicios")
+    palavra: Mapped["Palavra"] = relationship(back_populates="exercicios")
+    exercicio: Mapped["Exercicio"] = relationship(back_populates="palavras")
+
+
+class ExercicioStatus(str, Enum):
+    ABERTO = "A"
+    COMPLETO = "C"
 
 
 @registro_tabelas.mapped_as_dataclass
@@ -90,9 +111,10 @@ class ExercicioUsuario:
         ForeignKey("usuarios.id_usuario"), init=False, primary_key=True
     )
     id_exercicio: Mapped[int] = mapped_column(
-        ForeignKey("exercicio.id_exercicio"), init=False, primary_key=True
+        ForeignKey("exercicios.id_exercicio"), init=False, primary_key=True
     )
     status: Mapped[ExercicioStatus]
 
-    usuario: Mapped[Usuario] = relationship(back_populates="usuarios")
-    exercicios: Mapped[list[Exercicio]] = relationship(back_populates="exercicios")
+    # Acesso Reverso
+    usuario: Mapped["Usuario"] = relationship(back_populates="exercicio_progressos")
+    exercicio: Mapped["Exercicio"] = relationship(back_populates="usuario_progressos")
