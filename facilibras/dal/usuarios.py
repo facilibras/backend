@@ -15,4 +15,6 @@ class UsuarioDAO:
         return usuario
 
     def buscar_por_nome(self, nome: str) -> Usuario | None:
-        return self.session.scalar(select(Usuario).where(Usuario.nome == nome))
+        return self.session.scalar(
+            select(Usuario).where(Usuario.nome == nome)
+        )
