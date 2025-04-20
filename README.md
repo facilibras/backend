@@ -18,9 +18,9 @@ Backend do Facilibras
      ```
    - Editar o arquivo `.env` conforme necessário.
 
-3. Aplique as migrações do banco de dados:
+3. Inicie o banco de dados:
    ```bash
-   alembic upgrade head
+   python popular_db.py
    ```
 4. Inicie o servidor FastAPI:  
    ```bash
