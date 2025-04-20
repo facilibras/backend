@@ -1,1 +1,1 @@
-from facilibras.modelos.usuario import Usuario as Usuario
+from facilibras.modelos.usuario import Usuarios as Usuario
