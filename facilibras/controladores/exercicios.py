@@ -6,7 +6,7 @@ from fastapi import HTTPException, UploadFile
 
 from facilibras.dependencias.dal import T_ExercicioDAO, T_SecaoDAO
 from facilibras.modelos import Exercicio, ExercicioStatus, Secao
-from facilibras.schemas import ExercicioSchema, FeedbackExercicioSchema
+from facilibras.schemas import ExercicioSchema, FeedbackExercicioSchema, SecaoSchema
 
 
 class ExercicioControle:
@@ -14,8 +14,9 @@ class ExercicioControle:
         self.exercicio_dao = exercicio_dao
         self.secao_dao = secao_dao
 
-    def listar_secoes(self) -> Sequence[Secao]:
-        return self.secao_dao.listar_todas()
+    def listar_secoes(self) -> list[SecaoSchema]:
+        secoes = self.secao_dao.listar_todas_com_quantidade()
+        return converter_secao_para_schema(secoes)
 
     def listar_exercicios(self, id_usuario: int | None) -> Sequence[ExercicioSchema]:
         status = {}
@@ -23,7 +24,7 @@ class ExercicioControle:
         if id_usuario:
             status = self.exercicio_dao.listar_status_exercicios(exs, id_usuario)
 
-        return converter_exercicos_para_schema(exs, status)
+        return converter_exercicios_para_schema(exs, status)
 
     def listar_exercicio_por_nome(
         self, nome: str, id_usuario: int | None
@@ -40,7 +41,7 @@ class ExercicioControle:
                 detail=exc_msg,
             )
 
-        return converter_exercicos_para_schema(exs, status)[0]
+        return converter_exercicios_para_schema(exs, status)[0]
 
     def listar_exercicios_por_secao(
         self, nome_secao: str, id_usuario: int | None
@@ -58,7 +59,7 @@ class ExercicioControle:
         if id_usuario:
             status = self.exercicio_dao.listar_status_exercicios(exs, id_usuario)
 
-        return converter_exercicos_para_schema(exs, status)
+        return converter_exercicios_para_schema(exs, status)
 
     def reconhecer_exercicio(
         self, nome_exercicio: str, video: UploadFile, usuario: int | None
@@ -84,7 +85,7 @@ class ExercicioControle:
         )
 
 
-def converter_exercicos_para_schema(
+def converter_exercicios_para_schema(
     exercicios: Sequence[Exercicio],
     status_por_exercicio: dict[int, ExercicioStatus] | dict[int, None],
 ) -> Sequence[ExercicioSchema]:
@@ -115,3 +116,7 @@ def converter_exercicos_para_schema(
         exercicio_schemas.append(schema)
 
     return exercicio_schemas
+
+
+def converter_secao_para_schema(secoes: list[tuple[Secao, int]]) -> list[SecaoSchema]:
+    return [SecaoSchema(nome=secao.titulo, qtd_ex=qtd_ex) for secao, qtd_ex in secoes]

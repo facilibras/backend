@@ -5,6 +5,9 @@ from facilibras.schemas.exercicios import (
 from facilibras.schemas.exercicios import (
     FeedbackExercicioSchema as FeedbackExercicioSchema,
 )
+from facilibras.schemas.exercicios import (
+    SecaoSchema as SecaoSchema,
+)
 from facilibras.schemas.generico import MensagemSchema as MensagemSchema
 from facilibras.schemas.usuario import CriarUsuario as CriarUsuario
 from facilibras.schemas.usuario import LoginSchema as LoginSchema
