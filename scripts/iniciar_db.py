@@ -22,7 +22,7 @@ if __name__ == "__main__":
     alembic_cfg = Config("alembic.ini")
     command.upgrade(alembic_cfg, "head")
 
-    with open("links_drive.json", "r", encoding="utf-8") as f:
+    with open("data/links_drive.json", "r", encoding="utf-8") as f:
         links_drive = load(f)
 
     with Session(engine) as session:
