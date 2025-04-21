@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from pydantic import BaseModel
 
 
@@ -22,4 +20,4 @@ class ExercicioSchema(BaseModel):
 
 class SecaoSchema(BaseModel):
     nome: str
-    registro_em: datetime
+    qtd_ex: int

@@ -3,7 +3,7 @@ from string import ascii_uppercase
 
 from alembic import command
 from alembic.config import Config
-from sqlalchemy import select, desc
+from sqlalchemy import desc, select
 from sqlalchemy.orm import Session
 
 from facilibras.config.db import engine
@@ -55,7 +55,7 @@ if __name__ == "__main__":
                 descricao=f"TODO: Instruções p/ {palavra.nome} em formato texto",
                 secao=alfabeto,
             )
-            
+
             pe = PalavraExercicio(palavra=palavra, exercicio=ex)
             exercicios.append(ex)
             palavra_exercicios.append(pe)
@@ -76,8 +76,8 @@ if __name__ == "__main__":
         # Prox. Exercicios
         exercicios_alfabeto = session.scalars(
             select(Exercicio)
-                .where(Exercicio.id_secao == alfabeto.id_secao)
-                .order_by(desc(Exercicio.id_exercicio))
+            .where(Exercicio.id_secao == alfabeto.id_secao)
+            .order_by(desc(Exercicio.id_exercicio))
         ).all()
 
         anterior = None
@@ -87,8 +87,8 @@ if __name__ == "__main__":
 
         exercicios_numero = session.scalars(
             select(Exercicio)
-                .where(Exercicio.id_secao == numeros.id_secao)
-                .order_by(desc(Exercicio.id_exercicio))
+            .where(Exercicio.id_secao == numeros.id_secao)
+            .order_by(desc(Exercicio.id_exercicio))
         ).all()
 
         anterior = None

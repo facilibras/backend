@@ -6,9 +6,9 @@ from sqlalchemy.orm import selectinload
 from facilibras.dependencias.db import T_Session
 from facilibras.modelos import (
     Exercicio,
-    PalavraExercicio,
     ExercicioStatus,
     ExercicioUsuario,
+    PalavraExercicio,
 )
 
 
@@ -20,39 +20,52 @@ class ExercicioDAO:
         stmt = select(Exercicio).options(
             selectinload(Exercicio.secao),
             selectinload(Exercicio.palavras).selectinload(PalavraExercicio.palavra),
+            selectinload(Exercicio.prox_exercicio),
         )
 
         return self.session.scalars(stmt).all()
 
-    def listar_todos_com_status_usuario(
-        self, usuario_id: int
-    ) -> tuple[Sequence[Exercicio], dict[int, ExercicioStatus]]:
-        stmt_exercicios = select(Exercicio).options(
-            selectinload(Exercicio.secao),
-            selectinload(Exercicio.palavras).selectinload(PalavraExercicio.palavra),
+    def listar_por_secao(self, secao: int) -> Sequence[Exercicio]:
+        stmt = (
+            select(Exercicio)
+            .where(Exercicio.id_secao == secao)
+            .options(
+                selectinload(Exercicio.secao),
+                selectinload(Exercicio.palavras).selectinload(PalavraExercicio.palavra),
+                selectinload(Exercicio.prox_exercicio),
+            )
+            .order_by(Exercicio.id_exercicio)
         )
 
-        exercicios = self.session.scalars(stmt_exercicios).all()
+        return self.session.scalars(stmt).all()
 
-        stmt_status_usuario = select(
-            ExercicioUsuario.id_exercicio, ExercicioUsuario.status
-        ).where(ExercicioUsuario.id_usuario == usuario_id)
+    def listar_por_nome(self, nome: str) -> Sequence[Exercicio]:
+        stmt = (
+            select(Exercicio)
+            .where(Exercicio.titulo == nome)
+            .options(
+                selectinload(Exercicio.secao),
+                selectinload(Exercicio.palavras).selectinload(PalavraExercicio.palavra),
+                selectinload(Exercicio.prox_exercicio),
+            )
+        )
 
-        resultados_status = self.session.execute(stmt_status_usuario).all()
-        status_por_exercicio = {
-            col.id_exercicio: col.status for col in resultados_status
-        }
+        return self.session.scalars(stmt).all()
 
-        return exercicios, status_por_exercicio
+    def listar_status_exercicios(
+        self, exercicios: Sequence[Exercicio], id_usuario: int
+    ) -> dict[int, ExercicioStatus]:
+        exercicio_ids = [e.id_exercicio for e in exercicios]
 
-    def listar_por_secao(
-        self, secao: int, usuario_id: int | None
-    ) -> Sequence[Exercicio]:
-        # TODO: Retornar com o progresso do usuário
-        return self.session.scalars(
-            select(Exercicio).where(Exercicio.id_secao == secao)
-        ).all()
+        if exercicio_ids:
+            stmt_status_usuario = select(
+                ExercicioUsuario.id_exercicio, ExercicioUsuario.status
+            ).where(
+                ExercicioUsuario.id_usuario == id_usuario,
+                ExercicioUsuario.id_exercicio.in_(exercicio_ids),
+            )
 
-    def listar_por_nome(self, nome: str, usuario_id: int | None) -> Exercicio | None:
-        # TODO: Retornar com o progresso do usuário
-        return self.session.scalar(select(Exercicio).where(Exercicio.titulo == nome))
+            resultados_status = self.session.execute(stmt_status_usuario).all()
+            status = {col.id_exercicio: col.status for col in resultados_status}
+
+        return status
