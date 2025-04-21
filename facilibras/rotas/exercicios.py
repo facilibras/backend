@@ -1,34 +1,35 @@
 from fastapi import APIRouter, File, UploadFile
 
 from facilibras.dependencias.controladores import T_ExercicioControle
+from facilibras.schemas import FeedbackExercicioSchema, ExercicioSchema
 
 router = APIRouter(prefix="/exercicios", tags=["exercícios"])
 
 
-@router.get("/")
+@router.get("/", response_model=list[ExercicioSchema])
 def listar_exercicios(controle: T_ExercicioControle):
-    return controle.listar_exercicios()
+    return controle.listar_exercicios(None)
 
 
 @router.get("/{exercicio}")
 def pagina_exercicio(exercicio: str, controle: T_ExercicioControle):
-    ...
+    return controle.listar_exercicio_por_nome(exercicio, None)
 
-@router.post("/{exercicio}/reconhecer")
+
+@router.post("/{exercicio}/reconhecer", response_model=FeedbackExercicioSchema)
 def reconhecer_exercicio(
     exercicio: str,
     controle: T_ExercicioControle,
     video: UploadFile = File(...),
 ):
-    if not video.content_type or not video.content_type.startswith('video/'):
-        return "O arquivo enviado não parece ser um vídeo."
-    return "Vídeo recebido com sucesso."
-
-@router.get("/categorias")
-def listar_categorias(controle: T_ExercicioControle):
-    return ["Alfabeto", "Números"]
+    return controle.reconhecer_exercicio(exercicio, video, None)
 
 
-@router.get("/categorias/{categoria}")
-def listar_por_categoria(categoria: str, controle: T_ExercicioControle):
-    return [f"{categoria}_1", f"{categoria}_2", f"{categoria}_3"]
+@router.get("/secoes")
+def listar_secoes(controle: T_ExercicioControle):
+    return controle.listar_secoes()
+
+
+@router.get("/secoes/{secao}")
+def listar_por_secao(secao: str, controle: T_ExercicioControle):
+    return controle.listar_exercicios_por_secao(secao, None)

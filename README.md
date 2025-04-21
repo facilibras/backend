@@ -20,7 +20,7 @@ Backend do Facilibras
 
 3. Inicie o banco de dados:
    ```bash
-   python popular_db.py
+   python iniciar_db.py
    ```
 4. Inicie o servidor FastAPI:  
    ```bash

@@ -68,13 +68,23 @@ class Exercicio:
     __tablename__ = "exercicios"
 
     id_exercicio: Mapped[int] = mapped_column(init=False, primary_key=True)
-    id_secao: Mapped[int] = mapped_column(ForeignKey("secoes.id_secao"))
+    id_secao: Mapped[int] = mapped_column(ForeignKey("secoes.id_secao"), init=False)
+    id_prox_exercicio: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("exercicios.id_exercicio"),
+        init=False,
+        default=None
+    )
 
     titulo: Mapped[str]
     descricao: Mapped[str]
-    id_prox_tarefa: Mapped[Optional[int]] = mapped_column(init=False, default=None)
 
     # Acesso reverso
+    prox_exercicio: Mapped[Optional["Exercicio"]] = relationship(
+        remote_side=[id_exercicio],
+        init=False,
+        default=None
+    )
+    secao: Mapped["Secao"] = relationship(back_populates="exercicios")
     palavras: Mapped[list["PalavraExercicio"]] = relationship(
         back_populates="exercicio", default_factory=list, cascade="all, delete-orphan"
     )

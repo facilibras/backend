@@ -1,8 +1,8 @@
 """Schema Exercicios
 
-Revision ID: 3cca2c3a1e4c
+Revision ID: da82a3e5a119
 Revises: cc7c9034e524
-Create Date: 2025-04-20 19:06:51.365845
+Create Date: 2025-04-21 00:02:49.487534
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '3cca2c3a1e4c'
+revision: str = 'da82a3e5a119'
 down_revision: Union[str, None] = 'cc7c9034e524'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -36,9 +36,10 @@ def upgrade() -> None:
     op.create_table('exercicios',
     sa.Column('id_exercicio', sa.Integer(), nullable=False),
     sa.Column('id_secao', sa.Integer(), nullable=False),
+    sa.Column('id_prox_exercicio', sa.Integer(), nullable=True),
     sa.Column('titulo', sa.String(), nullable=False),
     sa.Column('descricao', sa.String(), nullable=False),
-    sa.Column('id_prox_tarefa', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['id_prox_exercicio'], ['exercicios.id_exercicio'], ),
     sa.ForeignKeyConstraint(['id_secao'], ['secoes.id_secao'], ),
     sa.PrimaryKeyConstraint('id_exercicio')
     )

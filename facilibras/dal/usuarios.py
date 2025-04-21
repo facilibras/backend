@@ -15,6 +15,4 @@ class UsuarioDAO:
         return usuario
 
     def buscar_por_email(self, email: str) -> Usuario | None:
-        return self.session.scalar(
-            select(Usuario).where(Usuario.email == email)
-        )
+        return self.session.scalar(select(Usuario).where(Usuario.email == email))

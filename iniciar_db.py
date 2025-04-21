@@ -3,6 +3,7 @@ from string import ascii_uppercase
 
 from alembic import command
 from alembic.config import Config
+from sqlalchemy import select, desc
 from sqlalchemy.orm import Session
 
 from facilibras.config.db import engine
@@ -24,7 +25,6 @@ if __name__ == "__main__":
     with open("links_drive.json", "r", encoding="utf-8") as f:
         links_drive = load(f)
 
-    print("Populando o banco de dados")
     with Session(engine) as session:
         # Usuários e Seções
         usuario = Usuario("João", "joao@exemplo.com", "123")
@@ -32,11 +32,11 @@ if __name__ == "__main__":
         numeros = Secao("Números", "Aprenda e pratique os números do 0 ao 9")
 
         alfabeto_dict = {
-            f"letra_{letra}": Palavra(f"Letra{letra}", links_drive[letra])
+            f"letra_{letra.lower()}": Palavra(f"Letra{letra}", links_drive[letra])
             for letra in ascii_uppercase + "Ç"
         }
         numeros_dict = {
-            f"numero_{numero}" : Palavra(str(numero), links_drive[str(numero)])
+            f"numero_{numero}": Palavra(str(numero), links_drive[str(numero)])
             for numero in range(10)
         }
 
@@ -49,17 +49,53 @@ if __name__ == "__main__":
         # Exercícios
         exercicios = []
         palavra_exercicios = []
-        for sinal, palavra in (alfabeto_dict|numeros_dict).items():
+        for sinal, palavra in alfabeto_dict.items():
             ex = Exercicio(
-                alfabeto.id_secao,
-                sinal.lower(),
-                f"TODO: Instruções p/ {palavra.nome} em formato texto"
+                titulo=sinal,
+                descricao=f"TODO: Instruções p/ {palavra.nome} em formato texto",
+                secao=alfabeto,
+            )
+            
+            pe = PalavraExercicio(palavra=palavra, exercicio=ex)
+            exercicios.append(ex)
+            palavra_exercicios.append(pe)
+
+        for sinal, palavra in numeros_dict.items():
+            ex = Exercicio(
+                titulo=sinal,
+                descricao=f"TODO: Instruções p/ {palavra.nome} em formato texto",
+                secao=numeros,
             )
             pe = PalavraExercicio(palavra=palavra, exercicio=ex)
             exercicios.append(ex)
             palavra_exercicios.append(pe)
 
         session.add_all(exercicios + palavra_exercicios)
+        session.commit()
+
+        # Prox. Exercicios
+        exercicios_alfabeto = session.scalars(
+            select(Exercicio)
+                .where(Exercicio.id_secao == alfabeto.id_secao)
+                .order_by(desc(Exercicio.id_exercicio))
+        ).all()
+
+        anterior = None
+        for ex in exercicios_alfabeto:
+            ex.prox_exercicio = anterior
+            anterior = ex
+
+        exercicios_numero = session.scalars(
+            select(Exercicio)
+                .where(Exercicio.id_secao == numeros.id_secao)
+                .order_by(desc(Exercicio.id_exercicio))
+        ).all()
+
+        anterior = None
+        for ex in exercicios_numero:
+            ex.prox_exercicio = anterior
+            anterior = ex
+
         session.commit()
 
         # Progresso
@@ -73,5 +109,5 @@ if __name__ == "__main__":
         ]
         session.add_all(completos + abertos)
         session.commit()
-    
+
     print("Migrações e inserção de dados iniciais aplicados com sucesso!")

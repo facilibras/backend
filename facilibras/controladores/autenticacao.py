@@ -87,7 +87,7 @@ class AutenticacaoControle:
         if not usuario or not self.validar_senha(dados_login.senha, usuario.hash_senha):
             raise HTTPException(
                 status_code=HTTPStatus.UNAUTHORIZED,
-                detail="Email e/ou senha inválido[s]."
+                detail="Email e/ou senha inválido[s].",
             )
 
         dados = {
