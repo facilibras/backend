@@ -9,3 +9,6 @@ from fastapi.security import (
 
 T_OAuth2 = Annotated[OAuth2PasswordRequestForm, Depends(OAuth2PasswordRequestForm)]
 T_Token = Annotated[HTTPAuthorizationCredentials, Depends(HTTPBearer())]
+T_TokenOpcional = Annotated[
+    HTTPAuthorizationCredentials | None, Depends(HTTPBearer(auto_error=False))
+]

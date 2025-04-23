@@ -6,7 +6,7 @@ from jwt import DecodeError, decode, encode
 from pwdlib import PasswordHash
 
 from facilibras.config.env import get_variavel_ambiente
-from facilibras.dependencias.autenticacao import T_Token
+from facilibras.dependencias.autenticacao import T_Token, T_TokenOpcional
 from facilibras.dependencias.dal import T_UsuarioDAO
 from facilibras.modelos import Usuario
 from facilibras.schemas import CriarUsuario, LoginSchema, Token
@@ -18,6 +18,13 @@ hasher = PasswordHash.recommended()
 
 def usuario_autenticado(token: T_Token):
     """Retorna o usuário autenticado através do token"""
+    return AutenticacaoControle.decodificar_token(token)
+
+
+def usuario_opcional(token: T_TokenOpcional = None):
+    """Retorna o usuário autenticado ou visitante através do token"""
+    if token is None:
+        return None
 
     return AutenticacaoControle.decodificar_token(token)
 
@@ -50,9 +57,9 @@ class AutenticacaoControle:
         try:
             # Decodificada os dados do token
             payload = decode(token.credentials, CHAVE, algorithms=["HS256"])
-            nome = payload.get("sub")
+            nome = payload.get("nome_usuario")
             id_usuario = payload.get("id_usuario")
-            super_usuario = payload.get("super")
+            super_usuario = payload.get("super_usuario")
 
             # Se não encontrar quer dizer que o token está em formato inválido
             if not nome or not super_usuario or not id_usuario:

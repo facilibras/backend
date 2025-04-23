@@ -1,9 +1,17 @@
 from fastapi import APIRouter, File, UploadFile
 
 from facilibras.dependencias.controladores import T_ExercicioControle
+from facilibras.dependencias.usuario import T_UsuarioOpcional
 from facilibras.schemas import ExercicioSchema, FeedbackExercicioSchema
 
 router = APIRouter(prefix="/exercicios", tags=["exercícios"])
+
+
+@router.get("/test")
+def test(usuario: T_UsuarioOpcional):
+    if usuario:
+        return {"mensagem": f"Olá, {usuario['nome']}! Você está autenticado."}
+    return {"mensagem": "Olá, visitante! Você não está autenticado."}
 
 
 @router.get("/secoes")
