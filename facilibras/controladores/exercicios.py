@@ -1,12 +1,18 @@
+import os
+import shutil
+import uuid
 from http import HTTPStatus
-from random import randint
 from typing import Sequence
 
 from fastapi import HTTPException, UploadFile
 
+from facilibras.controladores.reconhecimento import reconhecer_video
 from facilibras.dependencias.dal import T_ExercicioDAO, T_SecaoDAO
 from facilibras.modelos import Exercicio, ExercicioStatus, Secao
+from facilibras.modelos.sinais import get_sinal
 from facilibras.schemas import ExercicioSchema, FeedbackExercicioSchema, SecaoSchema
+
+TEMP_DIR = "videos"
 
 
 class ExercicioControle:
@@ -64,12 +70,14 @@ class ExercicioControle:
     def reconhecer_exercicio(
         self, nome_exercicio: str, video: UploadFile, usuario: int | None
     ) -> FeedbackExercicioSchema:
+        # Checa se realmente é um vídeo
         if not video.content_type or not video.content_type.startswith("video/"):
             raise HTTPException(
                 status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
                 detail="O arquivo enviado não parece ser um vídeo.",
             )
 
+        # Checa se o exercício existe
         exercicio = self.exercicio_dao.listar_por_nome(nome_exercicio)
         if not exercicio:
             exc_msg = f"Exercício com nome {nome_exercicio} não encontrado"
@@ -78,10 +86,39 @@ class ExercicioControle:
                 detail=exc_msg,
             )
 
-        # TODO: Reconhecer o sinal
+        # Checa se os sinais do exercício existe
+        try:
+            nome_sinal = exercicio[0].palavras[0].nome_palavra
+            sinal = get_sinal(nome_sinal)
+        except ValueError:
+            exc_msg = f"Sinal com nome {nome_sinal} não encontrado"
+            raise HTTPException(
+                status_code=HTTPStatus.NOT_FOUND,
+                detail=exc_msg,
+            ) from None
+
+        # Salva o vídeo temporariamente para reconhecer
+        os.makedirs(TEMP_DIR, exist_ok=True)
+        if video.filename:
+            extensao = os.path.splitext(video.filename)[1]
+            nome_arquivo_temp = f"{uuid.uuid4().hex}{extensao}"
+            caminho_arquivo_temp = os.path.join(TEMP_DIR, nome_arquivo_temp)
+            with open(caminho_arquivo_temp, "wb") as buffer:
+                shutil.copyfileobj(video.file, buffer)
+
+        # Usa o video para reconhecer
+        sucesso = reconhecer_video(sinal, caminho_arquivo_temp)
+
+        # Apaga o arquivo temporário
+        os.remove(caminho_arquivo_temp)
+
+        msg = "Inserir feedback do que deu errado..."
+        if sucesso:
+            msg = "Parabéns! Você realizou o sinal corretamente"
+
         return FeedbackExercicioSchema(
-            sucesso=bool(randint(0, 1)),
-            mensagem=f"Vídeo p/ {exercicio[0].titulo} recebido com sucesso.",
+            sucesso=sucesso,
+            mensagem=msg,
         )
 
 

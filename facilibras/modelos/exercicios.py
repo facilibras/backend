@@ -79,6 +79,10 @@ class PalavraExercicio:
     palavra: Mapped["Palavra"] = relationship(back_populates="exercicios")
     exercicio: Mapped["Exercicio"] = relationship(back_populates="palavras")
 
+    @property
+    def nome_palavra(self) -> str:
+        return self.palavra.nome
+
 
 class ExercicioStatus(str, Enum):
     ABERTO = "A"

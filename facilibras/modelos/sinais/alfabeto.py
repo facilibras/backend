@@ -2,7 +2,7 @@ from facilibras.modelos.mao import Dedo, Inclinacao, Movimento, Orientacao
 from facilibras.modelos.sinais import Categoria, SinalLibras
 
 LetraA = (
-    SinalLibras(Categoria.ALFABETO, "A")
+    SinalLibras(Categoria.ALFABETO, "letra_a")
     .mao(
         Dedo.POLEGAR_CIMA,
         Dedo.INDICADOR_BAIXO,
@@ -14,7 +14,7 @@ LetraA = (
 )
 
 LetraB = (
-    SinalLibras(Categoria.ALFABETO, "B")
+    SinalLibras(Categoria.ALFABETO, "letra_b")
     .mao(
         Dedo.POLEGAR_DENTRO,
         Dedo.INDICADOR_BAIXO,
@@ -26,7 +26,7 @@ LetraB = (
 )
 
 LetraC = (
-    SinalLibras(Categoria.ALFABETO, "C")
+    SinalLibras(Categoria.ALFABETO, "letra_c")
     .mao(
         Dedo.POLEGAR_CURVADO,
         Dedo.INDICADOR_CURVADO,
@@ -38,7 +38,7 @@ LetraC = (
 )
 
 LetraCC = (
-    SinalLibras(Categoria.ALFABETO, "Ç")
+    SinalLibras(Categoria.ALFABETO, "letra_ç")
     .mao(
         Dedo.POLEGAR_CURVADO,
         Dedo.INDICADOR_CURVADO,
@@ -59,7 +59,7 @@ LetraCC = (
 )
 
 LetraD = (
-    SinalLibras(Categoria.ALFABETO, "D")
+    SinalLibras(Categoria.ALFABETO, "letra_d")
     .mao(
         Dedo.INDICADOR_ENC_POLEGAR,
         Dedo.MEDIO_ENC_POLEGAR,
@@ -70,7 +70,7 @@ LetraD = (
 )
 
 LetraE = (
-    SinalLibras(Categoria.ALFABETO, "E")
+    SinalLibras(Categoria.ALFABETO, "letra_e")
     .mao(
         Dedo.POLEGAR_DENTRO,
         Dedo.INDICADOR_FLEXIONADO,
@@ -82,7 +82,7 @@ LetraE = (
 )
 
 LetraF = (
-    SinalLibras(Categoria.ALFABETO, "F")
+    SinalLibras(Categoria.ALFABETO, "letra_f")
     .mao(
         Dedo.POLEGAR_CIMA,
         Dedo.INDICADOR_FRENTE_90,
@@ -94,7 +94,7 @@ LetraF = (
 )
 
 LetraG = (
-    SinalLibras(Categoria.ALFABETO, "G")
+    SinalLibras(Categoria.ALFABETO, "letra_g")
     .mao(
         Dedo.POLEGAR_CIMA,
         Dedo.INDICADOR_CIMA,
@@ -106,7 +106,7 @@ LetraG = (
 )
 
 LetraH = (
-    SinalLibras(Categoria.ALFABETO, "H")
+    SinalLibras(Categoria.ALFABETO, "letra_h")
     .mao(
         Dedo.POLEGAR_DENTRO,
         Dedo.INDICADOR_FRENTE_90,
@@ -127,7 +127,7 @@ LetraH = (
 )
 
 LetraI = (
-    SinalLibras(Categoria.ALFABETO, "I")
+    SinalLibras(Categoria.ALFABETO, "letra_i")
     .mao(
         Dedo.POLEGAR_DENTRO,
         Dedo.INDICADOR_BAIXO,
@@ -139,7 +139,7 @@ LetraI = (
 )
 
 LetraJ = (
-    SinalLibras(Categoria.ALFABETO, "J")
+    SinalLibras(Categoria.ALFABETO, "letra_j")
     .mao(
         Dedo.POLEGAR_DENTRO,
         Dedo.INDICADOR_BAIXO,
@@ -161,7 +161,7 @@ LetraJ = (
 )
 
 LetraK = (
-    SinalLibras(Categoria.ALFABETO, "K")
+    SinalLibras(Categoria.ALFABETO, "letra_k")
     .mao(
         Dedo.POLEGAR_DENTRO,
         Dedo.INDICADOR_FRENTE_90,
@@ -174,7 +174,7 @@ LetraK = (
 )
 
 LetraL = (
-    SinalLibras(Categoria.ALFABETO, "L")
+    SinalLibras(Categoria.ALFABETO, "letra_l")
     .mao(
         Dedo.POLEGAR_FORA,
         Dedo.INDICADOR_CIMA,
@@ -186,7 +186,7 @@ LetraL = (
 )
 
 LetraM = (
-    SinalLibras(Categoria.ALFABETO, "M")
+    SinalLibras(Categoria.ALFABETO, "letra_m")
     .mao(
         Dedo.POLEGAR_DENTRO,
         Dedo.INDICADOR_CIMA,
@@ -198,7 +198,7 @@ LetraM = (
 )
 
 LetraN = (
-    SinalLibras(Categoria.ALFABETO, "N")
+    SinalLibras(Categoria.ALFABETO, "letra_n")
     .mao(
         Dedo.POLEGAR_DENTRO,
         Dedo.INDICADOR_CIMA,
@@ -210,7 +210,7 @@ LetraN = (
 )
 
 LetraO = (
-    SinalLibras(Categoria.ALFABETO, "O")
+    SinalLibras(Categoria.ALFABETO, "letra_o")
     .mao(
         Dedo.INDICADOR_ENC_POLEGAR,
         Dedo.MEDIO_ENC_POLEGAR,
@@ -221,7 +221,7 @@ LetraO = (
 )
 
 LetraP = (
-    SinalLibras(Categoria.ALFABETO, "P")
+    SinalLibras(Categoria.ALFABETO, "letra_p")
     .mao(
         Dedo.POLEGAR_DENTRO,
         Dedo.INDICADOR_FRENTE_90,
@@ -234,7 +234,7 @@ LetraP = (
 )
 
 LetraQ = (
-    SinalLibras(Categoria.ALFABETO, "Q")
+    SinalLibras(Categoria.ALFABETO, "letra_q")
     .mao(
         Dedo.POLEGAR_CIMA,
         Dedo.INDICADOR_CIMA,
@@ -246,7 +246,7 @@ LetraQ = (
 )
 
 LetraR = (
-    SinalLibras(Categoria.ALFABETO, "R")
+    SinalLibras(Categoria.ALFABETO, "letra_r")
     .mao(
         Dedo.POLEGAR_DENTRO,
         Dedo.INDICADOR_MEDIO_CRUZADO,
@@ -257,7 +257,7 @@ LetraR = (
 )
 
 LetraS = (
-    SinalLibras(Categoria.ALFABETO, "S")
+    SinalLibras(Categoria.ALFABETO, "letra_s")
     .mao(
         Dedo.POLEGAR_DENTRO,
         Dedo.INDICADOR_BAIXO,
@@ -269,7 +269,7 @@ LetraS = (
 )
 
 LetraT = (
-    SinalLibras(Categoria.ALFABETO, "T")
+    SinalLibras(Categoria.ALFABETO, "letra_t")
     .mao(
         Dedo.POLEGAR_DENTRO,
         Dedo.INDICADOR_FRENTE_90,
@@ -281,7 +281,7 @@ LetraT = (
 )
 
 LetraU = (
-    SinalLibras(Categoria.ALFABETO, "U")
+    SinalLibras(Categoria.ALFABETO, "letra_u")
     .mao(
         Dedo.POLEGAR_DENTRO,
         Dedo.INDICADOR_ENC_MEDIO,
@@ -292,7 +292,7 @@ LetraU = (
 )
 
 LetraV = (
-    SinalLibras(Categoria.ALFABETO, "V")
+    SinalLibras(Categoria.ALFABETO, "letra_v")
     .mao(
         Dedo.POLEGAR_DENTRO,
         Dedo.INDICADOR_DIST_MEDIO,
@@ -303,7 +303,7 @@ LetraV = (
 )
 
 LetraW = (
-    SinalLibras(Categoria.ALFABETO, "W")
+    SinalLibras(Categoria.ALFABETO, "letra_w")
     .mao(
         Dedo.POLEGAR_DENTRO,
         Dedo.INDICADOR_DIST_MEDIO,
@@ -314,7 +314,7 @@ LetraW = (
 )
 
 LetraX = (
-    SinalLibras(Categoria.ALFABETO, "X")
+    SinalLibras(Categoria.ALFABETO, "letra_x")
     .mao(
         Dedo.POLEGAR_DENTRO,
         Dedo.INDICADOR_FLEXIONADO,
@@ -327,7 +327,7 @@ LetraX = (
 )
 
 LetraY = (
-    SinalLibras(Categoria.ALFABETO, "Y")
+    SinalLibras(Categoria.ALFABETO, "letra_y")
     .mao(
         Dedo.POLEGAR_FORA,
         Dedo.INDICADOR_BAIXO,
@@ -347,7 +347,7 @@ LetraY = (
     .orientacao_palma(Orientacao.FRENTE)
 )
 LetraZ = (
-    SinalLibras(Categoria.ALFABETO, "Z")
+    SinalLibras(Categoria.ALFABETO, "letra_z")
     .mao(
         Dedo.POLEGAR_DENTRO,
         Dedo.INDICADOR_CIMA,

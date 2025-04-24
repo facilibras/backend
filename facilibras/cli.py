@@ -24,12 +24,13 @@ def letra(
         None, "--video", "-v", help="URL do vídeo associado à letra"
     ),
 ):
-    
-    from facilibras.controladores.reconhecimento import reconhecer_video, reconhecer_webcam
+    from facilibras.controladores.reconhecimento import (
+        reconhecer_video,
+        reconhecer_webcam,
+    )
 
-    letra = letra.upper()
-    typer.echo(f"Reconhecendo a letra: {letra}")
-    sinal = get_sinal(letra)
+    typer.echo(f"Reconhecendo a letra: {letra.upper()}")
+    sinal = get_sinal(f"letra_{letra.lower()}")
     if video:
         typer.echo(f"Vídeo: {video}")
         res = reconhecer_video(sinal, video)
