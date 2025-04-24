@@ -30,7 +30,6 @@ TEMPO_TOTAL = 5
 
 def reconhecer_webcam(sinal: SinalLibras) -> bool:
     sinal.preparar_reconhecimento()
-
     gerador = Camera(0)
 
     match sinal.tipo:
@@ -51,7 +50,9 @@ def reconhecer_estatico(
     frame_idx = 0
     resultado = False
 
-    with modelo_mao(min_detection_confidence=0.5, min_tracking_confidence=0.5):
+    with modelo_mao.Hands(
+        min_detection_confidence=0.5, min_tracking_confidence=0.5
+    ) as modelo:
         for frame in gerador:
             # Pula frame
             frame_idx += 1
@@ -61,7 +62,7 @@ def reconhecer_estatico(
             # Processa frame
             frame = cv2.flip(frame, 1)
             imagem_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            pontos = extrair_pontos_mao(imagem_rgb)
+            pontos = extrair_pontos_mao(imagem_rgb, modelo)
 
             # Extrai os pontos
             if pontos:
@@ -85,7 +86,9 @@ def reconhecer_com_transicao(
     conf_idx = 0
     total_confs = len(sinal.confs)
 
-    with modelo_mao(min_detection_confidence=0.5, min_tracking_confidence=0.5):
+    with modelo_mao.Hands(
+        min_detection_confidence=0.5, min_tracking_confidence=0.5
+    ) as modelo:
         for frame in gerador:
             # Pula frame
             frame_idx += 1
@@ -97,7 +100,7 @@ def reconhecer_com_transicao(
             imagem_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
             # Extrai os pontos
-            pontos = extrair_pontos_mao(imagem_rgb)
+            pontos = extrair_pontos_mao(imagem_rgb, modelo)
             if pontos:
                 resultado = validar_sinal(sinal, pontos, conf_idx)
 
@@ -127,7 +130,9 @@ def reconhecer_com_movimento(
     frame_idx = 0
     frames_bool = []
 
-    with modelo_mao(min_detection_confidence=0.5, min_tracking_confidence=0.5):
+    with modelo_mao.Hands(
+        min_detection_confidence=0.5, min_tracking_confidence=0.5
+    ) as modelo:
         for frame in gerador:
             # Pula frame
             frame_idx += 1
@@ -139,7 +144,7 @@ def reconhecer_com_movimento(
             altura, largura, _ = frame.shape
             imagem_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-            pontos = extrair_pontos_mao(imagem_rgb)
+            pontos = extrair_pontos_mao(imagem_rgb, modelo)
             if pontos:
                 # Reconhece formato da mão
                 reconheceu_formato = validar_sinal(sinal, pontos, 0)
@@ -314,8 +319,8 @@ def reconhecer_sequencia_movimentos(
     return idx_mov_atual == qtd_movimentos
 
 
-def extrair_pontos_mao(imagem_np) -> dict[int, tuple[float, float, float]]:
-    resultados = modelo_mao.process(imagem_np)
+def extrair_pontos_mao(imagem_np, modelo) -> dict[int, tuple[float, float, float]]:
+    resultados = modelo.process(imagem_np)
 
     # Para o caso de não encontrar uma mão
     if not resultados.multi_hand_landmarks:
