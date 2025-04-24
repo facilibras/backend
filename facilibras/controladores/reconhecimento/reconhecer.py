@@ -3,7 +3,12 @@ from itertools import pairwise
 
 import cv2
 
-from facilibras.controladores.reconhecimento.frames import Camera, GeradorFrames, Video
+from facilibras.controladores.reconhecimento.frames import (
+    Camera,
+    GeradorFrames,
+    TipoGerador,
+    Video,
+)
 from facilibras.controladores.reconhecimento.mp_modelos import modelo_mao
 from facilibras.controladores.reconhecimento.validadores import (
     Invalido,
@@ -74,9 +79,12 @@ def reconhecer_estatico(
             if pontos:
                 resultado = validar_sinal(sinal, pontos, 0)
 
-            cv2.imshow("Reconhecendo...", frame)
-            antigiu_tempo = time.time() - inicio >= tempo_limite
-            if resultado or (cv2.waitKey(1) & 0xFF == ord("q")) or antigiu_tempo:
+            atingiu_tempo = time.time() - inicio >= tempo_limite
+            if gerador.tipo == TipoGerador.CAMERA:
+                cv2.imshow("Reconhecendo...", frame)
+                if resultado or (cv2.waitKey(1) & 0xFF == ord("q")) or atingiu_tempo:
+                    break
+            elif resultado or atingiu_tempo:
                 break
 
     cv2.destroyAllWindows()
@@ -114,13 +122,16 @@ def reconhecer_com_transicao(
                 if resultado:
                     conf_idx += 1
 
-            cv2.imshow("Reconhecendo...", frame)
             atingiu_tempo = time.time() - inicio >= tempo_limite
-            if (
-                conf_idx == total_confs
-                or (cv2.waitKey(1) & 0xFF == ord("q"))
-                or atingiu_tempo
-            ):
+            if gerador.tipo == TipoGerador.CAMERA:
+                cv2.imshow("Reconhecendo...", frame)
+                if (
+                    conf_idx == total_confs
+                    or (cv2.waitKey(1) & 0xFF == ord("q"))
+                    or atingiu_tempo
+                ):
+                    break
+            elif conf_idx == total_confs or atingiu_tempo:
                 break
 
     cv2.destroyAllWindows()
@@ -161,9 +172,12 @@ def reconhecer_com_movimento(
                 y_px = int(pontos[8][1] * altura)
                 frames.append((x_px, y_px, pontos[8][2]))
 
-            cv2.imshow("Reconhecendo...", frame)
             atingiu_tempo = time.time() - inicio >= tempo_limite
-            if (cv2.waitKey(1) & 0xFF == ord("q")) or atingiu_tempo:
+            if gerador.tipo == TipoGerador.CAMERA:
+                cv2.imshow("Reconhecendo...", frame)
+                if (cv2.waitKey(1) & 0xFF == ord("q")) or atingiu_tempo:
+                    break
+            elif atingiu_tempo:
                 break
 
     cv2.destroyAllWindows()

@@ -64,4 +64,4 @@ class Video(GeradorFrames):
 
     @property
     def tipo(self) -> TipoGerador:
-        return TipoGerador.CAMERA
+        return TipoGerador.VIDEO
