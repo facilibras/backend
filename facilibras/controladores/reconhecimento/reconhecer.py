@@ -3,7 +3,7 @@ from itertools import pairwise
 
 import cv2
 
-from facilibras.controladores.reconhecimento.frames import GeradorFrames
+from facilibras.controladores.reconhecimento.frames import GeradorFrames, Camera
 from facilibras.controladores.reconhecimento.mp_modelos import modelo_mao
 from facilibras.controladores.reconhecimento.validadores import (
     Invalido,
@@ -31,132 +31,130 @@ TEMPO_TOTAL = 5
 def reconhecer_webcam(sinal: SinalLibras) -> bool:
     sinal.preparar_reconhecimento()
 
+    gerador = Camera(0)
+
     match sinal.tipo:
         case Tipo.ESTATICO:
-            res = reconhecer_estatico(sinal)
+            res = reconhecer_estatico(sinal, gerador, TEMPO_TOTAL)
         case Tipo.COM_MOVIMENTO:
-            res = reconhecer_com_movimento(sinal)
+            res = reconhecer_com_movimento(sinal, gerador, TEMPO_TOTAL)
         case Tipo.COM_TRANSICAO:
-            res = reconhecer_com_transicao(sinal)
+            res = reconhecer_com_transicao(sinal, gerador, TEMPO_TOTAL)
 
     return res
-    
 
 
-def reconhecer_estatico(sinal: SinalLibras) -> bool:
-    cap = cv2.VideoCapture(0)
+def reconhecer_estatico(
+    sinal: SinalLibras, gerador: GeradorFrames, tempo_limite: int
+) -> bool:
     inicio = time.time()
     frame_idx = 0
     resultado = False
 
-    while time.time() - inicio < TEMPO_TOTAL:
-        ret, frame = cap.read()
-        if not ret:
-            break
+    with modelo_mao(min_detection_confidence=0.5, min_tracking_confidence=0.5):
+        for frame in gerador:
+            # Pula frame
+            frame_idx += 1
+            if frame_idx % 3 != 0:
+                continue
 
-        # Pula frame
-        frame_idx += 1
-        if frame_idx % 3 != 0:
-            continue
+            # Processa frame
+            frame = cv2.flip(frame, 1)
+            imagem_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            pontos = extrair_pontos_mao(imagem_rgb)
 
-        # Processa frame
-        frame = cv2.flip(frame, 1)
-        imagem_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        pontos = extrair_pontos_mao(imagem_rgb)
+            # Extrai os pontos
+            if pontos:
+                resultado = validar_sinal(sinal, pontos, 0)
 
-        # Extrai os pontos
-        if pontos:
-            resultado = validar_sinal(sinal, pontos, 0)
+            cv2.imshow("Reconhecendo...", frame)
+            antigiu_tempo = time.time() - inicio >= tempo_limite
+            if resultado or (cv2.waitKey(1) & 0xFF == ord("q")) or antigiu_tempo:
+                break
 
-        cv2.imshow("Reconhecendo...", frame)
-        if resultado or (cv2.waitKey(1) & 0xFF == ord("q")):
-            break
-
-    cap.release()
     cv2.destroyAllWindows()
 
     return resultado
 
 
-def reconhecer_com_transicao(sinal: SinalLibras) -> bool:
-    cap = cv2.VideoCapture(0)
+def reconhecer_com_transicao(
+    sinal: SinalLibras, gerador: GeradorFrames, tempo_limite: int
+) -> bool:
     inicio = time.time()
     frame_idx = 0
     conf_idx = 0
     total_confs = len(sinal.confs)
 
-    while time.time() - inicio < TEMPO_TOTAL:
-        ret, frame = cap.read()
-        if not ret:
-            break
+    with modelo_mao(min_detection_confidence=0.5, min_tracking_confidence=0.5):
+        for frame in gerador:
+            # Pula frame
+            frame_idx += 1
+            if frame_idx % 3 != 0:
+                continue
 
-        # Pula frame
-        frame_idx += 1
-        if frame_idx % 3 != 0:
-            continue
+            # Processa frame
+            frame = cv2.flip(frame, 1)
+            imagem_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-        # Processa frame
-        frame = cv2.flip(frame, 1)
-        imagem_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            # Extrai os pontos
+            pontos = extrair_pontos_mao(imagem_rgb)
+            if pontos:
+                resultado = validar_sinal(sinal, pontos, conf_idx)
 
-        # Extrai os pontos
-        pontos = extrair_pontos_mao(imagem_rgb)
-        if pontos:
-            resultado = validar_sinal(sinal, pontos, conf_idx)
+                # Transição ocorreu
+                if resultado:
+                    conf_idx += 1
 
-            # Transição ocorreu
-            if resultado:
-                conf_idx += 1
+            cv2.imshow("Reconhecendo...", frame)
+            atingiu_tempo = time.time() - inicio >= tempo_limite
+            if (
+                conf_idx == total_confs
+                or (cv2.waitKey(1) & 0xFF == ord("q"))
+                or atingiu_tempo
+            ):
+                break
 
-        cv2.imshow("Reconhecendo...", frame)
-        if conf_idx == total_confs or (cv2.waitKey(1) & 0xFF == ord("q")):
-            break
-
-    cap.release()
     cv2.destroyAllWindows()
 
     return conf_idx == total_confs
 
 
-def reconhecer_com_movimento(sinal: SinalLibras):
-    cap = cv2.VideoCapture(0)
+def reconhecer_com_movimento(
+    sinal: SinalLibras, gerador: GeradorFrames, tempo_limite: int
+):
     inicio = time.time()
-
     frames = []
     frame_idx = 0
     frames_bool = []
 
-    while time.time() - inicio < TEMPO_TOTAL:
-        ret, frame = cap.read()
-        if not ret:
-            break
+    with modelo_mao(min_detection_confidence=0.5, min_tracking_confidence=0.5):
+        for frame in gerador:
+            # Pula frame
+            frame_idx += 1
+            if frame_idx % 3 != 0:
+                continue
 
-        # Pula frame
-        frame_idx += 1
-        if frame_idx % 3 != 0:
-            continue
+            # Processa frame
+            frame = cv2.flip(frame, 1)
+            altura, largura, _ = frame.shape
+            imagem_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-        # Processa frame
-        frame = cv2.flip(frame, 1)
-        altura, largura, _ = frame.shape
-        imagem_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            pontos = extrair_pontos_mao(imagem_rgb)
+            if pontos:
+                # Reconhece formato da mão
+                reconheceu_formato = validar_sinal(sinal, pontos, 0)
 
-        pontos = extrair_pontos_mao(imagem_rgb)
-        if pontos:
-            # Reconhece formato da mão
-            reconheceu_formato = validar_sinal(sinal, pontos, 0)
+                # Seta o frame com reconhecido ou não
+                frames_bool.append(reconheceu_formato)
+                x_px = int(pontos[8][0] * largura)
+                y_px = int(pontos[8][1] * altura)
+                frames.append((x_px, y_px, pontos[8][2]))
 
-            # Seta o frame com reconhecido ou não
-            frames_bool.append(reconheceu_formato)
-            x_px = int(pontos[8][0] * largura)
-            y_px = int(pontos[8][1] * altura)
-            frames.append((x_px, y_px, pontos[8][2]))
+            cv2.imshow("Reconhecendo...", frame)
+            atingiu_tempo = time.time() - inicio >= tempo_limite
+            if (cv2.waitKey(1) & 0xFF == ord("q")) or atingiu_tempo:
+                break
 
-        cv2.imshow("Reconhecendo...", frame)
-        if cv2.waitKey(1) & 0xFF == ord("q"):
-            break
-
-    cap.release()
     cv2.destroyAllWindows()
 
     # Janela de frames consecutivos onde o formato da mão está correta
@@ -188,10 +186,12 @@ def reconhecer_sequencia_movimentos(
     # TODO: Refatorar essa função, tem repetição e redundância (pelo menos funciona)
 
     if not movimentos:
-        raise ValueError("Deve haver pelo menos um movimento")
+        exc = "Deve haver pelo menos um movimento"
+        raise ValueError(exc)
 
     if len(posicoes) <= len(movimentos):
-        raise ValueError("Deve haver um frame a mais do que a quantidade de movimentos")
+        exc = "Deve haver um frame a mais do que a quantidade de movimentos"
+        raise ValueError(exc)
 
     anterior = None
     acumulado = (0, 0, 0)
@@ -211,9 +211,8 @@ def reconhecer_sequencia_movimentos(
         )
 
         if debug:
-            print(
-                f"DEBUG: ({idx_mov_atual}){movimentos[idx_mov_atual]}: {pos1} -> {pos2} + {acumulado} = {resultado}"
-            )
+            pos_str = f"{pos1} -> {pos2} + {acumulado} = {resultado}"
+            print(f"DEBUG: ({idx_mov_atual}){movimentos[idx_mov_atual]}: {pos_str}")
 
         match resultado:
             case Valido():
@@ -229,10 +228,10 @@ def reconhecer_sequencia_movimentos(
                 acumulado = (0, 0, 0)
 
             case Invalido():
-                # Se invalidar depois de já ter validado significa que ocorreu uma mudança de direção
+                # Se invalidar depois de já ter validado, ocorreu mudança de direção
                 if ja_validado:
                     if debug:
-                        print("DEBUG: Mudança de orientação (índice de movimentos++)")
+                        print("DEBUG: Mudança de orientação (ídx mov++)")
 
                     # Avança para o próximo movimento
                     anterior = movimentos[idx_mov_atual]
@@ -265,9 +264,7 @@ def reconhecer_sequencia_movimentos(
                     match resultado:
                         case Valido():
                             if debug:
-                                print(
-                                    "DEBUG: Mudança de movimento correta (índice de movimentos++)"
-                                )
+                                print("DEBUG: Mudança de movimento correta (ídx mov++)")
 
                             # Movimento correto
                             if idx_mov_atual + 1 == qtd_movimentos:
@@ -279,10 +276,10 @@ def reconhecer_sequencia_movimentos(
                         case Invalido():
                             if debug:
                                 print(
-                                    f"DEBUG: Resetando (falha dentro do Valido) em {movimentos[idx_mov_atual]}"
+                                    f"DEBUG: Resetando em {movimentos[idx_mov_atual]}"
                                 )
 
-                            # Mudança de movimento na direção errada -> reseta progresso
+                            # Mudança de movimento na dir errada -> reseta progresso
                             idx_mov_atual = 0
                             acumulado = (0, 0, 0)
                             anterior = None
@@ -291,22 +288,20 @@ def reconhecer_sequencia_movimentos(
                             if debug:
                                 print(f"DEBUG: Novo valor acumulado {valor_acumulado}")
 
-                            # Movimento não foi o suficiente, adiciona ele na próxima validação
+                            # Movimento não suficiente, adiciona na próxima validação
                             acumulado = valor_acumulado
 
                 # Falhou sem nunca ter validado
                 else:
                     if debug:
-                        print(
-                            f"DEBUG: Resetando (falha Invalido) em {movimentos[idx_mov_atual]}"
-                        )
+                        print(f"DEBUG: Resetando em {movimentos[idx_mov_atual]}")
 
                     # Movimento na direção errada -> reseta progresso
                     idx_mov_atual = 0
                     acumulado = (0, 0, 0)
                     anterior = None
 
-                # Como invalidou, deve validar novamente para continuar movimento mesma direção
+                # Como invalidou, valida novamente p/ continuar movimento mesma direção
                 ja_validado = False
 
             case Validando(valor_acumulado):

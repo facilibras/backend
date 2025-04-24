@@ -5,7 +5,7 @@ indent-width = 4
 target-version = "py312"
 
 [tool.ruff.lint]
-select = ["I", "F", "E", "W", "N", "S", "B", "A", "FBT", "C4", "DTZ", "ASYNC", "PGH004", 
+select = ["I", "F", "E", "W", "N", "S", "B", "A", "C4", "DTZ", "ASYNC", "PGH004", 
     "EM", "TCH", "SLF", "RET", "SIM", "PIE", "DJ", "TRY", "FURB", "PERF", "RUF", "PLC"]
 ignore = ["PLC0414", "PLC0415", "S311", "S101", "B008"]
 

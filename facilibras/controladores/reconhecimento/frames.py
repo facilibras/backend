@@ -1,6 +1,13 @@
 from abc import ABC, abstractmethod
+from enum import Enum
 
 import cv2
+
+
+class TipoGerador(Enum):
+    CAMERA = 1
+    VIDEO = 2
+    OUTRO = 3
 
 
 class GeradorFrames(ABC):
@@ -18,6 +25,10 @@ class GeradorFrames(ABC):
         """Libera o capture."""
         if self.cap:
             self.cap.release()
+
+    @property
+    @abstractmethod
+    def tipo(self) -> TipoGerador: ...
 
     def __iter__(self):
         """Iterador que vai retornando frames até a fonte acabar."""
@@ -38,6 +49,10 @@ class Camera(GeradorFrames):
     def open(self):
         self.cap = cv2.VideoCapture(self.index)
 
+    @property
+    def tipo(self) -> TipoGerador:
+        return TipoGerador.CAMERA
+
 
 class Video(GeradorFrames):
     def __init__(self, path: str):
@@ -46,3 +61,7 @@ class Video(GeradorFrames):
 
     def open(self):
         self.cap = cv2.VideoCapture(self.path)
+
+    @property
+    def tipo(self) -> TipoGerador:
+        return TipoGerador.CAMERA
