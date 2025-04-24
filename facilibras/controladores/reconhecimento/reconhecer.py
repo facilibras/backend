@@ -3,17 +3,16 @@ from itertools import pairwise
 
 import cv2
 
-from facilibras.controladores.reconhecimento.frames import GeradorFrames, Camera
+from facilibras.controladores.reconhecimento.frames import Camera, GeradorFrames, Video
 from facilibras.controladores.reconhecimento.mp_modelos import modelo_mao
 from facilibras.controladores.reconhecimento.validadores import (
     Invalido,
-    Valido,
     Validando,
+    Valido,
     get_validador,
 )
 from facilibras.modelos.sinais import SinalLibras
-from facilibras.modelos.sinais.base import Movimento, Tipo, Inclinacao, Orientacao
-
+from facilibras.modelos.sinais.base import Inclinacao, Movimento, Orientacao, Tipo
 
 LIMIAR_CORRETO = 100
 LIMIAR_INCORRETO = 100
@@ -29,8 +28,15 @@ TEMPO_TOTAL = 5
 
 
 def reconhecer_webcam(sinal: SinalLibras) -> bool:
+    return reconhecer(sinal, Camera(0))
+
+
+def reconhecer_video(sinal: SinalLibras, caminho_video: str) -> bool:
+    return reconhecer(sinal, Video(caminho_video))
+
+
+def reconhecer(sinal: SinalLibras, gerador: GeradorFrames) -> bool:
     sinal.preparar_reconhecimento()
-    gerador = Camera(0)
 
     match sinal.tipo:
         case Tipo.ESTATICO:

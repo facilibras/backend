@@ -26,3 +26,17 @@ Backend do Facilibras
    ```bash
    fastapi dev facilibras/main.py
    ```
+## Executar pela linha de comando
+```bash
+# Reconhece a letra G utiliza a webcam
+python -m facilibras letra G
+
+# Reconhece a letra Y a partir de um video
+python -m facilibras letra Y --video exemplo.mp4
+
+# Lista todas os sinais que podem ser reconhecidos
+python -m facilibras sinais
+
+# Lista todas os sinais da categoria ALFABETO
+python -m facilibras sinais --categoria alfabeto
+```
