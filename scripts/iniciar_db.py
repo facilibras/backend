@@ -32,11 +32,13 @@ if __name__ == "__main__":
         numeros = Secao("Números", "Aprenda e pratique os números do 0 ao 9")
 
         alfabeto_dict = {
-            f"letra_{letra.lower()}": Palavra(f"Letra{letra}", links_drive[letra])
+            f"letra_{letra.lower()}": Palavra(
+                f"letra_{letra.lower()}", links_drive[letra]
+            )
             for letra in ascii_uppercase + "Ç"
         }
         numeros_dict = {
-            f"numero_{numero}": Palavra(str(numero), links_drive[str(numero)])
+            f"numero_{numero}": Palavra(f"numero_{numero}", links_drive[str(numero)])
             for numero in range(10)
         }
 
