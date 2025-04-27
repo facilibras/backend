@@ -3,8 +3,8 @@
 Backend do Facilibras
 
 ## Bibliotecas Utilizadas
-- FastAPI
-- MediaPipe
+- FastAPI (Framework Web)
+- MediaPipe (Reconhecimento dos Gestos)
 
 ## Como Iniciar o Backend
 1. Instale as dependências:
@@ -39,4 +39,7 @@ python -m facilibras sinais
 
 # Lista todas os sinais da categoria ALFABETO
 python -m facilibras sinais --categoria alfabeto
+
+# Validar interativamente um sinal
+python -m facilibras interativo -o FRENTE -d POLEGAR_CIMA -d INDICADOR_BAIXO
 ```

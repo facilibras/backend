@@ -2,9 +2,14 @@ from string import ascii_lowercase
 
 import typer
 
-from facilibras.modelos.sinais import Categoria, get_sinal, listar_sinais
+from facilibras.modelos.sinais import (
+    Categoria,
+    construir_sinal,
+    get_sinal,
+    listar_sinais,
+)
 
-app = typer.Typer()
+app = typer.Typer(add_completion=False)
 
 
 LETRAS_VALIDAS = set(ascii_lowercase + "ç")
@@ -51,3 +56,20 @@ def sinais(categoria: Categoria | None = typer.Option(None)):
     else:
         typer.echo("Listando todos os sinais")
         typer.echo(listar_sinais())
+
+
+@app.command()
+def interativo(
+    o: str = typer.Option(
+        "FRENTE", "-o", "--orientacao", help="Orientação da palma da mão"
+    ),
+    i: str = typer.Option(
+        "RETA", "-i", "--inclinacao", help="Inclinação da palma da mão"
+    ),
+    d: list[str] | None = typer.Option(
+        [], "-d", "--dedo", help="Lista de posições dos dedos"
+    ),
+):
+    from facilibras.controladores.reconhecimento import reconhecer_interativamente
+
+    reconhecer_interativamente(construir_sinal(d or [], i, o))

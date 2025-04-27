@@ -1,5 +1,5 @@
 from enum import Enum, StrEnum
-from typing import Self
+from typing import Self, Type, TypeVar
 
 from facilibras.modelos.mao import (
     ConfiguracaoMao,
@@ -23,7 +23,7 @@ class Categoria(StrEnum):
 
 
 class SinalLibras:
-    def __init__(self, categoria: Categoria, nome: str) -> None:
+    def __init__(self, categoria: Categoria | None, nome: str) -> None:
         self.nome = nome
         self.categoria = categoria
         self.confs: list[ConfiguracaoMao] = []
@@ -108,3 +108,22 @@ def get_sinal(sinal: str) -> SinalLibras:
 
 def listar_sinais() -> None:
     print(", ".join(_sinais.keys()))
+
+
+T = TypeVar("T", bound=Enum)
+
+
+def get_componente(nome: str, tipo: Type[T]) -> T:
+    return tipo[nome]
+
+
+def construir_sinal(
+    dedos: list[str], inclinacao: str = "RETA", orientacao: str = "FRENTE"
+) -> SinalLibras:
+    o = get_componente(orientacao, Orientacao)
+    i = get_componente(inclinacao, Inclinacao)
+    d = [get_componente(dedo, Dedo) for dedo in dedos] if dedos else []
+
+    return (
+        SinalLibras(None, "interativo").mao(*d).orientacao_palma(o).inclinacao_palma(i)
+    )
