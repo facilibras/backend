@@ -4,6 +4,7 @@ from facilibras.controladores.reconhecimento.validadores import (
     Valido,
     registrar_validador,
 )
+from facilibras.controladores.reconhecimento.validadores.utils import distancia
 from facilibras.modelos.mao import Dedo, Inclinacao, Orientacao
 
 T_Dedos = dict[int, tuple[float, float, float]]
@@ -13,23 +14,35 @@ PROFUNDIDADE_BAIXO_CIMA = 0.02
 x, y, z = range(3)
 
 
+mensagem = "Nenhum sinal cadastrado no momento deve chegar aqui"
+exc = NotImplementedError(mensagem)
+
+
 @registrar_validador(Dedo.POLEGAR_CIMA)
 def validar_dedo_polegar_cima(
     dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao
 ) -> Resultado:
-    # TODO: Implementar os casos não utilizados na apresentação
-    diff_polegar_indicador = abs(dedos[3][x] - dedos[5][x])
-    diff_indicador_medio = abs(dedos[5][x] - dedos[9][x])
-    if diff_polegar_indicador > diff_indicador_medio * 1.5:
+    if not (
+        (orientacao == Orientacao.FRENTE and inclinacao == Inclinacao.RETA)
+        or (orientacao == Orientacao.TRAS and inclinacao == Inclinacao.DENTRO_180)
+    ):
+        raise exc
+
+    # Verifica se o polegar está aberto
+    dist_polegar_indicador = distancia(dedos[3][x], dedos[5][x])
+    dist_indicador_medio = distancia(dedos[5][x], dedos[9][x])
+    if dist_polegar_indicador > dist_indicador_medio * 1.5:
         return Invalido()
 
-    if orientacao == Orientacao.FRENTE:
-        mao_direita = dedos[3][x] < dedos[9][x]
-        if mao_direita:
-            if dedos[4][x] > dedos[5][x]:
-                return Invalido()
-        elif dedos[4][x] < dedos[5][x]:
-            return Invalido()
+    # Verifica se o polegar está para dentro da palma
+    mao_direita = dedos[3][x] < dedos[9][x]
+    if mao_direita:
+        dentro_palma = dedos[4][x] > dedos[2][x]
+    else:
+        dentro_palma = dedos[4][x] < dedos[2][x]
+
+    if dentro_palma:
+        return Invalido()
 
     return Valido()
 
@@ -38,60 +51,114 @@ def validar_dedo_polegar_cima(
 def validar_dedo_polegar_curvado(
     dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao
 ) -> Resultado:
-    raise NotImplementedError()
+    if orientacao not in (Orientacao.FRENTE, Orientacao.LATERAL):
+        raise exc
+
+    # Verifica se está dentro da palma
+    if orientacao == Orientacao.LATERAL:
+        mao_direita = dedos[5][x] < dedos[0][x]
+    else:
+        mao_direita = dedos[2][x] < dedos[17][x]
+
+    if mao_direita:
+        dentro_palma = dedos[4][x] > dedos[2][x]
+    else:
+        dentro_palma = dedos[4][x] < dedos[2][x]
+
+    if dentro_palma:
+        return Invalido()
+
+    # Verifica curvatura suficiente
+    if orientacao == Orientacao.LATERAL:
+        curvado = dedos[4][y] < dedos[3][y]
+        if not curvado:
+            return Invalido()
+
+    elif orientacao == Orientacao.FRENTE:
+        if mao_direita:
+            curvado = dedos[4][x] < dedos[3][x]
+        else:
+            curvado = dedos[4][x] < dedos[3][x]
+
+        if not curvado:
+            return Invalido()
+
+    return Valido()
 
 
 @registrar_validador(Dedo.POLEGAR_DENTRO)
 def validar_dedo_polegar_dentro(
     dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao
 ) -> Resultado:
-    # TODO: Implementar os casos não utilizados na apresentação
     if orientacao in (Orientacao.FRENTE, Orientacao.BAIXO):
-        mao_direita = dedos[2] < dedos[17]
+        if inclinacao != Inclinacao.RETA:
+            raise exc
+
+        # Verifica se está fora da palma
+        mao_direita = dedos[2][x] < dedos[17][x]
         if mao_direita:
-            if dedos[4][x] > dedos[2][x]:
-                return Valido()
-        elif dedos[4][x] < dedos[2][x]:
-            return Valido()
+            fora_palma = dedos[4][x] < dedos[2][x]
+        else:
+            fora_palma = dedos[4][x] > dedos[2][x]
+
+        if fora_palma:
+            return Invalido()
+
+    elif orientacao == Orientacao.LATERAL:
+        if inclinacao != Inclinacao.RETA:
+            raise exc
+
+        # Verifica se está fora da palma
+        fora_palma = dedos[4][z] < dedos[3][z]
+        if fora_palma:
+            return Invalido()
 
     elif orientacao == Orientacao.TRAS:
-        mao_direita = dedos[2] > dedos[17]
-        mao_direita = dedos[2] > dedos[17]
-        if mao_direita:
-            if dedos[4][x] < dedos[2][x]:
-                return Valido()
-        elif dedos[4][x] > dedos[2][x]:
-            return Valido()
-    else:
-        raise NotImplementedError()
+        # Verifica se está fora da palma
+        mao_direita = dedos[2][x] < dedos[17][x]
 
-    return Invalido()
+        if inclinacao in (Inclinacao.RETA, Inclinacao.DENTRO_45):
+            if mao_direita:
+                fora_palma = dedos[4][x] < dedos[2][x]
+            else:
+                fora_palma = dedos[4][x] > dedos[2][x]
+
+        elif inclinacao == Inclinacao.DENTRO_90:
+            fora_palma = dedos[4][y] < dedos[2][y]
+
+        elif inclinacao == Inclinacao.DENTRO_180:
+            if mao_direita:
+                fora_palma = dedos[4][x] < dedos[2][x]
+            else:
+                fora_palma = dedos[4][x] > dedos[2][x]
+
+        if fora_palma:
+            return Invalido()
+
+    else:
+        raise exc
+
+    return Valido()
 
 
 @registrar_validador(Dedo.POLEGAR_FORA)
 def validar_dedo_polegar_fora(
     dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao
 ) -> Resultado:
-    # TODO: Implementar os casos não utilizados na apresentação
-    if orientacao in (Orientacao.FRENTE, Orientacao.BAIXO):
-        mao_direita = dedos[2] < dedos[17]
-        if mao_direita:
-            if dedos[4][x] < dedos[2][x]:
-                return Valido()
-        elif dedos[4][x] > dedos[2][x]:
-            return Valido()
+    if orientacao not in (Orientacao.FRENTE, Orientacao.BAIXO):
+        raise exc
 
-    elif orientacao == Orientacao.TRAS:
-        mao_direita = dedos[2] > dedos[17]
-        if mao_direita:
-            if dedos[4][x] > dedos[2][x]:
-                return Valido()
-        elif dedos[4][x] < dedos[2][x]:
-            return Valido()
+    # Verifica se está dentro da palma
+    mao_direita = dedos[2] < dedos[17]
+    if mao_direita:
+        dentro_palma = dedos[4][x] > dedos[2][x]
     else:
-        raise NotImplementedError()
+        dentro_palma = dedos[4][x] < dedos[2][x]
 
-    return Invalido()
+    if dentro_palma:
+        return Invalido()
+
+    return Valido()
 
 
 @registrar_validador(Dedo.INDICADOR_BAIXO)

@@ -5,6 +5,10 @@ from facilibras.modelos.mao import Inclinacao, Orientacao
 XYZ = tuple[float, float, float]
 
 
+def distancia(p1: float, p2: float) -> float:
+    return abs(p1 - p2)
+
+
 def distancia_euclidiana(p1: XYZ, p2: XYZ) -> float:
     x1, y1, z1 = p1
     x2, y2, z2 = p2
