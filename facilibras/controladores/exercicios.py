@@ -10,7 +10,12 @@ from facilibras.controladores.reconhecimento import reconhecer_video
 from facilibras.dependencias.dal import T_ExercicioDAO, T_SecaoDAO
 from facilibras.modelos import Exercicio, ExercicioStatus, Secao
 from facilibras.modelos.sinais import get_sinal
-from facilibras.schemas import ExercicioSchema, FeedbackExercicioSchema, SecaoSchema
+from facilibras.schemas import (
+    ExercicioSchema,
+    FeedbackExercicioSchema,
+    PalavraSchema,
+    SecaoSchema,
+)
 
 TEMP_DIR = "videos"
 
@@ -129,7 +134,7 @@ def converter_exercicios_para_schema(
     exercicio_schemas = []
     for exercicio in exercicios:
         palavras = [
-            ex_pa.palavra.nome
+            PalavraSchema(palavra=ex_pa.palavra.nome, video=ex_pa.palavra.url_video)
             for ex_pa in exercicio.palavras
             if ex_pa.palavra is not None
         ]

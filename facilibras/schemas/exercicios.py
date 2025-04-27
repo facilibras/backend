@@ -6,6 +6,11 @@ class FeedbackExercicioSchema(BaseModel):
     mensagem: str
 
 
+class PalavraSchema(BaseModel):
+    palavra: str
+    video: str
+
+
 class ExercicioSchema(BaseModel):
     titulo: str
     secao: str
