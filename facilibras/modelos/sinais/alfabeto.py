@@ -17,10 +17,10 @@ LetraB = (
     SinalLibras(Categoria.ALFABETO, "letra_b")
     .mao(
         Dedo.POLEGAR_DENTRO,
-        Dedo.INDICADOR_BAIXO,
-        Dedo.MEDIO_BAIXO,
-        Dedo.ANELAR_BAIXO,
-        Dedo.MINIMO_BAIXO,
+        Dedo.INDICADOR_CIMA,
+        Dedo.MEDIO_CIMA,
+        Dedo.ANELAR_CIMA,
+        Dedo.MINIMO_CIMA,
     )
     .orientacao_palma(Orientacao.FRENTE)
 )
@@ -61,10 +61,10 @@ LetraCC = (
 LetraD = (
     SinalLibras(Categoria.ALFABETO, "letra_d")
     .mao(
-        Dedo.INDICADOR_ENC_POLEGAR,
+        Dedo.INDICADOR_CIMA,
         Dedo.MEDIO_ENC_POLEGAR,
         Dedo.ANELAR_ENC_POLEGAR,
-        Dedo.MINIMO_CIMA,
+        Dedo.MINIMO_CURVADO,
     )
     .orientacao_palma(Orientacao.LATERAL)
 )
@@ -164,7 +164,7 @@ LetraK = (
     SinalLibras(Categoria.ALFABETO, "letra_k")
     .mao(
         Dedo.POLEGAR_DENTRO,
-        Dedo.INDICADOR_FRENTE_90,
+        Dedo.INDICADOR_FRENTE_45,
         Dedo.MEDIO_CIMA,
         Dedo.ANELAR_BAIXO,
         Dedo.MINIMO_BAIXO,
@@ -194,7 +194,8 @@ LetraM = (
         Dedo.ANELAR_CIMA,
         Dedo.MINIMO_BAIXO,
     )
-    .orientacao_palma(Orientacao.FRENTE)
+    .orientacao_palma(Orientacao.TRAS)
+    .inclinacao_palma(Inclinacao.DENTRO_180)
 )
 
 LetraN = (
@@ -206,7 +207,8 @@ LetraN = (
         Dedo.ANELAR_BAIXO,
         Dedo.MINIMO_BAIXO,
     )
-    .orientacao_palma(Orientacao.FRENTE)
+    .orientacao_palma(Orientacao.TRAS)
+    .inclinacao_palma(Inclinacao.DENTRO_180)
 )
 
 LetraO = (
@@ -242,7 +244,8 @@ LetraQ = (
         Dedo.ANELAR_BAIXO,
         Dedo.MINIMO_BAIXO,
     )
-    .orientacao_palma(Orientacao.FRENTE)
+    .orientacao_palma(Orientacao.TRAS)
+    .inclinacao_palma(Inclinacao.DENTRO_180)
 )
 
 LetraR = (

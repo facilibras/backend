@@ -98,6 +98,7 @@ class Inclinacao(EnumUnico):
     RETA = auto()
     DENTRO_45 = auto()
     DENTRO_90 = auto()
+    DENTRO_180 = auto()
 
 
 class Movimento(EnumUnico):
