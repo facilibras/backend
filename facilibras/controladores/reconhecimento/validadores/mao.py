@@ -12,11 +12,7 @@ from facilibras.modelos.mao import Dedo, Inclinacao, Orientacao
 
 T_Dedos = dict[int, tuple[float, float, float]]
 
-PROFUNDIDADE_BAIXO_CIMA = 0.02
-
 x, y, z = range(3)
-
-
 mensagem = "Nenhum sinal cadastrado no momento deve chegar aqui"
 exc = NotImplementedError(mensagem)
 
@@ -674,44 +670,91 @@ def validar_dedo_anelar_flexionado(
 def validar_dedo_minimo_baixo(
     dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao
 ) -> Resultado:
-    if orientacao in (Orientacao.FRENTE, Orientacao.TRAS):
-        if dedos[20][y] > dedos[18][y]:
-            return Valido()
-    elif orientacao == Orientacao.BAIXO:
-        if dedos[17][y] < dedos[18][y]:
-            return Valido()
-    else:
-        raise NotImplementedError()
+    if orientacao not in (
+        Orientacao.FRENTE,
+        Orientacao.TRAS,
+        Orientacao.LATERAL,
+        Orientacao.BAIXO,
+    ):
+        raise exc
 
-    return Invalido()
+    # Verifica se está para cima
+    if inclinacao == Inclinacao.RETA or orientacao == Orientacao.LATERAL:
+        para_cima = dedos[20][y] < dedos[18][y]
+        if para_cima:
+            return Invalido()
+
+    elif orientacao == Orientacao.TRAS:
+        if inclinacao != Inclinacao.DENTRO_180:
+            raise exc
+
+        para_cima = dedos[20][y] > dedos[18][y]
+        if para_cima:
+            return Invalido()
+
+    return Valido()
 
 
 @registrar_validador(Dedo.MINIMO_CIMA)
 def validar_dedo_minimo_cima(
     dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao
 ) -> Resultado:
-    if orientacao in (Orientacao.FRENTE, Orientacao.TRAS):
-        if dedos[20][y] < dedos[18][y]:
-            return Valido()
-    elif orientacao == Orientacao.BAIXO:
-        diff = abs(dedos[18][z] - dedos[17][z])
-        if diff > 0.025:
-            return Valido()
-    else:
-        raise NotImplementedError()
+    if orientacao not in (Orientacao.FRENTE, Orientacao.TRAS, Orientacao.BAIXO):
+        raise exc
 
-    return Invalido()
+    if orientacao in (Orientacao.FRENTE, Orientacao.BAIXO):
+        para_baixo = dedos[20][y] > dedos[18][y]
+        if para_baixo:
+            return Invalido()
+
+    elif orientacao == Orientacao.TRAS:
+        mao_direita = dedos[9][x] < dedos[0][x]
+        if mao_direita:
+            para_baixo = dedos[20][x] > dedos[18][x]
+        else:
+            para_baixo = dedos[20][x] < dedos[18][x]
+
+        if para_baixo:
+            return Invalido()
+
+    return Valido()
 
 
 @registrar_validador(Dedo.MINIMO_CURVADO)
 def validar_dedo_minimo_curvado(
     dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao
 ) -> Resultado:
-    raise NotImplementedError()
+    if orientacao not in (Orientacao.FRENTE, Orientacao.LATERAL):
+        raise exc
+
+    # Verifica se está para cima
+    para_cima = dedos[20][y] < dedos[18][y]
+    if para_cima:
+        return Invalido()
+
+    # Verifica se está flexionado demais
+    flexionado_demais = dedos[18][y] > dedos[17][y]
+    if flexionado_demais:
+        return Invalido()
+
+    return Valido()
 
 
 @registrar_validador(Dedo.MINIMO_FLEXIONADO)
 def validar_dedo_minimo_flexionado(
     dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao
 ) -> Resultado:
-    raise NotImplementedError()
+    if orientacao != Orientacao.FRENTE or inclinacao != Inclinacao.RETA:
+        raise exc
+
+    # Verifica se está dobrado
+    dobrado = dedos[20][y] > dedos[17][y]
+    if dobrado:
+        return Invalido()
+
+    # Verifica se está para cima
+    para_cima = dedos[20][y] < dedos[18][y]
+    if para_cima:
+        return Invalido()
+
+    return Valido()
