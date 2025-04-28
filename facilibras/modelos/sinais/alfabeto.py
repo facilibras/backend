@@ -227,7 +227,7 @@ LetraP = (
     .mao(
         Dedo.POLEGAR_DENTRO,
         Dedo.INDICADOR_CIMA,
-        Dedo.MEDIO_BAIXO,
+        Dedo.MEDIO_CIMA,
         Dedo.ANELAR_BAIXO,
         Dedo.MINIMO_BAIXO,
     )
