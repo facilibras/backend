@@ -560,30 +560,78 @@ def validar_dedo_medio_frente_45(
 def validar_dedo_anelar_baixo(
     dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao
 ) -> Resultado:
-    if orientacao in (Orientacao.FRENTE, Orientacao.TRAS):
-        if dedos[16][y] > dedos[14][y]:
-            return Valido()
-    elif orientacao == Orientacao.BAIXO:
-        if dedos[13][y] < dedos[14][y]:
-            return Valido()
-    else:
-        raise NotImplementedError()
+    if orientacao not in (
+        Orientacao.FRENTE,
+        Orientacao.TRAS,
+        Orientacao.LATERAL,
+        Orientacao.BAIXO,
+    ):
+        raise exc
 
-    return Invalido()
+    # Verifica se está para cima
+    if inclinacao == Inclinacao.RETA or orientacao == Orientacao.LATERAL:
+        para_cima = dedos[16][y] < dedos[13][y]
+        if para_cima:
+            return Invalido()
+
+    elif orientacao == Orientacao.TRAS:
+        if inclinacao == Inclinacao.DENTRO_90:
+            mao_direita = dedos[9][x] < dedos[0][x]
+            if mao_direita:
+                para_cima = dedos[12][x] < dedos[10][x]
+            else:
+                para_cima = dedos[12][x] > dedos[10][x]
+
+            if para_cima:
+                return Invalido()
+
+        elif inclinacao == Inclinacao.DENTRO_180:
+            para_cima = dedos[12][y] > dedos[10][y]
+
+            if para_cima:
+                return Invalido()
+
+    return Valido()
 
 
 @registrar_validador(Dedo.ANELAR_CIMA)
 def validar_dedo_anelar_cima(
     dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao
 ) -> Resultado:
-    raise NotImplementedError()
+    if orientacao not in (Orientacao.FRENTE, Orientacao.TRAS):
+        raise exc
+
+    if orientacao == Orientacao.FRENTE:
+        para_baixo = dedos[16][y] > dedos[14][y]
+
+    elif orientacao == Orientacao.TRAS:
+        para_baixo = dedos[16][y] < dedos[14][y]
+
+    if para_baixo:
+        return Invalido()
+
+    return Valido()
 
 
 @registrar_validador(Dedo.ANELAR_CURVADO)
 def validar_dedo_anelar_curvado(
     dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao
 ) -> Resultado:
-    raise NotImplementedError()
+    if orientacao not in (Orientacao.FRENTE, Orientacao.LATERAL):
+        raise exc
+
+    # Verifica se está para cima
+    para_cima = dedos[16][y] < dedos[14][y]
+    if para_cima:
+        return Invalido()
+
+    # Verifica se está flexionado demais
+    # TODO: Se for bem, substituir nos outros dedos_curvados
+    flexionado_demais = dedos[14][y] > dedos[13][y]
+    if flexionado_demais:
+        return Invalido()
+
+    return Valido()
 
 
 @registrar_validador(Dedo.ANELAR_ENC_POLEGAR)
@@ -606,7 +654,20 @@ def validar_dedo_anelar_enc_polegar(
 def validar_dedo_anelar_flexionado(
     dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao
 ) -> Resultado:
-    raise NotImplementedError()
+    if orientacao != Orientacao.FRENTE or inclinacao != Inclinacao.RETA:
+        raise exc
+
+    # Verifica se está dobrado
+    dobrado = dedos[16][y] > dedos[13][y]
+    if dobrado:
+        return Invalido()
+
+    # Verifica se está para cima
+    para_cima = dedos[16][y] < dedos[14][y]
+    if para_cima:
+        return Invalido()
+
+    return Valido()
 
 
 @registrar_validador(Dedo.MINIMO_BAIXO)
