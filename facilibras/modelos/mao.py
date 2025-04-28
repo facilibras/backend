@@ -48,6 +48,7 @@ class Dedo(EnumUnico):
     MEDIO_CIMA = auto()
     MEDIO_BAIXO = auto()
     MEDIO_FLEXIONADO = auto()
+    MEDIO_FRENTE_45 = auto()
     MEDIO_CURVADO = auto()
     # Anelar
     ANELAR_CIMA = auto()

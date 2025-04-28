@@ -109,7 +109,7 @@ LetraH = (
     SinalLibras(Categoria.ALFABETO, "letra_h")
     .mao(
         Dedo.POLEGAR_DENTRO,
-        Dedo.INDICADOR_FRENTE_90,
+        Dedo.INDICADOR_CIMA,
         Dedo.MEDIO_CIMA,
         Dedo.ANELAR_BAIXO,
         Dedo.MINIMO_BAIXO,
@@ -118,7 +118,7 @@ LetraH = (
     .depois()
     .mao(
         Dedo.POLEGAR_DENTRO,
-        Dedo.INDICADOR_FRENTE_90,
+        Dedo.INDICADOR_CIMA,
         Dedo.MEDIO_CIMA,
         Dedo.ANELAR_BAIXO,
         Dedo.MINIMO_BAIXO,
@@ -164,12 +164,12 @@ LetraK = (
     SinalLibras(Categoria.ALFABETO, "letra_k")
     .mao(
         Dedo.POLEGAR_DENTRO,
-        Dedo.INDICADOR_FRENTE_45,
-        Dedo.MEDIO_CIMA,
+        Dedo.INDICADOR_CIMA,
+        Dedo.MEDIO_FRENTE_45,
         Dedo.ANELAR_BAIXO,
         Dedo.MINIMO_BAIXO,
     )
-    .orientacao_palma(Orientacao.LATERAL)
+    .orientacao_palma(Orientacao.FRENTE)
     .movimento(Movimento.CIMA)
 )
 
@@ -226,12 +226,12 @@ LetraP = (
     SinalLibras(Categoria.ALFABETO, "letra_p")
     .mao(
         Dedo.POLEGAR_DENTRO,
-        Dedo.INDICADOR_FRENTE_90,
-        Dedo.MEDIO_CIMA,
+        Dedo.INDICADOR_CIMA,
+        Dedo.MEDIO_BAIXO,
         Dedo.ANELAR_BAIXO,
         Dedo.MINIMO_BAIXO,
     )
-    .orientacao_palma(Orientacao.TRAS)
+    .orientacao_palma(Orientacao.LATERAL)
     .inclinacao_palma(Inclinacao.DENTRO_45)
 )
 
