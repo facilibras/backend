@@ -33,7 +33,7 @@ def validar_movimento_cima(
         return Valido()
 
     # Movimento não suficiente
-    return Validando((mov_x, mov_y))
+    return Validando((mov_x, mov_y, 0))
 
 
 @registrar_validador(Movimento.DIREITA)
@@ -57,7 +57,7 @@ def validar_movimento_direita(
         return Valido()
 
     # Movimento não suficiente
-    return Validando((mov_x, mov_y))
+    return Validando((mov_x, mov_y, 0))
 
 
 @registrar_validador(Movimento.TRAS)
@@ -68,7 +68,13 @@ def validar_movimento_tras(
     limiar_correto: int,
     limiar_incorreto: int,
 ) -> Resultado:
-    raise NotImplementedError()
+    # Chegagem de movimento em profundidade
+    mov_z = pos_atual[z] - pos_anterior[z] + acumulado[z]
+    if mov_z >= limiar_correto:
+        return Valido()
+
+    # Movimento não suficiente
+    return Validando((0, 0, mov_z))
 
 
 @registrar_validador(Movimento.BAIXO_ESQUERDA)
@@ -98,4 +104,4 @@ def validar_movimento_baixo_esquerda(
         return Valido()
 
     # Movimento não suficiente
-    return Validando((mov_x, mov_y))
+    return Validando((mov_x, mov_y, 0))

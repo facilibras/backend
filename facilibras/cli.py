@@ -1,3 +1,4 @@
+from pathlib import Path
 from string import ascii_lowercase
 
 import typer
@@ -37,6 +38,10 @@ def letra(
     typer.echo(f"Reconhecendo a letra: {letra.upper()}")
     sinal = get_sinal(f"letra_{letra.lower()}")
     if video:
+        if not Path(video).exists():
+            typer.secho("Caminho do vídeo não encontrado!", fg=typer.colors.BRIGHT_RED)
+            exit(1)
+
         typer.echo(f"Vídeo: {video}")
         res = reconhecer_video(sinal, video)
     else:
