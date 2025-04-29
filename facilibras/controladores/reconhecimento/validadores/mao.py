@@ -34,7 +34,7 @@ def validar_dedo_polegar_cima(
         return Invalido()
 
     # Verifica se o polegar está para dentro da palma
-    mao_direita = dedos[3][x] < dedos[9][x]
+    mao_direita = dedos[3][x] < dedos[17][x]
     if mao_direita:
         dentro_palma = dedos[4][x] > dedos[2][x]
     else:
@@ -53,19 +53,10 @@ def validar_dedo_polegar_curvado(
     if orientacao not in (Orientacao.FRENTE, Orientacao.LATERAL):
         raise exc
 
-    # Verifica se está dentro da palma
     if orientacao == Orientacao.LATERAL:
         mao_direita = dedos[5][x] < dedos[0][x]
     else:
         mao_direita = dedos[2][x] < dedos[17][x]
-
-    if mao_direita:
-        dentro_palma = dedos[4][x] > dedos[2][x]
-    else:
-        dentro_palma = dedos[4][x] < dedos[2][x]
-
-    if dentro_palma:
-        return Invalido()
 
     # Verifica curvatura suficiente
     if orientacao == Orientacao.LATERAL:
@@ -74,10 +65,17 @@ def validar_dedo_polegar_curvado(
             return Invalido()
 
     elif orientacao == Orientacao.FRENTE:
+        # Verifica se está dentro da palma
         if mao_direita:
-            curvado = dedos[4][x] < dedos[3][x]
+            dentro_palma = dedos[4][x] > dedos[2][x]
         else:
-            curvado = dedos[4][x] < dedos[3][x]
+            dentro_palma = dedos[4][x] < dedos[2][x]
+
+        if dentro_palma:
+            return Invalido()
+
+        # Verifica curvatura
+        curvado = dedos[4][y] < dedos[3][y]
 
         if not curvado:
             return Invalido()
@@ -106,23 +104,25 @@ def validar_dedo_polegar_dentro(
     elif orientacao == Orientacao.LATERAL:
         # Verifica se está fora da palma
         if inclinacao == Inclinacao.RETA:
-            fora_palma = dedos[4][z] < dedos[3][z]
+            fora_palma = dedos[4][y] < dedos[5][y]
             if fora_palma:
-                return Invalido()
-        elif inclinacao == Inclinacao.DENTRO_45:
-            polegar_aberto = dedos[4][y] < dedos[3][y]
-            if polegar_aberto:
                 return Invalido()
 
     elif orientacao == Orientacao.TRAS:
         # Verifica se está fora da palma
         mao_direita = dedos[2][x] < dedos[17][x]
 
-        if inclinacao in (Inclinacao.RETA, Inclinacao.DENTRO_45):
+        if inclinacao == Inclinacao.RETA:
             if mao_direita:
                 fora_palma = dedos[4][x] < dedos[2][x]
             else:
                 fora_palma = dedos[4][x] > dedos[2][x]
+
+        elif inclinacao == Inclinacao.DENTRO_45:
+            if mao_direita:
+                fora_palma = dedos[4][x] < dedos[5][x]
+            else:
+                fora_palma = dedos[4][x] > dedos[5][x]
 
         elif inclinacao == Inclinacao.DENTRO_90:
             fora_palma = dedos[4][y] < dedos[2][y]
@@ -179,7 +179,12 @@ def validar_dedo_indicador_baixo(
         if inclinacao != Inclinacao.DENTRO_90:
             raise exc
 
-        para_cima = dedos[8][x] > dedos[6][x]
+        mao_direita = dedos[9][x] < dedos[0][x]
+        if mao_direita:
+            para_cima = dedos[8][x] < dedos[7][x]
+        else:
+            para_cima = dedos[8][x] > dedos[7][x]
+
         if para_cima:
             return Invalido()
 
@@ -199,10 +204,12 @@ def validar_dedo_indicador_cima(
             return Invalido()
 
     elif orientacao == Orientacao.TRAS:
-        if inclinacao != Inclinacao.DENTRO_180:
-            raise exc
+        if inclinacao == Inclinacao.DENTRO_180:
+            para_baixo = dedos[8][y] < dedos[6][y]
+        elif inclinacao == Inclinacao.RETA:
+            para_baixo = dedos[8][y] > dedos[6][y]
 
-        if dedos[8][y] < dedos[6][y]:
+        if para_baixo:
             return Invalido()
 
     return Valido()
@@ -304,11 +311,8 @@ def validar_dedo_indicador_flexionado(
             return Invalido()
 
     elif orientacao == Orientacao.BAIXO:
-        # TODO: Testar logica semelhante na Orientacao.FRENTE
-        dist_ponta = distancia(dedos[8][y], dedos[7][y])
-        dist_origem = distancia(dedos[6][y], dedos[5][y])
-        dist_media = distancia(dedos[7][y], dedos[6][y])
-        if dist_media <= dist_ponta or dist_media <= dist_origem:
+        flexionado = dedos[8][y] > dedos[5][y]
+        if not flexionado:
             return Invalido()
 
     return Valido()
@@ -393,7 +397,7 @@ def validar_dedo_medio_baixo(
 
     elif orientacao == Orientacao.TRAS:
         if inclinacao == Inclinacao.DENTRO_90:
-            mao_direita = dedos[9][x] > dedos[0][x]
+            mao_direita = dedos[9][x] < dedos[0][x]
             if mao_direita:
                 para_cima = dedos[12][x] < dedos[10][x]
             else:
@@ -403,7 +407,7 @@ def validar_dedo_medio_baixo(
                 return Invalido()
 
         elif inclinacao == Inclinacao.DENTRO_180:
-            para_cima = dedos[12][y] > dedos[10][y]
+            para_cima = dedos[12][y] > dedos[11][y]
             if para_cima:
                 return Invalido()
         else:
@@ -421,31 +425,22 @@ def validar_dedo_medio_cima(
 
     # Verifica se está para baixo
     if inclinacao == Inclinacao.RETA:
-        para_baixo = dedos[12][y] > dedos[10][y]
+        para_baixo = dedos[12][y] > dedos[11][y]
         if para_baixo:
             return Invalido()
 
     if orientacao == Orientacao.LATERAL:
-        # Verifica se o dedo está inclinado
         if inclinacao == Inclinacao.DENTRO_45:
-            mao_direita = dedos[9][x] < dedos[0][x]
-            if mao_direita:
-                nao_inclinado = dedos[12][x] < dedos[11][x]
-            else:
-                nao_inclinado = dedos[12][x] > dedos[11][x]
+            # Verifica se o dedo está inclinado
+            nao_inclinado = dedos[12][y] > dedos[10][y]
 
             if nao_inclinado:
                 return Invalido()
-        else:
-            raise exc
 
-    elif orientacao == Orientacao.TRAS:
-        if inclinacao == Inclinacao.DENTRO_180:
-            para_baixo = dedos[12][y] < dedos[10][y]
-            if para_baixo:
-                return Invalido()
-        else:
-            raise exc
+    elif orientacao == Orientacao.TRAS and inclinacao == Inclinacao.DENTRO_180:
+        para_baixo = dedos[12][y] < dedos[10][y]
+        if para_baixo:
+            return Invalido()
 
     return Valido()
 
@@ -502,10 +497,14 @@ def validar_dedo_medio_enc_polegar(
     if orientacao != Orientacao.LATERAL or inclinacao != Inclinacao.RETA:
         raise exc
 
-    # Checa se os dedos estão distantes
-    dist_maxima = distancia_euclidiana(dedos[12], dedos[11])
-    dist_entre_pontas = distancia_euclidiana(dedos[12], dedos[4])
-    if dist_entre_pontas > dist_maxima:
+    # Verifica se polegar está para baixo
+    para_baixo = dedos[4][y] > dedos[3][y]
+    if para_baixo:
+        return Invalido()
+
+    # Verifica se polegar está para baixo
+    para_cima = dedos[12][y] < dedos[11][y]
+    if para_cima:
         return Invalido()
 
     return Valido()
@@ -539,14 +538,8 @@ def validar_dedo_medio_frente_45(
         raise exc
 
     # Verifica se está para baixo
-    para_baixo = dedos[12][y] < dedos[9][y]
+    para_baixo = dedos[12][y] > dedos[9][y]
     if para_baixo:
-        return Invalido()
-
-    # # Verifica angulo insuficiente
-    dist_ponta = distancia(dedos[12][y], dedos[11][y])
-    dist_origem = distancia(dedos[11][y], dedos[9][y])
-    if dist_origem < dist_ponta:
         return Invalido()
 
     return Valido()
@@ -574,15 +567,15 @@ def validar_dedo_anelar_baixo(
         if inclinacao == Inclinacao.DENTRO_90:
             mao_direita = dedos[9][x] < dedos[0][x]
             if mao_direita:
-                para_cima = dedos[12][x] < dedos[10][x]
+                para_cima = dedos[16][x] < dedos[14][x]
             else:
-                para_cima = dedos[12][x] > dedos[10][x]
+                para_cima = dedos[16][x] > dedos[14][x]
 
             if para_cima:
                 return Invalido()
 
         elif inclinacao == Inclinacao.DENTRO_180:
-            para_cima = dedos[12][y] > dedos[10][y]
+            para_cima = dedos[16][y] > dedos[14][y]
 
             if para_cima:
                 return Invalido()
@@ -637,10 +630,14 @@ def validar_dedo_anelar_enc_polegar(
     if orientacao != Orientacao.LATERAL or inclinacao != Inclinacao.RETA:
         raise exc
 
-    # Checa se os dedos estão distantes
-    dist_maxima = distancia_euclidiana(dedos[16], dedos[15])
-    dist_entre_pontas = distancia_euclidiana(dedos[16], dedos[4])
-    if dist_entre_pontas > dist_maxima:
+    # Verifica polegar para baixo
+    para_baixo = dedos[4][y] > dedos[3][y]
+    if para_baixo:
+        return Invalido()
+
+    # Verifica anelar para cima
+    para_cima = dedos[16][y] < dedos[15][y]
+    if para_cima:
         return Invalido()
 
     return Valido()
@@ -659,7 +656,7 @@ def validar_dedo_anelar_flexionado(
         return Invalido()
 
     # Verifica se está para cima
-    para_cima = dedos[16][y] < dedos[14][y]
+    para_cima = dedos[16][y] < dedos[15][y]
     if para_cima:
         return Invalido()
 
@@ -677,6 +674,12 @@ def validar_dedo_minimo_baixo(
         Orientacao.BAIXO,
     ):
         raise exc
+
+    if orientacao == Orientacao.BAIXO:
+        if dedos[19][y] > dedos[18][y]:
+            return Valido()
+        if dedos[18][y] > dedos[17][y]:
+            return Valido()
 
     # Verifica se está para cima
     if inclinacao == Inclinacao.RETA or orientacao == Orientacao.LATERAL:
@@ -753,7 +756,7 @@ def validar_dedo_minimo_flexionado(
         return Invalido()
 
     # Verifica se está para cima
-    para_cima = dedos[20][y] < dedos[18][y]
+    para_cima = dedos[20][y] < dedos[19][y]
     if para_cima:
         return Invalido()
 

@@ -231,7 +231,7 @@ LetraP = (
         Dedo.ANELAR_BAIXO,
         Dedo.MINIMO_BAIXO,
     )
-    .orientacao_palma(Orientacao.LATERAL)
+    .orientacao_palma(Orientacao.TRAS)
     .inclinacao_palma(Inclinacao.DENTRO_45)
 )
 
