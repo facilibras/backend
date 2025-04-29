@@ -75,6 +75,12 @@ def interativo(
         [], "-d", "--dedo", help="Lista de posições dos dedos"
     ),
 ):
+    if not d and not o:
+        typer.secho("Dedo ou orientação necessários", fg=typer.colors.BRIGHT_RED)
+        exit(1)
+
     from facilibras.controladores.reconhecimento import reconhecer_interativamente
 
-    reconhecer_interativamente(construir_sinal(d or [], i, o))
+    d = [dedo.upper() for dedo in d] if d else []
+
+    reconhecer_interativamente(construir_sinal(d, i.upper(), o.upper()))

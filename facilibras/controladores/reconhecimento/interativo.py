@@ -33,7 +33,7 @@ def reconhecer_interativamente(sinal: SinalLibras):
                 cor = (0, 255, 0)
 
             # Exibe o o frame
-            cv2.circle(frame, (20, 20), radius=5, color=cor, thickness=-1)
+            cv2.circle(frame, (50, 50), radius=25, color=cor, thickness=-1)
             cv2.imshow("Pressione q para sair", frame)
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 break
