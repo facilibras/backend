@@ -9,6 +9,7 @@ from facilibras.modelos import (
     ExercicioStatus,
     ExercicioUsuario,
     PalavraExercicio,
+    Usuario,
 )
 
 opt = (
@@ -57,3 +58,45 @@ class ExercicioDAO:
             status = {col.id_exercicio: col.status for col in resultados_status}
 
         return status
+
+    def listar_exercicio_usuario(
+        self, exercicio: Exercicio, usuario: int
+    ) -> ExercicioUsuario | None:
+        stmt = select(ExercicioUsuario).where(
+            ExercicioUsuario.id_usuario == usuario,
+            ExercicioUsuario.exercicio == exercicio,
+        )
+
+        return self.session.scalar(stmt)
+
+    def alterar_exercicio_usuario(
+        self, progresso: ExercicioUsuario, status: ExercicioStatus
+    ):
+        progresso.status = status
+        self.session.add(progresso)
+        self.session.commit()
+
+    def criar_exercicio_usuario(
+        self, exercicio: Exercicio, usuario: Usuario, status: ExercicioStatus
+    ) -> ExercicioUsuario:
+        progresso = ExercicioUsuario(status, usuario, exercicio)
+        self.session.add(progresso)
+        self.session.commit()
+
+        return progresso
+
+    def tentativa_exercicio(self, exercicio: Exercicio, usuario: Usuario):
+        progresso_usuario = self.listar_exercicio_usuario(exercicio, usuario.id_usuario)
+        if progresso_usuario:
+            if progresso_usuario.status not in (ExercicioStatus.COMPLETO, ExercicioStatus.ABERTO):
+                self.alterar_exercicio_usuario(progresso_usuario, ExercicioStatus.ABERTO)
+        else:
+            self.criar_exercicio_usuario(exercicio, usuario, ExercicioStatus.ABERTO)
+
+    def completar_exercicio(self, exercicio: Exercicio, usuario: Usuario):
+        progresso_usuario = self.listar_exercicio_usuario(exercicio, usuario.id_usuario)
+        if progresso_usuario:
+            if progresso_usuario.status != ExercicioStatus.COMPLETO:
+                self.alterar_exercicio_usuario(progresso_usuario, ExercicioStatus.COMPLETO)
+        else:
+            self.criar_exercicio_usuario(exercicio, usuario, ExercicioStatus.COMPLETO)

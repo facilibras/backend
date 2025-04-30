@@ -7,7 +7,7 @@ from typing import Sequence
 from fastapi import HTTPException, UploadFile
 
 from facilibras.controladores.reconhecimento import reconhecer_video
-from facilibras.dependencias.dal import T_ExercicioDAO, T_SecaoDAO
+from facilibras.dependencias.dal import T_ExercicioDAO, T_SecaoDAO, T_UsuarioDAO
 from facilibras.modelos import Exercicio, ExercicioStatus, Secao
 from facilibras.modelos.sinais import get_sinal
 from facilibras.schemas import (
@@ -21,9 +21,15 @@ TEMP_DIR = "videos"
 
 
 class ExercicioControle:
-    def __init__(self, exercicio_dao: T_ExercicioDAO, secao_dao: T_SecaoDAO) -> None:
+    def __init__(
+        self,
+        exercicio_dao: T_ExercicioDAO,
+        secao_dao: T_SecaoDAO,
+        usuario_dao: T_UsuarioDAO,
+    ) -> None:
         self.exercicio_dao = exercicio_dao
         self.secao_dao = secao_dao
+        self.usuario_dao = usuario_dao
 
     def listar_secoes(self) -> list[SecaoSchema]:
         secoes = self.secao_dao.listar_todas_com_quantidade()
@@ -72,6 +78,16 @@ class ExercicioControle:
 
         return converter_exercicios_para_schema(exs, status)
 
+    def completar_exercicio(self, exercicio: Exercicio, id_usuario: int):
+        usuario = self.usuario_dao.buscar_por_id(id_usuario)
+        if usuario:
+            self.exercicio_dao.completar_exercicio(exercicio, usuario)
+
+    def tentativa_exercicio(self, exercicio: Exercicio, id_usuario: int):
+        usuario = self.usuario_dao.buscar_por_id(id_usuario)
+        if usuario:
+            self.exercicio_dao.tentativa_exercicio(exercicio, usuario)
+
     def reconhecer_exercicio(
         self, nome_exercicio: str, video: UploadFile, usuario: int | None
     ) -> FeedbackExercicioSchema:
@@ -117,9 +133,14 @@ class ExercicioControle:
         # Apaga o arquivo temporário
         os.remove(caminho_arquivo_temp)
 
-        msg = "Inserir feedback do que deu errado..."
         if sucesso:
             msg = "Parabéns! Você realizou o sinal corretamente"
+            if usuario is not None:
+                self.completar_exercicio(exercicio[0], usuario)
+        else:
+            msg = "Inserir feedback do que deu errado..."
+            if usuario is not None:
+                self.tentativa_exercicio(exercicio[0], usuario)
 
         return FeedbackExercicioSchema(
             sucesso=sucesso,

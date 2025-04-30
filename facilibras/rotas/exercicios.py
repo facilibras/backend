@@ -20,24 +20,33 @@ def listar_secoes(controle: T_ExercicioControle):
 
 
 @router.get("/secoes/{secao}", response_model=list[ExercicioSchema])
-def listar_por_secao(secao: str, controle: T_ExercicioControle):
-    return controle.listar_exercicios_por_secao(secao, None)
+def listar_por_secao(
+    secao: str, controle: T_ExercicioControle, usuario: T_UsuarioOpcional
+):
+    usuario_id = usuario["id"] if usuario else None
+    return controle.listar_exercicios_por_secao(secao, usuario_id)
 
 
 @router.get("/", response_model=list[ExercicioSchema])
-def listar_exercicios(controle: T_ExercicioControle):
-    return controle.listar_exercicios(None)
+def listar_exercicios(controle: T_ExercicioControle, usuario: T_UsuarioOpcional):
+    usuario_id = usuario["id"] if usuario else None
+    return controle.listar_exercicios(usuario_id)
 
 
 @router.get("/{exercicio}")
-def pagina_exercicio(exercicio: str, controle: T_ExercicioControle):
-    return controle.listar_exercicio_por_nome(exercicio, None)
+def pagina_exercicio(
+    exercicio: str, controle: T_ExercicioControle, usuario: T_UsuarioOpcional,
+):
+    usuario_id = usuario["id"] if usuario else None
+    return controle.listar_exercicio_por_nome(exercicio, usuario_id)
 
 
 @router.post("/{exercicio}/reconhecer", response_model=FeedbackExercicioSchema)
 def reconhecer_exercicio(
     exercicio: str,
     controle: T_ExercicioControle,
+    usuario: T_UsuarioOpcional,
     video: UploadFile = File(...),
 ):
-    return controle.reconhecer_exercicio(exercicio, video, None)
+    usuario_id = usuario["id"] if usuario else None
+    return controle.reconhecer_exercicio(exercicio, video, usuario_id)
