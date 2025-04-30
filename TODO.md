@@ -4,6 +4,11 @@
 - [ ] Corrigir sinal da letra P (Orientacao.LATERAL -> Orientacao.TRAS) ???
 - [ ] Variações de Sinais
 
+## Corrigir Sinais
+- [ ] Letra Ç: Reconhece ambos sinais na lateral.
+- [ ] Letra O: Funciona mas dependendo do ângulo da mão não é instantâneo.
+- [ ] Letra X: Movimento
+
 ## Melhorar
 - [ ] Polegar_dentro (BAIXO): *Falso negativo*
 - [ ] Indicador_cima (LATERAL): *Falso negativo* comum nos sinais com orientação lateral

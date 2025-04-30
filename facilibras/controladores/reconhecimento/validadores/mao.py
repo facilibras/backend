@@ -206,7 +206,7 @@ def validar_dedo_indicador_cima(
     elif orientacao == Orientacao.TRAS:
         if inclinacao == Inclinacao.DENTRO_180:
             para_baixo = dedos[8][y] < dedos[6][y]
-        elif inclinacao == Inclinacao.RETA:
+        elif inclinacao in (Inclinacao.RETA, Inclinacao.DENTRO_45):
             para_baixo = dedos[8][y] > dedos[6][y]
 
         if para_baixo:
@@ -688,9 +688,6 @@ def validar_dedo_minimo_baixo(
             return Invalido()
 
     elif orientacao == Orientacao.TRAS:
-        if inclinacao != Inclinacao.DENTRO_180:
-            raise exc
-
         para_cima = dedos[20][y] > dedos[18][y]
         if para_cima:
             return Invalido()
