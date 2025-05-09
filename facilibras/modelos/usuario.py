@@ -18,6 +18,7 @@ class Usuario:
     nome: Mapped[str]
     email: Mapped[str] = mapped_column(unique=True)
     hash_senha: Mapped[str]
+    super_usuario: Mapped[bool] = mapped_column(default=False, nullable=False)
 
     # Perfil
     apelido: Mapped[Optional[str]] = mapped_column(unique=True, default=None)

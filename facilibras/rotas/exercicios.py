@@ -35,7 +35,9 @@ def listar_exercicios(controle: T_ExercicioControle, usuario: T_UsuarioOpcional)
 
 @router.get("/{exercicio}")
 def pagina_exercicio(
-    exercicio: str, controle: T_ExercicioControle, usuario: T_UsuarioOpcional,
+    exercicio: str,
+    controle: T_ExercicioControle,
+    usuario: T_UsuarioOpcional,
 ):
     usuario_id = usuario["id"] if usuario else None
     return controle.listar_exercicio_por_nome(exercicio, usuario_id)

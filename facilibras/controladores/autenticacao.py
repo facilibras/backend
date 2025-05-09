@@ -68,7 +68,7 @@ class AutenticacaoControle:
         except DecodeError as err:
             raise exc_invalido from err
 
-        return {"id": id_usuario, "nome": nome, "super": super}
+        return {"id": id_usuario, "nome": nome, "super": super_usuario}
 
     def registrar_usuario(self, dados_usuario: CriarUsuario) -> Usuario:
         # Checa se o usuário já está cadastrado

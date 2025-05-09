@@ -88,8 +88,13 @@ class ExercicioDAO:
     def tentativa_exercicio(self, exercicio: Exercicio, usuario: Usuario):
         progresso_usuario = self.listar_exercicio_usuario(exercicio, usuario.id_usuario)
         if progresso_usuario:
-            if progresso_usuario.status not in (ExercicioStatus.COMPLETO, ExercicioStatus.ABERTO):
-                self.alterar_exercicio_usuario(progresso_usuario, ExercicioStatus.ABERTO)
+            if progresso_usuario.status not in (
+                ExercicioStatus.COMPLETO,
+                ExercicioStatus.ABERTO,
+            ):
+                self.alterar_exercicio_usuario(
+                    progresso_usuario, ExercicioStatus.ABERTO
+                )
         else:
             self.criar_exercicio_usuario(exercicio, usuario, ExercicioStatus.ABERTO)
 
@@ -97,6 +102,8 @@ class ExercicioDAO:
         progresso_usuario = self.listar_exercicio_usuario(exercicio, usuario.id_usuario)
         if progresso_usuario:
             if progresso_usuario.status != ExercicioStatus.COMPLETO:
-                self.alterar_exercicio_usuario(progresso_usuario, ExercicioStatus.COMPLETO)
+                self.alterar_exercicio_usuario(
+                    progresso_usuario, ExercicioStatus.COMPLETO
+                )
         else:
             self.criar_exercicio_usuario(exercicio, usuario, ExercicioStatus.COMPLETO)

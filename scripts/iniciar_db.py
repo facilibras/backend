@@ -7,6 +7,7 @@ from sqlalchemy import desc, select
 from sqlalchemy.orm import Session
 
 from facilibras.config.db import engine
+from facilibras.controladores.autenticacao import hasher
 from facilibras.modelos import (
     Exercicio,
     ExercicioStatus,
@@ -27,7 +28,7 @@ if __name__ == "__main__":
 
     with Session(engine) as session:
         # Usuários e Seções
-        usuario = Usuario("João", "joao@exemplo.com", "123")
+        usuario = Usuario("João", "joao@exemplo.com", hasher.hash("123"), True)
         alfabeto = Secao("Alfabeto", "Aprenda e pratique as letras do alfabeto")
         numeros = Secao("Números", "Aprenda e pratique os números do 0 ao 9")
 
