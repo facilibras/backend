@@ -77,7 +77,7 @@ def reconhecer_estatico(
 
             # Extrai os pontos
             if pontos:
-                resultado = validar_sinal(sinal, pontos, 0)
+                resultado, msg = validar_sinal(sinal, pontos, 0)
 
             atingiu_tempo = time.time() - inicio >= tempo_limite
             if gerador.tipo == TipoGerador.CAMERA:
@@ -116,7 +116,7 @@ def reconhecer_com_transicao(
             # Extrai os pontos
             pontos = extrair_pontos_mao(imagem_rgb, modelo)
             if pontos:
-                resultado = validar_sinal(sinal, pontos, conf_idx)
+                resultado, msg = validar_sinal(sinal, pontos, conf_idx)
 
                 # Transição ocorreu
                 if resultado:
@@ -164,7 +164,7 @@ def reconhecer_com_movimento(
             pontos = extrair_pontos_mao(imagem_rgb, modelo)
             if pontos:
                 # Reconhece formato da mão
-                reconheceu_formato = validar_sinal(sinal, pontos, 0)
+                reconheceu_formato, msg = validar_sinal(sinal, pontos, 0)
 
                 # Seta o frame com reconhecido ou não
                 frames_bool.append(reconheceu_formato)
@@ -356,15 +356,24 @@ def extrair_pontos_mao(imagem_np, modelo) -> dict[int, tuple[float, float, float
 
 def validar_sinal(
     sinal: SinalLibras, pontos: dict[int, tuple[float, float, float]], conf_idx: int
-) -> bool:
+) -> tuple[bool, str]:
     dedos = sinal.confs[conf_idx].dedos
     orientacao = sinal.confs[conf_idx].orientacao or Orientacao.FRENTE
     inclinacao = sinal.confs[conf_idx].inclinacao or Inclinacao.RETA
 
-    return all(
-        type(get_validador(dedo)(pontos, orientacao, inclinacao)) is Valido
-        for dedo in dedos
-    )
+    validadores = [get_validador(dedo) for dedo in dedos]
+    sucesso = True
+    mensagens = []
+
+    for validador in validadores:
+        resultado = validador(pontos, orientacao, inclinacao)
+        if type(resultado) is Invalido:
+            sucesso = False
+            mensagens.append(resultado.mensagem)
+
+    feedback = "".join([f"{i + 1}: {msg}" for i, msg in enumerate(mensagens)])
+
+    return sucesso, feedback
 
 
 def validar_janelas_continuas(validos: list[bool], frames: list) -> list:

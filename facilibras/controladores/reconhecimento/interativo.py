@@ -29,10 +29,24 @@ def reconhecer_interativamente(sinal: SinalLibras):
             # Extrai os pontos e valida
             pontos = extrair_pontos_mao(imagem_rgb, modelo)
             cor = (0, 0, 255)
-            if pontos and validar_sinal(sinal, pontos, 0):
-                cor = (0, 255, 0)
+            if pontos:
+                resultado = validar_sinal(sinal, pontos, 0)
+                msg = resultado[1]
+                if resultado[0]:
+                    cor = (0, 255, 0)
 
             # Exibe o o frame
+            if msg:
+                cv2.putText(
+                    frame,
+                    msg,
+                    (50 - 20, 50 + 40),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.5,
+                    (0, 0, 0),
+                    1,
+                    cv2.LINE_AA,
+                )
             cv2.circle(frame, (50, 50), radius=25, color=cor, thickness=-1)
             cv2.imshow("Pressione q para sair", frame)
             if cv2.waitKey(1) & 0xFF == ord("q"):
