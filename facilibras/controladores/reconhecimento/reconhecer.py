@@ -32,34 +32,36 @@ HORIZONTAIS = (Movimento.DIREITA, Movimento.ESQUERDA)
 TEMPO_TOTAL = 5
 
 
-def reconhecer_webcam(sinal: SinalLibras) -> bool:
+def reconhecer_webcam(sinal: SinalLibras) -> tuple[bool, str]:
     return reconhecer(sinal, Camera(0))
 
 
-def reconhecer_video(sinal: SinalLibras, caminho_video: str) -> bool:
+def reconhecer_video(sinal: SinalLibras, caminho_video: str) -> tuple[bool, str]:
     return reconhecer(sinal, Video(caminho_video))
 
 
-def reconhecer(sinal: SinalLibras, gerador: GeradorFrames) -> bool:
+def reconhecer(sinal: SinalLibras, gerador: GeradorFrames) -> tuple[bool, str]:
     sinal.preparar_reconhecimento()
 
     match sinal.tipo:
         case Tipo.ESTATICO:
-            res = reconhecer_estatico(sinal, gerador, TEMPO_TOTAL)
+            res, erros = reconhecer_estatico(sinal, gerador, TEMPO_TOTAL)
         case Tipo.COM_MOVIMENTO:
-            res = reconhecer_com_movimento(sinal, gerador, TEMPO_TOTAL)
+            res, erros = reconhecer_com_movimento(sinal, gerador, TEMPO_TOTAL)
         case Tipo.COM_TRANSICAO:
-            res = reconhecer_com_transicao(sinal, gerador, TEMPO_TOTAL)
+            res, erros = reconhecer_com_transicao(sinal, gerador, TEMPO_TOTAL)
 
-    return res
+    return res, montar_feedback(erros)
 
 
 def reconhecer_estatico(
     sinal: SinalLibras, gerador: GeradorFrames, tempo_limite: int
-) -> bool:
+) -> tuple[bool, list[str]]:
     inicio = time.time()
     frame_idx = 0
     resultado = False
+    melhor = float("inf")
+    feedback = []
 
     with modelo_mao.Hands(
         min_detection_confidence=0.5, min_tracking_confidence=0.5
@@ -75,9 +77,13 @@ def reconhecer_estatico(
             imagem_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             pontos = extrair_pontos_mao(imagem_rgb, modelo)
 
-            # Extrai os pontos
+            # Valida sinal
             if pontos:
-                resultado, msg = validar_sinal(sinal, pontos, 0)
+                resultado, erros = validar_sinal(sinal, pontos, 0)
+                qtd_erros = len(erros)
+                if qtd_erros <= melhor:
+                    melhor = qtd_erros
+                    feedback = erros
 
             atingiu_tempo = time.time() - inicio >= tempo_limite
             if gerador.tipo == TipoGerador.CAMERA:
@@ -89,16 +95,18 @@ def reconhecer_estatico(
 
     cv2.destroyAllWindows()
 
-    return resultado
+    return resultado, feedback
 
 
 def reconhecer_com_transicao(
     sinal: SinalLibras, gerador: GeradorFrames, tempo_limite: int
-) -> bool:
+) -> tuple[bool, list[str]]:
     inicio = time.time()
     frame_idx = 0
     conf_idx = 0
     total_confs = len(sinal.confs)
+    melhor = float("inf")
+    feedback = []
 
     with modelo_mao.Hands(
         min_detection_confidence=0.5, min_tracking_confidence=0.5
@@ -116,7 +124,11 @@ def reconhecer_com_transicao(
             # Extrai os pontos
             pontos = extrair_pontos_mao(imagem_rgb, modelo)
             if pontos:
-                resultado, msg = validar_sinal(sinal, pontos, conf_idx)
+                resultado, erros = validar_sinal(sinal, pontos, conf_idx)
+                qtd_erros = len(erros)
+                if qtd_erros <= melhor:
+                    melhor = qtd_erros
+                    feedback = erros
 
                 # Transição ocorreu
                 if resultado:
@@ -136,7 +148,15 @@ def reconhecer_com_transicao(
 
     cv2.destroyAllWindows()
 
-    return conf_idx == total_confs
+    sucesso = conf_idx == total_confs
+    if sucesso:
+        return True, []
+    if not feedback:
+        return False, ["Faltou movimento"]
+    return False, [
+        *feedback,
+        "Corrija a configuração da mão antes de fazer o movimento",
+    ]
 
 
 def reconhecer_com_movimento(
@@ -146,6 +166,8 @@ def reconhecer_com_movimento(
     frames = []
     frame_idx = 0
     frames_bool = []
+    melhor = float("inf")
+    feedback = []
 
     with modelo_mao.Hands(
         min_detection_confidence=0.5, min_tracking_confidence=0.5
@@ -164,7 +186,11 @@ def reconhecer_com_movimento(
             pontos = extrair_pontos_mao(imagem_rgb, modelo)
             if pontos:
                 # Reconhece formato da mão
-                reconheceu_formato, msg = validar_sinal(sinal, pontos, 0)
+                reconheceu_formato, erros = validar_sinal(sinal, pontos, 0)
+                qtd_erros = len(erros)
+                if qtd_erros <= melhor:
+                    melhor = qtd_erros
+                    feedback = erros
 
                 # Seta o frame com reconhecido ou não
                 frames_bool.append(reconheceu_formato)
@@ -187,7 +213,11 @@ def reconhecer_com_movimento(
     janelas_continuas = validar_janelas_continuas(frames_com_margem, frames)
 
     # Por fim, avalia se houve movimento
+    if not janelas_continuas:
+        return False, feedback
+
     resultado = False
+    teve_movimento = False
     for tentativa in janelas_continuas:
         resultado = reconhecer_sequencia_movimentos(
             posicoes=tentativa,
@@ -196,9 +226,12 @@ def reconhecer_com_movimento(
             limiar_incorreto=100,
         )
         if resultado:
+            teve_movimento = True
             break
 
-    return resultado
+    if not teve_movimento:
+        return resultado, ["Faltou movimento"]
+    return resultado, feedback
 
 
 def reconhecer_sequencia_movimentos(
@@ -354,9 +387,14 @@ def extrair_pontos_mao(imagem_np, modelo) -> dict[int, tuple[float, float, float
     return pontos
 
 
+def montar_feedback(mensagens: list[str]) -> str:
+    feedback = ", ".join([f"{i + 1}: {msg}" for i, msg in enumerate(mensagens)])
+    return feedback
+
+
 def validar_sinal(
     sinal: SinalLibras, pontos: dict[int, tuple[float, float, float]], conf_idx: int
-) -> tuple[bool, str]:
+) -> tuple[bool, list[str]]:
     dedos = sinal.confs[conf_idx].dedos
     orientacao = sinal.confs[conf_idx].orientacao or Orientacao.FRENTE
     inclinacao = sinal.confs[conf_idx].inclinacao or Inclinacao.RETA
@@ -371,9 +409,7 @@ def validar_sinal(
             sucesso = False
             mensagens.append(resultado.mensagem)
 
-    feedback = "".join([f"{i + 1}: {msg}" for i, msg in enumerate(mensagens)])
-
-    return sucesso, feedback
+    return sucesso, mensagens
 
 
 def validar_janelas_continuas(validos: list[bool], frames: list) -> list:

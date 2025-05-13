@@ -128,7 +128,7 @@ class ExercicioControle:
                 shutil.copyfileobj(video.file, buffer)
 
         # Usa o video para reconhecer
-        sucesso = reconhecer_video(sinal, caminho_arquivo_temp)
+        sucesso, feedback = reconhecer_video(sinal, caminho_arquivo_temp)
 
         # Apaga o arquivo temporário
         os.remove(caminho_arquivo_temp)
@@ -138,7 +138,7 @@ class ExercicioControle:
             if usuario is not None:
                 self.completar_exercicio(exercicio[0], usuario)
         else:
-            msg = "Inserir feedback do que deu errado..."
+            msg = feedback
             if usuario is not None:
                 self.tentativa_exercicio(exercicio[0], usuario)
 

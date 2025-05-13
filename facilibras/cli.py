@@ -43,14 +43,16 @@ def letra(
             exit(1)
 
         typer.echo(f"Vídeo: {video}")
-        res = reconhecer_video(sinal, video)
+        res, feedback = reconhecer_video(sinal, video)
     else:
-        res = reconhecer_webcam(sinal)
+        res, feedback = reconhecer_webcam(sinal)
 
     if res:
         typer.secho("Reconhecido com sucesso!", fg=typer.colors.BRIGHT_GREEN)
     else:
         typer.secho("Não reconheceu o sinal!", fg=typer.colors.BRIGHT_RED)
+        typer.secho("Erros:", fg=typer.colors.BRIGHT_RED)
+        typer.secho(f"{feedback}", fg=typer.colors.BRIGHT_RED)
 
 
 @app.command()

@@ -5,6 +5,7 @@
 - [ ] Variações de Sinais
 
 ## Corrigir Sinais
+= [ ] Letra P: Falsos positivos nos dedos para baixo (trocar y por x)
 - [ ] Letra Ç: Reconhece ambos sinais na lateral.
 - [ ] Letra O: Funciona mas dependendo do ângulo da mão não é instantâneo.
 - [ ] Letra X: Movimento

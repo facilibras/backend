@@ -4,6 +4,7 @@ from facilibras.controladores.reconhecimento.frames import Camera
 from facilibras.controladores.reconhecimento.mp_modelos import modelo_mao
 from facilibras.controladores.reconhecimento.reconhecer import (
     extrair_pontos_mao,
+    montar_feedback,
     validar_sinal,
 )
 from facilibras.modelos.sinais import SinalLibras
@@ -29,9 +30,10 @@ def reconhecer_interativamente(sinal: SinalLibras):
             # Extrai os pontos e valida
             pontos = extrair_pontos_mao(imagem_rgb, modelo)
             cor = (0, 0, 255)
+            msg = ""
             if pontos:
                 resultado = validar_sinal(sinal, pontos, 0)
-                msg = resultado[1]
+                msg = montar_feedback(resultado[1])
                 if resultado[0]:
                     cor = (0, 255, 0)
 

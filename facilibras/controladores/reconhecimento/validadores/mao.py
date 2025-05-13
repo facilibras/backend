@@ -688,6 +688,11 @@ def validar_dedo_minimo_baixo(
             return Invalido("Mínimo")
 
     elif orientacao == Orientacao.TRAS:
+        if inclinacao == Inclinacao.DENTRO_45:
+            para_baixo = dedos[20][x] > dedos[18][x]
+            if para_baixo:
+                return Valido()
+
         para_cima = dedos[20][y] > dedos[18][y]
         if para_cima:
             return Invalido("Mínimo")
