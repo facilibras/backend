@@ -23,12 +23,12 @@ def validar_movimento_cima(
     # Chegagem de movimento em horizontal
     mov_x = pos_atual[x] - pos_anterior[x] + acumulado[x]
     if abs(mov_x) >= limiar_incorreto:
-        return Invalido()
+        return Invalido("Movimento direção errada")
 
     # Checagem de movimento vertical
     mov_y = pos_atual[y] - pos_anterior[y] + acumulado[y]
     if mov_y >= limiar_incorreto:
-        return Invalido()
+        return Invalido("Movimento direção errada")
     if mov_y <= -limiar_correto:
         return Valido()
 
@@ -47,12 +47,12 @@ def validar_movimento_direita(
     # Chegagem de movimento em vertical
     mov_y = pos_atual[y] - pos_anterior[y] + acumulado[y]
     if abs(mov_y) >= limiar_incorreto:
-        return Invalido()
+        return Invalido("Movimento direção errada (vertical)")
 
     # Chegagem de movimento em horizontal
     mov_x = pos_atual[x] - pos_anterior[x] + acumulado[x]
     if mov_x <= -limiar_incorreto:
-        return Invalido()
+        return Invalido("Movimento direção errada (esquerda)")
     if mov_x >= limiar_correto:
         return Valido()
 
@@ -88,12 +88,12 @@ def validar_movimento_baixo_esquerda(
     # Checagem de movimento contrário (direita)
     mov_x = pos_atual[x] - pos_anterior[x] + acumulado[x]
     if mov_x >= limiar_incorreto:
-        return Invalido()
+        return Invalido("Movimento direção errada (direita)")
 
     # Checagem de movimento contrário (cima)
     mov_y = pos_atual[y] - pos_anterior[y] + acumulado[y]
     if mov_y <= -limiar_incorreto:
-        return Invalido()
+        return Invalido("Movimento direção errada (cima)")
 
     # Suficiente na direção horizontal (esquerda)
     if mov_x <= -limiar_correto and mov_y >= limiar_correto // 2:

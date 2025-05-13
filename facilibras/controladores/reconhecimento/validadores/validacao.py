@@ -12,7 +12,7 @@ from facilibras.modelos.mao import (
 )
 
 Valido = namedtuple("Valido", [])
-Invalido = namedtuple("Invalido", [])
+Invalido = namedtuple("Invalido", ["mensagem"])
 Validando = namedtuple("Validando", ["resultado_atual"])
 
 T_Ponto: TypeAlias = tuple[float, float, float]
