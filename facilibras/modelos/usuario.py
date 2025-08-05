@@ -1,36 +1,33 @@
-from datetime import datetime
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from sqlalchemy import func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.types import TIMESTAMP, TEXT
 
 from facilibras.config.db import registro_tabelas
 
 if TYPE_CHECKING:
-    from facilibras.modelos import ExercicioUsuario
+    from facilibras.modelos import Perfil, ProgressoUsuario
 
 
 @registro_tabelas.mapped_as_dataclass
 class Usuario:
-    __tablename__ = "usuarios"
+    __tablename__ = "tb_usuarios"
 
-    id_usuario: Mapped[int] = mapped_column(init=False, primary_key=True)
+    id: Mapped[int] = mapped_column(init=False, primary_key=True)
     nome: Mapped[str]
     email: Mapped[str] = mapped_column(unique=True)
-    hash_senha: Mapped[str]
-
-    # Perfil
-    apelido: Mapped[Optional[str]] = mapped_column(unique=True, default=None)
-    img_url_perfil: Mapped[Optional[str]] = mapped_column(default=None)
-    img_url_fundo: Mapped[Optional[str]] = mapped_column(default=None)
-
-    # Controle
-    registro_em: Mapped[datetime] = mapped_column(init=False, server_default=func.now())
-    atualizado_em: Mapped[Optional[datetime]] = mapped_column(default=None)
-    inativo_em: Mapped[Optional[datetime]] = mapped_column(default=None)
-    ultimo_login: Mapped[Optional[datetime]] = mapped_column(default=None)
+    senha: Mapped[TEXT]
+    salt: Mapped[TEXT]
+    criado_em: Mapped[TIMESTAMP]
+    ultimo_login: Mapped[TIMESTAMP]
+    ativo: Mapped[bool]
 
     # Acesso Reverso
-    exercicio_progressos: Mapped[list["ExercicioUsuario"]] = relationship(
-        back_populates="usuario", default_factory=list, cascade="all, delete-orphan"
+    perfil: Mapped["Perfil"] = relationship(back_populates="usuario")
+   
+    exercicios: Mapped[list["ProgressoUsuario"]] = relationship(
+        back_populates="usuario", 
+        default_factory=list, 
+        cascade="all, delete-orphan"
     )
