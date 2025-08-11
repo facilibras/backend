@@ -17,5 +17,5 @@ class PalavraExercicio:
     exercicio_id: Mapped[int] = mapped_column(ForeignKey("tb_exercicios.id"), primary_key=True)
 
     # Acesso reverso
-    palavra: Mapped["Palavra"]
-    exercicio: Mapped["Exercicio"]
+    palavra: Mapped["Palavra"] = relationship(back_populates="palavra_exercicio")
+    exercicio: Mapped["Exercicio"] = relationship(back_populates="palavra_exercicio")

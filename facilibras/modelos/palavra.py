@@ -5,7 +5,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from facilibras.config.db import registro_tabelas
 
 if TYPE_CHECKING:
-    from facilibras.modelos import Exercicio
+    from facilibras.modelos import PalavraExercicio
 
 
 @registro_tabelas.mapped_as_dataclass
@@ -16,4 +16,4 @@ class Palavra:
     nome: Mapped[str]
     url_video: Mapped[str]
 
-    exercicios: Mapped[list["Exercicio"]] = relationship(back_populates="palavras")
+    palavra_exercicio: Mapped[list["PalavraExercicio"]] = relationship(back_populates="palavra")
