@@ -6,7 +6,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from facilibras.config.db import registro_tabelas
 
 if TYPE_CHECKING:
-    from facilibras.modelos import Usuario, Palavra
+    from facilibras.modelos import Usuario, Palavra, Secao
 
 @registro_tabelas.mapped_as_dataclass
 class Exercicio:
@@ -18,5 +18,6 @@ class Exercicio:
     prox_exercicio: Mapped[int] = mapped_column(ForeignKey("tb_exercicios.id"))
 
     # Acesso reverso
-    usuarios: Mapped[list["Usuario"]]
-    palavras: Mapped[list["Palavra"]]
+    usuarios: Mapped[list["Usuario"]] = relationship(back_populates="exercicio")
+    palavras: Mapped[list["Palavra"]] = relationship()
+    secao: Mapped["Secao"] = relationship(back_populates="exercicios")

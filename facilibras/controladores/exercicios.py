@@ -109,7 +109,7 @@ class ExercicioControle:
 
         # Checa se os sinais do exercício existe
         try:
-            nome_sinal = exercicio[0].palavras[0].nome_palavra
+            nome_sinal = exercicio[0].palavras[0].nome
             sinal = get_sinal(nome_sinal)
         except ValueError:
             exc_msg = f"Sinal com nome {nome_sinal} não encontrado"

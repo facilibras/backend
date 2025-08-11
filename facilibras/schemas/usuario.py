@@ -9,9 +9,10 @@ class UsuarioSchema(BaseModel):
 
 
 class CriarUsuario(BaseModel):
-    nome: str
+    nome_usuario: str
     email: str
     senha: str
+
 
 
 class LoginSchema(BaseModel):

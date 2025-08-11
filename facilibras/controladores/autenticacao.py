@@ -84,22 +84,22 @@ class AutenticacaoControle:
 
         # Registra usuário no banco de dados
         novo_usuario = Usuario(
-            nome=dados_usuario.nome, email=dados_usuario.email, hash_senha=hash_senha
+            nome_usuario=dados_usuario.nome_usuario, email=dados_usuario.email, senha=hash_senha
         )
         return self.dao.criar(novo_usuario)
 
     def autenticar_usuario(self, dados_login: LoginSchema) -> Token:
         usuario = self.dao.buscar_por_email(dados_login.nome)
 
-        if not usuario or not self.validar_senha(dados_login.senha, usuario.hash_senha):
+        if not usuario or not self.validar_senha(dados_login.senha, usuario.senha):
             raise HTTPException(
                 status_code=HTTPStatus.UNAUTHORIZED,
                 detail="Email e/ou senha inválido[s].",
             )
 
         dados = {
-            "nome_usuario": usuario.nome,
-            "id_usuario": usuario.id_usuario,
+            "nome_usuario": usuario.nome_usuario,
+            "id_usuario": usuario.id,
             "super_usuario": True,
         }
 

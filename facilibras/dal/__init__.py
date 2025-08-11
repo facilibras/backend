@@ -1,9 +1,9 @@
-from facilibras.dal.exercicios import (
+from facilibras.dal.exercicio import (
     ExercicioDAO as ExercicioDAO,
 )
-from facilibras.dal.secoes import (
+from facilibras.dal.secao import (
     SecaoDAO as SecaoDAO,
 )
-from facilibras.dal.usuarios import (
+from facilibras.dal.usuario import (
     UsuarioDAO as UsuarioDAO,
 )

@@ -19,5 +19,10 @@ class UsuarioDAO:
 
     def buscar_por_id(self, id_usuario: int) -> Usuario | None:
         return self.session.scalar(
-            select(Usuario).where(Usuario.id_usuario == id_usuario)
+            select(Usuario).where(Usuario.id == id_usuario)
+        )
+    
+    def buscar_por_username(self, nome_usuario) -> Usuario | None:
+        return self.session.scalar(
+            select(Usuario).where(Usuario.nome_usuario == nome_usuario)
         )
