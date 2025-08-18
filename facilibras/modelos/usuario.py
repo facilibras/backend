@@ -43,10 +43,11 @@ class Usuario:
         default=True)
 
     # Acesso Reverso
-    # perfil: Mapped["Perfil"] = relationship(
-    #     back_populates="usuario")
+    perfil: Mapped["Perfil"] = relationship(
+        back_populates="usuario",
+        cascade="delete-orphan")
     
-    # exercicios: Mapped[list["ProgressoUsuario"]] = relationship(
-    #     back_populates="usuario", 
-    #     default_factory=list, 
-    #     cascade="all, delete-orphan")
+    progressos_exercicios: Mapped[list["ProgressoUsuario"]] = relationship(
+        back_populates="usuario", 
+        default_factory=list, 
+        cascade="all, delete-orphan")

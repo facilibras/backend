@@ -30,7 +30,8 @@ class Perfil:
     
     criado_em: Mapped[datetime] = mapped_column(
         TIMESTAMP, 
-        default=func.now())
+        default=func.now(),
+        init=False)
 
     # Acesso Reverso
-    # usuario: Mapped["Usuario"] = relationship(back_populates="perfil")
+    usuario: Mapped["Usuario"] = relationship(back_populates="perfil")

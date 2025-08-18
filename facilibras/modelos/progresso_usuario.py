@@ -38,5 +38,5 @@ class ProgressoUsuario:
         init=False)
 
     # Acesso Reverso
-    # usuario: Mapped["Usuario"] = relationship(back_populates="exercicios")
-    # exercicio: Mapped["Exercicio"] = relationship(back_populates="usuarios")
+    usuario: Mapped["Usuario"] = relationship(back_populates="progressos_exercicios")
+    exercicio: Mapped["Exercicio"] = relationship(back_populates="progressos_usuarios")

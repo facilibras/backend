@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -6,7 +6,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from facilibras.config.db import registro_tabelas
 
 if TYPE_CHECKING:
-    from facilibras.modelos import Secao, ProgressoUsuario, PalavraExercicio
+    from facilibras.modelos import Secao, ProgressoUsuario, Palavra
 
 @registro_tabelas.mapped_as_dataclass
 class Exercicio:
@@ -22,10 +22,14 @@ class Exercicio:
     
     descricao: Mapped[str]
     
-    prox_exercicio: Mapped[int] = mapped_column(ForeignKey("tb_exercicios.id"))
+    prox_exercicio: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("tb_exercicios.id"),
+        nullable=True)
 
     # Acesso reverso
-    # progressos_usuarios: Mapped[list["ProgressoUsuario"]] = relationship(back_populates="exercicio")
-    # palavra_exercicio: Mapped[list["PalavraExercicio"]] = relationship(back_populates="exercicio")
-    # secao: Mapped["Secao"] = relationship(back_populates="exercicios")
-    # proximo: Mapped["Exercicio"] = relationship()
+    proximo: Mapped["Exercicio"] = relationship()
+    progressos_usuarios: Mapped[list["ProgressoUsuario"]] = relationship(back_populates="exercicio")
+    secao: Mapped["Secao"] = relationship(back_populates="exercicios")
+    palavras: Mapped[list["Palavra"]] = relationship(
+        secondary="tb_palavras_exercicios",
+        back_populates="exercicios")
