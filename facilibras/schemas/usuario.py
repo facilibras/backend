@@ -1,20 +1,19 @@
 from datetime import datetime
 
-from pydantic import BaseModel
+from facilibras.schemas import BaseSchema
+
+class UsuarioSchema(BaseSchema):
+    nome_usuario: str
+    criado_em: datetime
 
 
-class UsuarioSchema(BaseModel):
-    nome: str
-    registro_em: datetime
-
-
-class CriarUsuario(BaseModel):
+class CriarUsuario(BaseSchema):
     nome_usuario: str
     email: str
     senha: str
 
 
 
-class LoginSchema(BaseModel):
+class LoginSchema(BaseSchema):
     nome: str
     senha: str

@@ -1,7 +1,7 @@
-from pydantic import BaseModel
+from facilibras.schemas import BaseSchema
 
 
-class MensagemSchema(BaseModel):
+class MensagemSchema(BaseSchema):
     """Mensagem retornada p/ informar sucesso ou falha em várias rotas"""
 
     mensagem: str

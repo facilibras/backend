@@ -1,7 +1,7 @@
-from pydantic import BaseModel
+from facilibras.schemas import BaseSchema
 
 
-class Token(BaseModel):
+class Token(BaseSchema):
     """Formato do JWT retornado no /login"""
 
     token: str
