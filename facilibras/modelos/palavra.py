@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING
 
+from sqlalchemy import func, Sequence
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from facilibras.config.db import registro_tabelas
@@ -12,8 +13,13 @@ if TYPE_CHECKING:
 class Palavra:
     __tablename__ = "tb_palavras"
 
-    id: Mapped[int] = mapped_column(init=False, primary_key=True)
+    id: Mapped[int] = mapped_column(
+        primary_key=True,
+        default=func.next_value(Sequence("sq_palavras")),
+        init=False)
+    
     nome: Mapped[str]
+    
     url_video: Mapped[str]
 
-    palavra_exercicio: Mapped[list["PalavraExercicio"]] = relationship(back_populates="palavra")
+    # palavra_exercicio: Mapped[list["PalavraExercicio"]] = relationship(back_populates="palavra")

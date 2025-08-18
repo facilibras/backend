@@ -13,9 +13,14 @@ if TYPE_CHECKING:
 class PalavraExercicio:
     __tablename__ = "tb_palavras_exercicios"
 
-    palavra_id: Mapped[int] = mapped_column(ForeignKey("tb_palavras.id"), primary_key=True)
-    exercicio_id: Mapped[int] = mapped_column(ForeignKey("tb_exercicios.id"), primary_key=True)
+    palavra_id: Mapped[int] = mapped_column(
+        ForeignKey("tb_palavras.id"), 
+        primary_key=True)
+    
+    exercicio_id: Mapped[int] = mapped_column(
+        ForeignKey("tb_exercicios.id"), 
+        primary_key=True)
 
     # Acesso reverso
-    palavra: Mapped["Palavra"] = relationship(back_populates="palavra_exercicio")
-    exercicio: Mapped["Exercicio"] = relationship(back_populates="palavra_exercicio")
+    # palavra: Mapped["Palavra"] = relationship(back_populates="palavra_exercicio")
+    # exercicio: Mapped["Exercicio"] = relationship(back_populates="palavra_exercicio")

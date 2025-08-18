@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -12,8 +12,12 @@ if TYPE_CHECKING:
 class Secao:
     __tablename__ = "tb_secoes"
 
-    id: Mapped[int] = mapped_column(init=False, primary_key=True)
+    id: Mapped[int] = mapped_column(
+        init=False, 
+        primary_key=True)
+    
     nome: Mapped[str]
-    descricao: Mapped[str]
 
-    exercicios: Mapped[list["Exercicio"]] = relationship(back_populates="exercicio")
+    descricao: Mapped[Optional[str]]
+
+    # exercicios: Mapped[list["Exercicio"]] = relationship(back_populates="exercicio")

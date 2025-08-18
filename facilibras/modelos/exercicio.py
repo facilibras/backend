@@ -12,14 +12,20 @@ if TYPE_CHECKING:
 class Exercicio:
     __tablename__ = "tb_exercicios"
 
-    id: Mapped[int] = mapped_column(init=False, primary_key=True)
+    id: Mapped[int] = mapped_column(
+        primary_key=True, 
+        init=False)
+    
     secao_id: Mapped[int] = mapped_column(ForeignKey("tb_secoes.id"))
+    
     titulo: Mapped[str]
+    
     descricao: Mapped[str]
+    
     prox_exercicio: Mapped[int] = mapped_column(ForeignKey("tb_exercicios.id"))
 
     # Acesso reverso
-    progressos_usuarios: Mapped[list["ProgressoUsuario"]] = relationship(back_populates="exercicio")
-    palavra_exercicio: Mapped[list["PalavraExercicio"]] = relationship(back_populates="exercicio")
-    secao: Mapped["Secao"] = relationship(back_populates="exercicios")
-    proximo: Mapped["Exercicio"] = relationship()
+    # progressos_usuarios: Mapped[list["ProgressoUsuario"]] = relationship(back_populates="exercicio")
+    # palavra_exercicio: Mapped[list["PalavraExercicio"]] = relationship(back_populates="exercicio")
+    # secao: Mapped["Secao"] = relationship(back_populates="exercicios")
+    # proximo: Mapped["Exercicio"] = relationship()

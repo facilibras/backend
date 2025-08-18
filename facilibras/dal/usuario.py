@@ -11,18 +11,14 @@ class UsuarioDAO:
     def criar(self, usuario: Usuario) -> Usuario:
         self.session.add(usuario)
         self.session.commit()
-        self.session.refresh(usuario)
+        # self.session.refresh(usuario)
         return usuario
 
     def buscar_por_email(self, email: str) -> Usuario | None:
-        return self.session.scalar(select(Usuario).where(Usuario.email == email))
+        return self.session.query(Usuario).filter_by(email=email).one_or_none()
 
     def buscar_por_id(self, id_usuario: int) -> Usuario | None:
-        return self.session.scalar(
-            select(Usuario).where(Usuario.id == id_usuario)
-        )
+        return self.session.query(Usuario).filter_by(id=id_usuario).one_or_none()
     
     def buscar_por_username(self, nome_usuario) -> Usuario | None:
-        return self.session.scalar(
-            select(Usuario).where(Usuario.nome_usuario == nome_usuario)
-        )
+        return self.session.query(Usuario).filter_by(nome_usuario=nome_usuario).one_or_none()

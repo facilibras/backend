@@ -1,9 +1,10 @@
 from enum import Enum
 from typing import TYPE_CHECKING
+from datetime import datetime
 
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.types import TIMESTAMP
+from sqlalchemy.types import TIMESTAMP, VARCHAR
 
 from facilibras.config.db import registro_tabelas
 
@@ -26,15 +27,16 @@ class ProgressoUsuario:
         ForeignKey('tb_exercicios.id'), 
         primary_key=True)
     
-    criado_em: Mapped[TIMESTAMP]
+    criado_em: Mapped[datetime] = mapped_column(
+        TIMESTAMP, 
+        default=func.now(), 
+        init=False)
     
-    status = Mapped[ExercicioStatus]
+    status: Mapped[ExercicioStatus] = mapped_column(
+        VARCHAR, 
+        default=ExercicioStatus.INCOMPLETO, 
+        init=False)
 
     # Acesso Reverso
-    usuario: Mapped["Usuario"] = relationship(back_populates="exercicios")
-    exercicio: Mapped["Exercicio"] = relationship(back_populates="usuarios")
-
-    def __init__(self, status, usuario_id, exercicio_id):
-        self.usuario_id = usuario_id
-        self.exercicio_id = exercicio_id
-        self.status = status
+    # usuario: Mapped["Usuario"] = relationship(back_populates="exercicios")
+    # exercicio: Mapped["Exercicio"] = relationship(back_populates="usuarios")
