@@ -79,7 +79,9 @@ class ExercicioDAO:
     def criar_exercicio_usuario(
         self, exercicio: Exercicio, usuario: Usuario, status: ExercicioStatus
     ) -> ProgressoUsuario:
-        progresso = ProgressoUsuario(status, usuario, exercicio)
+        
+        progresso = ProgressoUsuario(usuario_id=usuario.id, exercicio_id=exercicio.id)
+        
         self.session.add(progresso)
         self.session.commit()
 

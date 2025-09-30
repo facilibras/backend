@@ -36,7 +36,9 @@ class ProgressoUsuario:
         VARCHAR, 
         default=ExercicioStatus.INCOMPLETO, 
         init=False)
+    
+    qtd_ex_completos: Mapped[int] = mapped_column(default=0, init=False)
 
     # Acesso Reverso
-    usuario: Mapped["Usuario"] = relationship(back_populates="progressos_exercicios")
-    exercicio: Mapped["Exercicio"] = relationship(back_populates="progressos_usuarios")
+    usuario: Mapped["Usuario"] = relationship(back_populates="usuario", init=False)
+    exercicio: Mapped["Exercicio"] = relationship(back_populates="exercicio", init=False)

@@ -22,5 +22,5 @@ class PalavraExercicio:
         primary_key=True)
 
     # Acesso reverso
-    # palavra: Mapped["Palavra"] = relationship(back_populates="palavra_exercicio")
-    # exercicio: Mapped["Exercicio"] = relationship(back_populates="palavra_exercicio")
+    palavra: Mapped["Palavra"] = relationship(back_populates="palavra_exercicio")
+    exercicio: Mapped["Exercicio"] = relationship(back_populates="palavra_exercicio")

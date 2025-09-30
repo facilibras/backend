@@ -33,5 +33,7 @@ class Perfil:
         default=func.now(),
         init=False)
 
+    qtd_exerc_concluido = Mapped[int]
+
     # Acesso Reverso
     usuario: Mapped["Usuario"] = relationship(back_populates="perfil")
