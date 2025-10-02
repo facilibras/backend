@@ -72,7 +72,7 @@ class ExercicioControle:
             )
 
         status = {}
-        exs = self.exercicio_dao.listar_por_secao(secao.id_secao)
+        exs = self.exercicio_dao.listar_por_secao(secao.id)
         if id_usuario:
             status = self.exercicio_dao.listar_status_exercicios(exs, id_usuario)
 
@@ -109,7 +109,7 @@ class ExercicioControle:
 
         # Checa se os sinais do exercício existe
         try:
-            nome_sinal = exercicio[0].palavras[0].nome_palavra
+            nome_sinal = exercicio[0].palavra_exercicio[0].palavra.nome
             sinal = get_sinal(nome_sinal)
         except ValueError:
             exc_msg = f"Sinal com nome {nome_sinal} não encontrado"
@@ -156,21 +156,21 @@ def converter_exercicios_para_schema(
     for exercicio in exercicios:
         palavras = [
             PalavraSchema(palavra=ex_pa.palavra.nome, video=ex_pa.palavra.url_video)
-            for ex_pa in exercicio.palavras
+            for ex_pa in exercicio.palavra_exercicio
             if ex_pa.palavra is not None
         ]
 
-        if exercicio.prox_exercicio:
-            prox_tarefa_titulo = exercicio.prox_exercicio.titulo
+        if exercicio.proximo:
+            prox_tarefa_titulo = exercicio.proximo.titulo
         else:
             prox_tarefa_titulo = None
 
-        status_enum = status_por_exercicio.get(exercicio.id_exercicio)
+        status_enum = status_por_exercicio.get(exercicio.id)
         status_str = status_enum.value if status_enum is not None else None
 
         schema = ExercicioSchema(
             titulo=exercicio.titulo,
-            secao=exercicio.secao.titulo,
+            secao=exercicio.secao.nome,
             descricao=exercicio.descricao,
             prox_tarefa=prox_tarefa_titulo,
             palavras=palavras,
@@ -182,4 +182,4 @@ def converter_exercicios_para_schema(
 
 
 def converter_secao_para_schema(secoes: list[tuple[Secao, int]]) -> list[SecaoSchema]:
-    return [SecaoSchema(nome=secao.titulo, qtd_ex=qtd_ex) for secao, qtd_ex in secoes]
+    return [SecaoSchema(nome=secao.nome, qtd_ex=qtd_ex) for secao, qtd_ex in secoes]

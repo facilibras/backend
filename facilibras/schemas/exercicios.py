@@ -1,17 +1,17 @@
-from pydantic import BaseModel
+from facilibras.schemas import BaseSchema
 
 
-class FeedbackExercicioSchema(BaseModel):
+class FeedbackExercicioSchema(BaseSchema):
     sucesso: bool
     mensagem: str
 
 
-class PalavraSchema(BaseModel):
+class PalavraSchema(BaseSchema):
     palavra: str
     video: str
 
 
-class ExercicioSchema(BaseModel):
+class ExercicioSchema(BaseSchema):
     titulo: str
     secao: str
     descricao: str
@@ -23,6 +23,6 @@ class ExercicioSchema(BaseModel):
         from_attributes = True
 
 
-class SecaoSchema(BaseModel):
+class SecaoSchema(BaseSchema):
     nome: str
     qtd_ex: int

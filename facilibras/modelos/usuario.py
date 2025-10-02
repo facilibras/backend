@@ -1,36 +1,53 @@
-from datetime import datetime
 from typing import TYPE_CHECKING, Optional
+from datetime import datetime
 
-from sqlalchemy import func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import func, Sequence
+from sqlalchemy.types import TEXT, TIMESTAMP
 
 from facilibras.config.db import registro_tabelas
 
 if TYPE_CHECKING:
-    from facilibras.modelos import ExercicioUsuario
+    from facilibras.modelos import Perfil, ProgressoUsuario, Exercicio
 
 
 @registro_tabelas.mapped_as_dataclass
 class Usuario:
-    __tablename__ = "usuarios"
+    __tablename__ = "tb_usuarios"
 
-    id_usuario: Mapped[int] = mapped_column(init=False, primary_key=True)
-    nome: Mapped[str]
+    id: Mapped[int] = mapped_column(
+        primary_key=True,
+        init=False,
+        default=func.next_value(Sequence("sq_usuarios")))
+    
+    nome_usuario: Mapped[str] = mapped_column(unique=True)
+    
     email: Mapped[str] = mapped_column(unique=True)
-    hash_senha: Mapped[str]
-
-    # Perfil
-    apelido: Mapped[Optional[str]] = mapped_column(unique=True, default=None)
-    img_url_perfil: Mapped[Optional[str]] = mapped_column(default=None)
-    img_url_fundo: Mapped[Optional[str]] = mapped_column(default=None)
-
-    # Controle
-    registro_em: Mapped[datetime] = mapped_column(init=False, server_default=func.now())
-    atualizado_em: Mapped[Optional[datetime]] = mapped_column(default=None)
-    inativo_em: Mapped[Optional[datetime]] = mapped_column(default=None)
-    ultimo_login: Mapped[Optional[datetime]] = mapped_column(default=None)
+    
+    senha: Mapped[str] = mapped_column(TEXT)
+    
+    salt: Mapped[str] = mapped_column(TEXT)
+    
+    criado_em: Mapped[datetime] = mapped_column(
+        TIMESTAMP, 
+        init=False, 
+        default=func.now())
+    
+    ultimo_login: Mapped[Optional[datetime]] = mapped_column(
+        TIMESTAMP, 
+        nullable=True, 
+        init=False)
+    
+    ativo: Mapped[bool] = mapped_column(
+        init=False, 
+        default=True)
 
     # Acesso Reverso
-    exercicio_progressos: Mapped[list["ExercicioUsuario"]] = relationship(
-        back_populates="usuario", default_factory=list, cascade="all, delete-orphan"
-    )
+    perfil: Mapped["Perfil"] = relationship(
+        back_populates="usuario",
+        cascade="delete-orphan")
+    
+    progressos_exercicios: Mapped[list["ProgressoUsuario"]] = relationship(
+        back_populates="usuario", 
+        default_factory=list, 
+        cascade="all, delete-orphan")

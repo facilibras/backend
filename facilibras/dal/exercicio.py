@@ -7,7 +7,7 @@ from facilibras.dependencias.db import T_Session
 from facilibras.modelos import (
     Exercicio,
     ExercicioStatus,
-    ExercicioUsuario,
+    ProgressoUsuario,
     PalavraExercicio,
     Usuario,
 )
@@ -31,9 +31,9 @@ class ExercicioDAO:
     def listar_por_secao(self, secao: int) -> Sequence[Exercicio]:
         stmt = (
             select(Exercicio)
-            .where(Exercicio.id_secao == secao)
+            .where(Exercicio.id == secao)
             .options(*opt)
-            .order_by(Exercicio.id_exercicio)
+            .order_by(Exercicio.id)
         )
 
         return self.session.scalars(stmt).all()
@@ -46,31 +46,31 @@ class ExercicioDAO:
     def listar_status_exercicios(
         self, exercicios: Sequence[Exercicio], id_usuario: int
     ) -> dict[int, ExercicioStatus]:
-        exercicio_ids = [e.id_exercicio for e in exercicios]
+        exercicio_ids = [e.id for e in exercicios]
 
         if exercicio_ids:
-            stmt = select(ExercicioUsuario.id_exercicio, ExercicioUsuario.status).where(
-                ExercicioUsuario.id_usuario == id_usuario,
-                ExercicioUsuario.id_exercicio.in_(exercicio_ids),
+            stmt = select(ProgressoUsuario).where(
+                ProgressoUsuario.usuario_id == id_usuario,
+                ProgressoUsuario.usuario_id.in_(exercicio_ids),
             )
 
             resultados_status = self.session.execute(stmt).all()
-            status = {col.id_exercicio: col.status for col in resultados_status}
+            status = {col.exercicio_id: col.status for col in resultados_status}
 
         return status
 
     def listar_exercicio_usuario(
         self, exercicio: Exercicio, usuario: int
-    ) -> ExercicioUsuario | None:
-        stmt = select(ExercicioUsuario).where(
-            ExercicioUsuario.id_usuario == usuario,
-            ExercicioUsuario.exercicio == exercicio,
+    ) -> ProgressoUsuario | None:
+        stmt = select(ProgressoUsuario).where(
+            ProgressoUsuario.usuario_id == usuario,
+            ProgressoUsuario.exercicio == exercicio,
         )
 
         return self.session.scalar(stmt)
 
     def alterar_exercicio_usuario(
-        self, progresso: ExercicioUsuario, status: ExercicioStatus
+        self, progresso: ProgressoUsuario, status: ExercicioStatus
     ):
         progresso.status = status
         self.session.add(progresso)
@@ -78,23 +78,25 @@ class ExercicioDAO:
 
     def criar_exercicio_usuario(
         self, exercicio: Exercicio, usuario: Usuario, status: ExercicioStatus
-    ) -> ExercicioUsuario:
-        progresso = ExercicioUsuario(status, usuario, exercicio)
+    ) -> ProgressoUsuario:
+        
+        progresso = ProgressoUsuario(usuario_id=usuario.id, exercicio_id=exercicio.id)
+        
         self.session.add(progresso)
         self.session.commit()
 
         return progresso
 
     def tentativa_exercicio(self, exercicio: Exercicio, usuario: Usuario):
-        progresso_usuario = self.listar_exercicio_usuario(exercicio, usuario.id_usuario)
+        progresso_usuario = self.listar_exercicio_usuario(exercicio, usuario.id)
         if progresso_usuario:
-            if progresso_usuario.status not in (ExercicioStatus.COMPLETO, ExercicioStatus.ABERTO):
-                self.alterar_exercicio_usuario(progresso_usuario, ExercicioStatus.ABERTO)
+            if progresso_usuario.status not in (ExercicioStatus.COMPLETO, ExercicioStatus.INCOMPLETO):
+                self.alterar_exercicio_usuario(progresso_usuario, ExercicioStatus.INCOMPLETO)
         else:
-            self.criar_exercicio_usuario(exercicio, usuario, ExercicioStatus.ABERTO)
+            self.criar_exercicio_usuario(exercicio, usuario, ExercicioStatus.INCOMPLETO)
 
     def completar_exercicio(self, exercicio: Exercicio, usuario: Usuario):
-        progresso_usuario = self.listar_exercicio_usuario(exercicio, usuario.id_usuario)
+        progresso_usuario = self.listar_exercicio_usuario(exercicio, usuario.id)
         if progresso_usuario:
             if progresso_usuario.status != ExercicioStatus.COMPLETO:
                 self.alterar_exercicio_usuario(progresso_usuario, ExercicioStatus.COMPLETO)
