@@ -15,7 +15,7 @@ class SecaoDAO:
         stmt = (
             select(Secao, func.count(Exercicio.id).label("qtd"))
             .select_from(Secao)
-            .outerjoin(Exercicio, Secao.id == Exercicio.id)
+            .outerjoin(Exercicio, Secao.id == Exercicio.secao_id)
             .group_by(Secao.id)
             .order_by(Secao.nome)
         )

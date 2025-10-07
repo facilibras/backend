@@ -1,4 +1,4 @@
-from facilibras.schemas.base_schema import BaseSchema as BaseSchema
+from facilibras.schemas.base_schema import BaseSchema as BaseSchema  # noqa: I001
 
 from facilibras.schemas.autenticacao import Token as Token
 

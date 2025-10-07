@@ -109,7 +109,7 @@ class ExercicioControle:
 
         # Checa se os sinais do exercício existe
         try:
-            nome_sinal = exercicio[0].palavra_exercicio[0].palavra.nome
+            nome_sinal = exercicio[0].palavras[0].palavra.nome
             sinal = get_sinal(nome_sinal)
         except ValueError:
             exc_msg = f"Sinal com nome {nome_sinal} não encontrado"
@@ -156,12 +156,12 @@ def converter_exercicios_para_schema(
     for exercicio in exercicios:
         palavras = [
             PalavraSchema(palavra=ex_pa.palavra.nome, video=ex_pa.palavra.url_video)
-            for ex_pa in exercicio.palavra_exercicio
+            for ex_pa in exercicio.palavras
             if ex_pa.palavra is not None
         ]
 
-        if exercicio.proximo:
-            prox_tarefa_titulo = exercicio.proximo.titulo
+        if exercicio.prox_exercicio:
+            prox_tarefa_titulo = exercicio.prox_exercicio.titulo
         else:
             prox_tarefa_titulo = None
 

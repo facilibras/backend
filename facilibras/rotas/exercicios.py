@@ -7,13 +7,6 @@ from facilibras.schemas import ExercicioSchema, FeedbackExercicioSchema
 router = APIRouter(prefix="/exercicios", tags=["exercícios"])
 
 
-@router.get("/test")
-def test(usuario: T_UsuarioOpcional):
-    if usuario:
-        return {"mensagem": f"Olá, {usuario['nome']}! Você está autenticado."}
-    return {"mensagem": "Olá, visitante! Você não está autenticado."}
-
-
 @router.get("/secoes")
 def listar_secoes(controle: T_ExercicioControle):
     return controle.listar_secoes()
@@ -35,7 +28,9 @@ def listar_exercicios(controle: T_ExercicioControle, usuario: T_UsuarioOpcional)
 
 @router.get("/{exercicio}")
 def pagina_exercicio(
-    exercicio: str, controle: T_ExercicioControle, usuario: T_UsuarioOpcional,
+    exercicio: str,
+    controle: T_ExercicioControle,
+    usuario: T_UsuarioOpcional,
 ):
     usuario_id = usuario["id"] if usuario else None
     return controle.listar_exercicio_por_nome(exercicio, usuario_id)

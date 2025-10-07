@@ -8,7 +8,7 @@ from pwdlib import PasswordHash
 from facilibras.config.env import get_variavel_ambiente
 from facilibras.dependencias.autenticacao import T_Token, T_TokenOpcional
 from facilibras.dependencias.dal import T_UsuarioDAO
-from facilibras.modelos import Usuario
+from facilibras.modelos import Perfil, Usuario
 from facilibras.schemas import CriarUsuario, LoginSchema, Token
 
 CHAVE = get_variavel_ambiente("CHAVE", str)
@@ -27,10 +27,6 @@ def usuario_opcional(token: T_TokenOpcional = None):
         return None
 
     return AutenticacaoControle.decodificar_token(token)
-
-
-def super_usuario(usuario: dict):
-    """Checa se o usuário é super usuário"""
 
 
 class AutenticacaoControle:
@@ -76,34 +72,36 @@ class AutenticacaoControle:
         if usuario:
             raise HTTPException(
                 status_code=HTTPStatus.CONFLICT,
-                detail="Usuário já registrado, utilize outro email",
-            )
-        
-        # Verificar se nome de usuário já está em uso
-        print(dados_usuario.nome_usuario)
-        usuario = self.dao.buscar_por_username(dados_usuario.nome_usuario)
-
-        if usuario:
-            raise HTTPException(
-                status_code=HTTPStatus.CONFLICT,
-                detail="Nome de usuário já cadastrado."
+                detail="Email já registrado, utilize outro email",
             )
 
         # Criar hash da senha
         hash_senha = self.gerar_hash_senha(dados_usuario.senha)
 
+        # Cria o perfil do usuário
+        separado = dados_usuario.nome_usuario.split()
+        if len(separado) > 1:
+            iniciais = separado[0][0] + separado[-1][0]
+        else:
+            iniciais = dados_usuario.nome_usuario[0]
+
+        perfil = Perfil(
+            apelido=dados_usuario.nome_usuario,
+            url_img_perfil=f"https://placehold.co/50x50?text={iniciais.upper()}",
+        )
+
         # Registra usuário no banco de dados
         novo_usuario = Usuario(
-            nome_usuario=dados_usuario.nome_usuario, 
-            email=dados_usuario.email, 
+            nome_usuario=dados_usuario.nome_usuario,
+            email=dados_usuario.email,
             senha=hash_senha,
-            salt=""
+            perfil=perfil,
         )
 
         return self.dao.criar(novo_usuario)
 
     def autenticar_usuario(self, dados_login: LoginSchema) -> Token:
-        usuario = self.dao.buscar_por_email(dados_login.nome)
+        usuario = self.dao.buscar_por_email(dados_login.email)
 
         if not usuario or not self.validar_senha(dados_login.senha, usuario.senha):
             raise HTTPException(

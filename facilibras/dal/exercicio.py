@@ -7,8 +7,8 @@ from facilibras.dependencias.db import T_Session
 from facilibras.modelos import (
     Exercicio,
     ExercicioStatus,
-    ProgressoUsuario,
     PalavraExercicio,
+    ProgressoUsuario,
     Usuario,
 )
 
@@ -31,7 +31,7 @@ class ExercicioDAO:
     def listar_por_secao(self, secao: int) -> Sequence[Exercicio]:
         stmt = (
             select(Exercicio)
-            .where(Exercicio.id == secao)
+            .where(Exercicio.secao_id == secao)
             .options(*opt)
             .order_by(Exercicio.id)
         )
@@ -79,9 +79,10 @@ class ExercicioDAO:
     def criar_exercicio_usuario(
         self, exercicio: Exercicio, usuario: Usuario, status: ExercicioStatus
     ) -> ProgressoUsuario:
-        
-        progresso = ProgressoUsuario(usuario_id=usuario.id, exercicio_id=exercicio.id)
-        
+        progresso = ProgressoUsuario(
+            status=status, usuario=usuario, exercicio=exercicio
+        )
+
         self.session.add(progresso)
         self.session.commit()
 
@@ -90,8 +91,13 @@ class ExercicioDAO:
     def tentativa_exercicio(self, exercicio: Exercicio, usuario: Usuario):
         progresso_usuario = self.listar_exercicio_usuario(exercicio, usuario.id)
         if progresso_usuario:
-            if progresso_usuario.status not in (ExercicioStatus.COMPLETO, ExercicioStatus.INCOMPLETO):
-                self.alterar_exercicio_usuario(progresso_usuario, ExercicioStatus.INCOMPLETO)
+            if progresso_usuario.status not in (
+                ExercicioStatus.COMPLETO,
+                ExercicioStatus.INCOMPLETO,
+            ):
+                self.alterar_exercicio_usuario(
+                    progresso_usuario, ExercicioStatus.INCOMPLETO
+                )
         else:
             self.criar_exercicio_usuario(exercicio, usuario, ExercicioStatus.INCOMPLETO)
 
@@ -99,6 +105,8 @@ class ExercicioDAO:
         progresso_usuario = self.listar_exercicio_usuario(exercicio, usuario.id)
         if progresso_usuario:
             if progresso_usuario.status != ExercicioStatus.COMPLETO:
-                self.alterar_exercicio_usuario(progresso_usuario, ExercicioStatus.COMPLETO)
+                self.alterar_exercicio_usuario(
+                    progresso_usuario, ExercicioStatus.COMPLETO
+                )
         else:
             self.criar_exercicio_usuario(exercicio, usuario, ExercicioStatus.COMPLETO)

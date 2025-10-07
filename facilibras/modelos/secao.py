@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import func, Sequence
+from sqlalchemy import Sequence, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from facilibras.config.db import registro_tabelas
@@ -14,12 +14,14 @@ class Secao:
     __tablename__ = "tb_secoes"
 
     id: Mapped[int] = mapped_column(
-        init=False, 
-        primary_key=True,
-        default=func.next_value(Sequence("sq_secoes")))
-    
-    nome: Mapped[str]
+        init=False, primary_key=True, default=func.next_value(Sequence("sq_secoes"))
+    )
 
+    nome: Mapped[str]
     descricao: Mapped[Optional[str]]
 
-    exercicios: Mapped[list["Exercicio"]] = relationship(back_populates="exercicio")
+    exercicios: Mapped[list["Exercicio"]] = relationship(
+        init=False,
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )

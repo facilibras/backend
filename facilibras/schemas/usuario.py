@@ -2,6 +2,7 @@ from datetime import datetime
 
 from facilibras.schemas import BaseSchema
 
+
 class UsuarioSchema(BaseSchema):
     nome_usuario: str
     criado_em: datetime
@@ -13,7 +14,6 @@ class CriarUsuario(BaseSchema):
     senha: str
 
 
-
 class LoginSchema(BaseSchema):
-    nome: str
+    email: str
     senha: str

@@ -16,6 +16,7 @@ from facilibras.modelos import (
     Secao,
     Usuario,
 )
+from facilibras.modelos.palavra_exercicio import PalavraExercicio
 from facilibras.modelos.perfil import Perfil
 
 if __name__ == "__main__":
@@ -125,16 +126,18 @@ if __name__ == "__main__":
 
         # Exercícios
         exercicios = []
+        palavra_exercicios = []
         for sec_id, sinais in palavras.items():
             secao = session.get(Secao, sec_id)
             for sinal in sinais:
                 ex = Exercicio(
                     titulo=sinal.nome, descricao=sinal.instrucoes, secao=secao or outros
                 )
-                ex.palavras.append(sinal)
+                pe = PalavraExercicio(palavra=sinal, exercicio=ex)
                 exercicios.append(ex)
+                palavra_exercicios.append(ex)
 
-        session.add_all(exercicios)
+        session.add_all(exercicios + palavra_exercicios)
         session.commit()
 
         # Prox. Exercicios

@@ -1,5 +1,3 @@
-from sqlalchemy import select
-
 from facilibras.dependencias.db import T_Session
 from facilibras.modelos import Usuario
 
@@ -11,7 +9,7 @@ class UsuarioDAO:
     def criar(self, usuario: Usuario) -> Usuario:
         self.session.add(usuario)
         self.session.commit()
-        # self.session.refresh(usuario)
+        self.session.refresh(usuario)
         return usuario
 
     def buscar_por_email(self, email: str) -> Usuario | None:
@@ -19,6 +17,10 @@ class UsuarioDAO:
 
     def buscar_por_id(self, id_usuario: int) -> Usuario | None:
         return self.session.query(Usuario).filter_by(id=id_usuario).one_or_none()
-    
+
     def buscar_por_username(self, nome_usuario) -> Usuario | None:
-        return self.session.query(Usuario).filter_by(nome_usuario=nome_usuario).one_or_none()
+        return (
+            self.session.query(Usuario)
+            .filter_by(nome_usuario=nome_usuario)
+            .one_or_none()
+        )
