@@ -166,7 +166,7 @@ def converter_exercicios_para_schema(
             prox_tarefa_titulo = None
 
         status_enum = status_por_exercicio.get(exercicio.id)
-        status_str = status_enum.value if status_enum is not None else None
+        status_str = status_enum if status_enum is not None else None
 
         schema = ExercicioSchema(
             titulo=exercicio.titulo,

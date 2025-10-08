@@ -49,9 +49,9 @@ class ExercicioDAO:
         exercicio_ids = [e.id for e in exercicios]
 
         if exercicio_ids:
-            stmt = select(ProgressoUsuario).where(
+            stmt = select(ProgressoUsuario.exercicio_id, ProgressoUsuario.status).where(
                 ProgressoUsuario.usuario_id == id_usuario,
-                ProgressoUsuario.usuario_id.in_(exercicio_ids),
+                ProgressoUsuario.exercicio_id.in_(exercicio_ids),
             )
 
             resultados_status = self.session.execute(stmt).all()
@@ -92,8 +92,8 @@ class ExercicioDAO:
         progresso_usuario = self.listar_exercicio_usuario(exercicio, usuario.id)
         if progresso_usuario:
             if progresso_usuario.status not in (
-                ExercicioStatus.COMPLETO,
-                ExercicioStatus.INCOMPLETO,
+                str(ExercicioStatus.COMPLETO),
+                str(ExercicioStatus.INCOMPLETO),
             ):
                 self.alterar_exercicio_usuario(
                     progresso_usuario, ExercicioStatus.INCOMPLETO
@@ -104,7 +104,7 @@ class ExercicioDAO:
     def completar_exercicio(self, exercicio: Exercicio, usuario: Usuario):
         progresso_usuario = self.listar_exercicio_usuario(exercicio, usuario.id)
         if progresso_usuario:
-            if progresso_usuario.status != ExercicioStatus.COMPLETO:
+            if progresso_usuario.status != str(ExercicioStatus.COMPLETO):
                 self.alterar_exercicio_usuario(
                     progresso_usuario, ExercicioStatus.COMPLETO
                 )
