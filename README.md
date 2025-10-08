@@ -11,18 +11,23 @@ Backend do Facilibras
    ```bash
    pip install -r requirements.txt
    ```
-2. Configure as variáveis de ambiente:
+2. Crie o banco de dados PostgreSQL
+    ```sql
+    CREATE DATABASE facilibras;
+    ```
+
+3. Configure as variáveis de ambiente:
    - Copie o arquivo de exemplo `.env.example` para um novo arquivo `.env`:  
      ```bash
      cp .env.example .env
      ```
    - Editar o arquivo `.env` conforme necessário.
 
-3. Inicie o banco de dados:
+4. Inicie o banco de dados:
    ```bash
    python -m scripts.iniciar_db
    ```
-4. Inicie o servidor FastAPI:
+5. Inicie o servidor FastAPI:
    ```bash
    fastapi dev facilibras/main.py
    ```
