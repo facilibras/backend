@@ -1,3 +1,5 @@
+from collections import defaultdict
+import random
 import os
 import shutil
 import uuid
@@ -5,6 +7,7 @@ from http import HTTPStatus
 from typing import Sequence
 
 from fastapi import HTTPException, UploadFile
+from sqlalchemy import result_tuple
 
 from facilibras.controladores.reconhecimento import reconhecer_video
 from facilibras.dependencias.dal import T_ExercicioDAO, T_SecaoDAO, T_UsuarioDAO
@@ -41,7 +44,8 @@ class ExercicioControle:
         if id_usuario:
             status = self.exercicio_dao.listar_status_exercicios(exs, id_usuario)
 
-        return converter_exercicios_para_schema(exs, status)
+        exs_schema = converter_exercicios_para_schema(exs, status)
+        return distribuir_exercicios(exs_schema)
 
     def listar_exercicio_por_nome(
         self, nome: str, id_usuario: int | None
@@ -146,6 +150,28 @@ class ExercicioControle:
             sucesso=sucesso,
             mensagem=msg,
         )
+
+
+def distribuir_exercicios(
+    exercicios: Sequence[ExercicioSchema],
+) -> list[ExercicioSchema]:
+    grupos = defaultdict(list)
+    for ex in exercicios:
+        grupos[ex.secao].append(ex)
+
+    for lista in grupos.values():
+        random.shuffle(lista)
+
+    secoes = list(grupos.keys())
+    random.shuffle(secoes)
+
+    resultado = []
+    while any(grupos.values()):
+        for secao in secoes:
+            if grupos[secao]:
+                resultado.append(grupos[secao].pop())  # noqa: PERF401
+
+    return resultado
 
 
 def converter_exercicios_para_schema(
