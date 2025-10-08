@@ -83,7 +83,7 @@ if __name__ == "__main__":
         # Palavras e exercicios
         sec_url = {
             "Alfabeto": "letra_",
-            "Números": "numero_",
+            "Números": "número_",
             "Alimentos": "alimento_",
             "Verbos": "verbo_",
             "Saudações": "saud_",
@@ -101,6 +101,7 @@ if __name__ == "__main__":
         }
 
         palavras: dict[int, list[Palavra]] = defaultdict(list)
+        map_var = {}
         for chave in dados:
             sec_str = dados[chave]["categoria"]
             sec_url_str = sec_url[sec_str]
@@ -108,17 +109,22 @@ if __name__ == "__main__":
             sec_id = sec_obj_str.id  # usa o id como chave
 
             var_1 = dados[chave]["1"]
+            if sec_str not in ("Números", "Alfabeto"):
+                sec_url_str = ""
+            titulo_str = chave.lower().replace(" ", "_")
             instrucoes_str = "\n".join(var_1["instrucoes"])
             palavras[sec_id].append(
-                Palavra(f"{sec_url_str}{chave.lower()}", instrucoes_str, var_1["video"])
+                Palavra(f"{sec_url_str}{titulo_str}", instrucoes_str, var_1["video"])
             )
 
             var_2 = dados[chave].get("2")
             if var_2:
+                titulo_str2 = sec_url_str + titulo_str + "_2"
+                map_var[sec_url_str + titulo_str] = titulo_str2
                 instrucoes_str = "\n".join(var_2["instrucoes"])
                 palavras[sec_id].append(
                     Palavra(
-                        f"{sec_url_str}{chave.lower()}_2",
+                        titulo_str2,
                         instrucoes_str,
                         var_2["video"],
                     )
@@ -131,7 +137,11 @@ if __name__ == "__main__":
             secao = session.get(Secao, sec_id)
             for sinal in sinais:
                 ex = Exercicio(
-                    titulo=sinal.nome, descricao=sinal.instrucoes, secao=secao or outros
+                    titulo=sinal.nome,
+                    descricao=sinal.instrucoes,
+                    secao=secao or outros,
+                    nome_variacao=map_var.get(sinal.nome, ""),
+                    eh_variacao=sinal.nome in map_var.values(),
                 )
                 pe = PalavraExercicio(palavra=sinal, exercicio=ex)
                 exercicios.append(ex)

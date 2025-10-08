@@ -20,7 +20,7 @@ def registrar(usuario: CriarUsuario, controlador: T_AutenticacaoControle):
 
 
 @router.get("/quem")
-def test(usuario: T_UsuarioOpcional):
+def quem_esta_logado(usuario: T_UsuarioOpcional):
     if usuario:
         return {"mensagem": f"Olá, {usuario['nome']}! Você está autenticado."}
     return {"mensagem": "Olá, visitante! Você não está autenticado."}

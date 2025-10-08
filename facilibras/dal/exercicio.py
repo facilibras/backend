@@ -31,7 +31,7 @@ class ExercicioDAO:
     def listar_por_secao(self, secao: int) -> Sequence[Exercicio]:
         stmt = (
             select(Exercicio)
-            .where(Exercicio.secao_id == secao)
+            .where(Exercicio.secao_id == secao, Exercicio.eh_variacao.is_(False))
             .options(*opt)
             .order_by(Exercicio.id)
         )

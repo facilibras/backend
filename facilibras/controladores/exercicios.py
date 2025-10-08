@@ -1,13 +1,12 @@
-from collections import defaultdict
-import random
 import os
+import random
 import shutil
 import uuid
+from collections import defaultdict
 from http import HTTPStatus
 from typing import Sequence
 
 from fastapi import HTTPException, UploadFile
-from sqlalchemy import result_tuple
 
 from facilibras.controladores.reconhecimento import reconhecer_video
 from facilibras.dependencias.dal import T_ExercicioDAO, T_SecaoDAO, T_UsuarioDAO
@@ -191,6 +190,8 @@ def converter_exercicios_para_schema(
         else:
             prox_tarefa_titulo = None
 
+        variacao_titulo = exercicio.nome_variacao or None
+
         status_enum = status_por_exercicio.get(exercicio.id)
         status_str = status_enum if status_enum is not None else None
 
@@ -198,6 +199,8 @@ def converter_exercicios_para_schema(
             titulo=exercicio.titulo,
             secao=exercicio.secao.nome,
             descricao=exercicio.descricao,
+            eh_variacao=exercicio.eh_variacao,
+            variacao=variacao_titulo,
             prox_tarefa=prox_tarefa_titulo,
             palavras=palavras,
             status=status_str,

@@ -16,6 +16,8 @@ class ExercicioSchema(BaseSchema):
     secao: str
     descricao: str
     palavras: list
+    eh_variacao: bool = False
+    variacao: str | None = None
     prox_tarefa: str | None = None
     status: str | None = None
 

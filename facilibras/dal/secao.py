@@ -1,4 +1,4 @@
-from sqlalchemy import func, select
+from sqlalchemy import and_, func, select
 
 from facilibras.dependencias.db import T_Session
 from facilibras.modelos import Exercicio, Secao
@@ -15,7 +15,13 @@ class SecaoDAO:
         stmt = (
             select(Secao, func.count(Exercicio.id).label("qtd"))
             .select_from(Secao)
-            .outerjoin(Exercicio, Secao.id == Exercicio.secao_id)
+            .outerjoin(
+                Exercicio,
+                and_(
+                    Secao.id == Exercicio.secao_id,
+                    Exercicio.eh_variacao.is_(False),
+                ),
+            )
             .group_by(Secao.id)
             .order_by(Secao.nome)
         )

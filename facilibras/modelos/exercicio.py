@@ -21,6 +21,8 @@ class Exercicio:
 
     titulo: Mapped[str]
     descricao: Mapped[str]
+    eh_variacao: Mapped[bool]
+    nome_variacao: Mapped[str]
 
     # Acesso reverso
     prox_exercicio: Mapped[Optional["Exercicio"]] = relationship(

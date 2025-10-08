@@ -3,11 +3,8 @@
 run:
 	fastapi dev facilibras/main.py
 
-migrate:
-	alembic upgrade head
-
-makemigrations:
-	alembic revision --autogenerate -m "$(m)"
+initdb:
+	python -m scripts.iniciar_db
 
 lint:
 	ruff format
