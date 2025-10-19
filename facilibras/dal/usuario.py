@@ -1,5 +1,5 @@
 from facilibras.dependencias.db import T_Session
-from facilibras.modelos import Usuario
+from facilibras.modelos import Conquista, Perfil, Usuario
 
 
 class UsuarioDAO:
@@ -24,3 +24,11 @@ class UsuarioDAO:
             .filter_by(nome_usuario=nome_usuario)
             .one_or_none()
         )
+
+    def buscar_perfil_usuario(self, id_usuario: int) -> Perfil | None:
+        return self.session.query(Perfil).filter_by(usuario_id=id_usuario).one_or_none()
+
+    def listar_conquistas_usuario(self, id_usuario: int) -> list[Conquista]:
+        return self.session.query(Conquista).filter_by(perfil_id=id_usuario).all()
+
+    def alterar_perfil_usuario(self, perfil) -> Perfil: ...

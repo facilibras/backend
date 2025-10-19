@@ -1,6 +1,7 @@
 from typing import Sequence
 
 from sqlalchemy import select
+from sqlalchemy.engine import RowMapping
 from sqlalchemy.orm import selectinload
 
 from facilibras.dependencias.db import T_Session
@@ -42,6 +43,18 @@ class ExercicioDAO:
         stmt = select(Exercicio).where(Exercicio.titulo == nome).options(*opt)
 
         return self.session.scalars(stmt).all()
+
+    def listar_atividade(self, id_usuario: int) -> Sequence[RowMapping]:
+        stmt = (
+            select(Exercicio.titulo, ProgressoUsuario.criado_em)
+            .join(ProgressoUsuario.exercicio)
+            .where(
+                ProgressoUsuario.usuario_id == id_usuario,
+                ProgressoUsuario.status == ExercicioStatus.COMPLETO,
+            )
+        )
+
+        return self.session.execute(stmt).mappings().all()
 
     def listar_status_exercicios(
         self, exercicios: Sequence[Exercicio], id_usuario: int

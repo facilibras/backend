@@ -8,7 +8,7 @@ from sqlalchemy.types import TIMESTAMP
 from facilibras.config.db import registro_tabelas
 
 if TYPE_CHECKING:
-    from facilibras.modelos import Usuario
+    from facilibras.modelos import Conquista, Usuario
 
 
 @registro_tabelas.mapped_as_dataclass
@@ -29,7 +29,13 @@ class Perfil:
     )
 
     qtd_ex_completos: Mapped[int] = mapped_column(default=0)
+    nivel: Mapped[int] = mapped_column(default=1)
+    pontos_total: Mapped[int] = mapped_column(default=0)
+    pontos_nivel: Mapped[int] = mapped_column(default=0)
 
     usuario: Mapped["Usuario"] = relationship(
         "Usuario", back_populates="perfil", init=False
+    )
+    conquistas: Mapped[list["Conquista"]] = relationship(
+        "Conquista", back_populates="perfil", init=False
     )

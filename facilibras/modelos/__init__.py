@@ -1,3 +1,5 @@
+from facilibras.modelos.conquista import Conquista as Conquista
+from facilibras.modelos.conquista import NomeConquista as NomeConquista
 from facilibras.modelos.exercicio import Exercicio as Exercicio
 from facilibras.modelos.palavra import Palavra as Palavra
 from facilibras.modelos.palavra_exercicio import PalavraExercicio as PalavraExercicio

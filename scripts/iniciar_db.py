@@ -1,5 +1,6 @@
 from collections import defaultdict
 from json import load
+from sys import argv
 
 from alembic import command
 from alembic.config import Config
@@ -9,8 +10,10 @@ from sqlalchemy.orm import Session
 
 from facilibras.config.db import engine
 from facilibras.modelos import (
+    Conquista,
     Exercicio,
     ExercicioStatus,
+    NomeConquista,
     Palavra,
     ProgressoUsuario,
     Secao,
@@ -21,6 +24,12 @@ from facilibras.modelos.perfil import Perfil
 
 if __name__ == "__main__":
     print("Aplicando as migrações do banco de dados")
+
+    somente_tabelas = False
+    if len(argv) > 1 and argv[1] in ("--sem_usuarios", "-su"):
+        print("Iniciando somente tabelas")
+        somente_tabelas = True
+
     alembic_cfg = Config("alembic.ini")
     command.upgrade(alembic_cfg, "head")
     hasher = PasswordHash.recommended()
@@ -29,26 +38,50 @@ if __name__ == "__main__":
         dados = load(f)
 
     with Session(engine) as session:
+        adicionar = []
         usuarios = []
         perfils = []
-        # Usuarios
-        nomes = ["Ana", "Beto", "Carlos", "Duda", "Eduardo"]
-        for nome in nomes:
-            perfil = Perfil(
-                apelido=nome,
-                url_img_perfil=f"https://placehold.co/50x50?text={nome[0]}",
-            )
-            usuario = Usuario(
-                nome_usuario=nome.lower(),
-                email=f"{nome.lower()}@exemplo.com",
-                senha=hasher.hash("123"),
-                perfil=perfil,
-            )
-            perfils.append(perfil)
-            usuarios.append(usuario)
+        conquistas = []
+        if not somente_tabelas:
+            # Usuarios
+            nomes = ["Ana", "Beto", "Carlos", "Duda", "Eduardo"]
+            for nome in nomes:
+                perfil = Perfil(
+                    apelido=nome,
+                    url_img_perfil=f"https://placehold.co/50x50?text={nome[0]}",
+                )
+                usuario = Usuario(
+                    nome_usuario=nome.lower(),
+                    email=f"{nome[0].lower()}@facilibras.com",
+                    senha=hasher.hash("123"),
+                    perfil=perfil,
+                )
 
-        session.add_all(perfils + usuarios)
-        session.commit()
+                # Conquistas
+                conq_nomes = [NomeConquista.PRIMEIRO_SINAL, NomeConquista.ALIMENTOS]
+
+                if nome in ("Ana", "Beto", "Carlos"):
+                    c1 = Conquista(
+                        nome=conq_nomes[0], descricao="Realizou seu primeiro sinal!"
+                    )
+                    c2 = Conquista(
+                        nome=conq_nomes[1],
+                        descricao="Completou todos os sinais da categoria Alimentos!",
+                    )
+                    perfil.conquistas = [c1, c2]
+                    conquistas.extend([c1, c2])
+                else:
+                    c1 = Conquista(
+                        nome=conq_nomes[0], descricao="Realizou seu primeiro sinal!"
+                    )
+                    perfil.conquistas = [c1]
+                    conquistas.append(c1)
+
+                perfils.append(perfil)
+                usuarios.append(usuario)
+
+            session.add_all(perfils + usuarios + conquistas)
+            session.commit()
 
         # Secoes
         alfabeto = Secao("Alfabeto", "Aprenda e pratique as letras do alfabeto")
@@ -62,6 +95,7 @@ if __name__ == "__main__":
             "Identidade", "Aprenda e pratique sinais referentes a identidade"
         )
         outros = Secao("Outros", "Aprenda e pratique diversos sinais")
+        frases = Secao("Frases", "Aprenda e pratique múltiplos sinais de uma única vez")
 
         # Salva secoes e usuarios
         adicionar = [
@@ -72,6 +106,7 @@ if __name__ == "__main__":
             saudacoes,
             identidade,
             outros,
+            frases,
             *perfils,
             *usuarios,
         ]
@@ -89,6 +124,7 @@ if __name__ == "__main__":
             "Saudações": "saud_",
             "Identidade": "id_",
             "Outros": "",
+            "Frases": "",
         }
         sec_obj = {
             "Alfabeto": alfabeto,
@@ -98,6 +134,7 @@ if __name__ == "__main__":
             "Saudações": saudacoes,
             "Identidade": identidade,
             "Outros": outros,
+            "Frases": frases,
         }
 
         palavras: dict[int, list[Palavra]] = defaultdict(list)
@@ -105,8 +142,8 @@ if __name__ == "__main__":
         for chave in dados:
             sec_str = dados[chave]["categoria"]
             sec_url_str = sec_url[sec_str]
-            sec_obj_str = sec_obj[sec_str]  # instância de Secao
-            sec_id = sec_obj_str.id  # usa o id como chave
+            sec_obj_str = sec_obj[sec_str]
+            sec_id = sec_obj_str.id
 
             var_1 = dados[chave]["1"]
             if sec_str not in ("Números", "Alfabeto"):
@@ -231,19 +268,20 @@ if __name__ == "__main__":
         session.commit()
 
         # Ranking
-        completos = []
-        rank = [[1, 2, 3], [1, 2, 3, 4], [1, 2], [1, 2, 3, 4, 5, 6], [1, 2]]
-        for u, exs in enumerate(rank):
-            for e in exs:
-                completos.append(  # noqa: PERF401
-                    ProgressoUsuario(
-                        status=ExercicioStatus.COMPLETO,
-                        usuario=usuarios[u],
-                        exercicio=exercicios[e],
+        if not somente_tabelas:
+            completos = []
+            rank = [[1, 55, 3], [1, 55, 3, 4], [55, 2], [1, 2, 3, 4, 5, 6], [1, 2]]
+            for u, exs in enumerate(rank):
+                for e in exs:
+                    completos.append(  # noqa: PERF401
+                        ProgressoUsuario(
+                            status=ExercicioStatus.COMPLETO,
+                            usuario=usuarios[u],
+                            exercicio=exercicios[e - 1],
+                        )
                     )
-                )
 
-        session.add_all(completos)
-        session.commit()
+            session.add_all(completos)
+            session.commit()
 
     print("Migrações e inserção de dados iniciais aplicados com sucesso!")

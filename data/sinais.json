@@ -586,5 +586,19 @@
                 "Mantendo a posição da mão, movimente ela em direção a seu corpo."
             ]
         }
+    },
+    "Oi Tudo bem?": {
+        "categoria": "Frases",
+        "1": {
+            "video": "",
+            "instrucoes": [
+                "Sinal Oi: Posicione sua mão com a palma voltada para frente.",
+                "Sinal Oi: Feche a mão, deixando apenas o dedo mínimo esticado.",
+                "Sinal Oi: Movimente a mão de dentro para fora.",
+                "Sinal Tudo bem: Depois, posicione sua mão com a palma voltada para trás e feche a mão na altura do queixo.",
+                "Sinal Tudo bem: Abra sua mão, esticando todos os dedos.",
+                "Sinal Tudo bem: Em seguida, faça um joinha com a mão."
+            ]
+        }
     }
 }
