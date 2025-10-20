@@ -8,6 +8,7 @@ from typing import Sequence
 
 from fastapi import HTTPException, UploadFile
 
+from facilibras.controladores.pontuacao import PONTOS_PRIMEIRA_VEZ, pontos_para_subir
 from facilibras.controladores.reconhecimento import reconhecer_video
 from facilibras.dependencias.dal import T_ExercicioDAO, T_SecaoDAO, T_UsuarioDAO
 from facilibras.modelos import Exercicio, ExercicioStatus, Secao
@@ -84,7 +85,33 @@ class ExercicioControle:
     def completar_exercicio(self, exercicio: Exercicio, id_usuario: int):
         usuario = self.usuario_dao.buscar_por_id(id_usuario)
         if usuario:
-            self.exercicio_dao.completar_exercicio(exercicio, usuario)
+            primeira_vez = self.exercicio_dao.completar_exercicio(exercicio, usuario)
+            print(primeira_vez)
+            if primeira_vez:
+                if not usuario.perfil:
+                    return
+
+                nova_qtd_sinais = usuario.perfil.qtd_ex_completos + 1
+                novo_pontos_total = usuario.perfil.pontos_total + PONTOS_PRIMEIRA_VEZ
+                if (
+                    pontos_para_subir(usuario.perfil.nivel, usuario.perfil.pontos_nivel)
+                    <= PONTOS_PRIMEIRA_VEZ
+                ):
+                    novo_nivel = usuario.perfil.nivel + 1
+                    novo_pontos_nivel = 0
+                else:
+                    novo_nivel = usuario.perfil.nivel
+                    novo_pontos_nivel = (
+                        usuario.perfil.pontos_nivel + PONTOS_PRIMEIRA_VEZ
+                    )
+
+                self.usuario_dao.atualizar_progresso(
+                    perfil=usuario.perfil,
+                    nivel=novo_nivel,
+                    pontos_nivel=novo_pontos_nivel,
+                    pontos_total=novo_pontos_total,
+                    qtd_sinais=nova_qtd_sinais,
+                )
 
     def tentativa_exercicio(self, exercicio: Exercicio, id_usuario: int):
         usuario = self.usuario_dao.buscar_por_id(id_usuario)

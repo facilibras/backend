@@ -117,9 +117,13 @@ class ExercicioDAO:
     def completar_exercicio(self, exercicio: Exercicio, usuario: Usuario):
         progresso_usuario = self.listar_exercicio_usuario(exercicio, usuario.id)
         if progresso_usuario:
+            primeira_vez = str(progresso_usuario.status) != "C"
             if progresso_usuario.status != str(ExercicioStatus.COMPLETO):
                 self.alterar_exercicio_usuario(
                     progresso_usuario, ExercicioStatus.COMPLETO
                 )
         else:
+            primeira_vez = True
             self.criar_exercicio_usuario(exercicio, usuario, ExercicioStatus.COMPLETO)
+
+        return primeira_vez

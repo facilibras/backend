@@ -45,10 +45,26 @@ if __name__ == "__main__":
         if not somente_tabelas:
             # Usuarios
             nomes = ["Ana", "Beto", "Carlos", "Duda", "Eduardo"]
-            for nome in nomes:
+            rank = [[1, 55, 3], [1, 55, 3, 4], [55, 2], [1, 2, 3, 4, 5, 6], [1, 2]]
+            for idx, nome in enumerate(nomes):
+                qtd = len(rank[idx])
+                pontos_total = qtd * 100
+                nivel = 3
+                sobrando = pontos_total - 500
+                if pontos_total <= 100:
+                    nivel = 1
+                    sobrando = pontos_total
+                elif pontos_total <= 500:
+                    nivel = 2
+                    sobrando = pontos_total - 100
+
                 perfil = Perfil(
                     apelido=nome,
                     url_img_perfil=f"https://placehold.co/50x50?text={nome[0]}",
+                    qtd_ex_completos=qtd,
+                    pontos_total=pontos_total,
+                    pontos_nivel=sobrando,
+                    nivel=nivel,
                 )
                 usuario = Usuario(
                     nome_usuario=nome.lower(),
@@ -270,7 +286,6 @@ if __name__ == "__main__":
         # Ranking
         if not somente_tabelas:
             completos = []
-            rank = [[1, 55, 3], [1, 55, 3, 4], [55, 2], [1, 2, 3, 4, 5, 6], [1, 2]]
             for u, exs in enumerate(rank):
                 for e in exs:
                     completos.append(  # noqa: PERF401

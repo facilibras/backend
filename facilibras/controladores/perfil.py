@@ -2,6 +2,7 @@ from http import HTTPStatus
 
 from fastapi import HTTPException
 
+from facilibras.controladores.pontuacao import calcular_porcentagem, pontos_para_subir
 from facilibras.dependencias.dal import T_ExercicioDAO, T_UsuarioDAO
 from facilibras.modelos import Perfil
 from facilibras.schemas.perfil import (
@@ -36,8 +37,8 @@ def converter_perfil_para_schema(perfil: Perfil, exs) -> PerfilSchema:
         nivel=perfil.nivel,
         pontos_total=perfil.pontos_total,
         pontos_nivel=perfil.pontos_nivel,
-        pontos_para_subir=1000,
-        msg_progresso="TODO",
+        pontos_para_subir=pontos_para_subir(perfil.nivel, perfil.pontos_nivel),
+        msg_progresso=f"{calcular_porcentagem(perfil.nivel, perfil.pontos_nivel)}%",
     )
 
     a = []

@@ -31,4 +31,14 @@ class UsuarioDAO:
     def listar_conquistas_usuario(self, id_usuario: int) -> list[Conquista]:
         return self.session.query(Conquista).filter_by(perfil_id=id_usuario).all()
 
+    def atualizar_progresso(
+        self, perfil, nivel, pontos_nivel, pontos_total, qtd_sinais
+    ):
+        perfil.qtd_ex_completos = qtd_sinais
+        perfil.nivel = nivel
+        perfil.pontos_total = pontos_total
+        perfil.pontos_nivel = pontos_nivel
+
+        self.session.commit()
+
     def alterar_perfil_usuario(self, perfil) -> Perfil: ...
