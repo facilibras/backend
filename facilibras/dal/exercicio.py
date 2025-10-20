@@ -60,6 +60,7 @@ class ExercicioDAO:
         self, exercicios: Sequence[Exercicio], id_usuario: int
     ) -> dict[int, ExercicioStatus]:
         exercicio_ids = [e.id for e in exercicios]
+        status = {}
 
         if exercicio_ids:
             stmt = select(ProgressoUsuario.exercicio_id, ProgressoUsuario.status).where(

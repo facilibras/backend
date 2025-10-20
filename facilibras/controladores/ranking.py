@@ -1,13 +1,57 @@
+from datetime import datetime, timedelta
+
+from facilibras.dependencias.dal import T_UsuarioDAO
 from facilibras.schemas.ranking import Periodo, RankingSchema, UsuarioRanking
 
 
 class RankingControle:
-    def __init__(self) -> None:
-        pass
+    def __init__(self, usuario_dao: T_UsuarioDAO) -> None:
+        self.usuario_dao = usuario_dao
 
-    def listar_ranking(self, periodo: Periodo):
-        ranking = dados_temporarios()
-        return RankingSchema(periodo=periodo, ranking=ranking)
+    def listar_ranking(self, periodo: Periodo) -> RankingSchema:
+        agora = datetime.now()  # noqa: DTZ005
+        hoje_inicio = datetime(agora.year, agora.month, agora.day)  # noqa: DTZ001
+        semana_inicio = hoje_inicio - timedelta(days=7)
+        mes_inicio = hoje_inicio - timedelta(days=30)
+        if periodo == Periodo.all:
+            ranking = self.usuario_dao.ranking_com_perfil(inicio=None)
+        elif periodo == Periodo.semanal:
+            ranking = self.usuario_dao.ranking_com_perfil(inicio=semana_inicio)
+        elif periodo == Periodo.hoje:
+            ranking = self.usuario_dao.ranking_com_perfil(inicio=hoje_inicio)
+        elif periodo == Periodo.mensal:
+            ranking = self.usuario_dao.ranking_com_perfil(inicio=mes_inicio)
+
+        # for row in ranking:
+        #     print(
+        #         row.usuario_id,
+        #         row.apelido,
+        #         row.url_img_perfil,
+        #         row.qtd_ex_completos,
+        #         row.pontos_total,
+        #     )
+        #
+        # return RankingSchema(periodo=periodo, ranking=dados_temporarios())
+
+        return converter_ranking_para_schema(periodo, ranking)
+
+
+def converter_ranking_para_schema(periodo: Periodo, ranking) -> RankingSchema:
+    usuarios = []
+    for coluna in ranking:
+        perfil = "/perfil/" + str(coluna.usuario_id)
+        usuarios.append(
+            UsuarioRanking(
+                nome_ou_apelido=coluna.apelido,
+                imagem_perfil=coluna.url_img_perfil,
+                sinais_periodo=coluna.qtd_ex_completos,
+                total_sinais=coluna.qtd_ex_completos,
+                link_perfil=perfil,
+                pontos=coluna.pontos_total,
+            )
+        )
+
+    return RankingSchema(periodo=periodo, ranking=usuarios)
 
 
 def dados_temporarios():

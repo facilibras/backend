@@ -1,5 +1,15 @@
+from datetime import datetime
+
+from sqlalchemy import func, select
+
 from facilibras.dependencias.db import T_Session
-from facilibras.modelos import Conquista, Perfil, Usuario
+from facilibras.modelos import (
+    Conquista,
+    ExercicioStatus,
+    Perfil,
+    ProgressoUsuario,
+    Usuario,
+)
 
 
 class UsuarioDAO:
@@ -42,3 +52,25 @@ class UsuarioDAO:
         self.session.commit()
 
     def alterar_perfil_usuario(self, perfil) -> Perfil: ...
+
+    def ranking_com_perfil(self, inicio: datetime | None = None):
+        stmt = (
+            select(
+                Usuario.id.label("usuario_id"),
+                Perfil.apelido,
+                Perfil.url_img_perfil,
+                Perfil.qtd_ex_completos,
+                Perfil.pontos_total,
+            )
+            .join(ProgressoUsuario, ProgressoUsuario.usuario_id == Usuario.id)
+            .join(Perfil, Perfil.id == Usuario.id)
+            .where(ProgressoUsuario.status == ExercicioStatus.COMPLETO)
+        )
+
+        if inicio:
+            stmt = stmt.where(ProgressoUsuario.criado_em >= inicio)
+
+        stmt = stmt.group_by(Usuario.id, Perfil.id)
+        stmt = stmt.order_by(func.count(ProgressoUsuario.exercicio_id).desc())
+
+        return self.session.execute(stmt).all()
