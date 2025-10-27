@@ -39,14 +39,6 @@ class SinalLibras:
 
         return self
 
-    def depois_de(self, sinal: Self) -> Self:
-        # TODO: Implementar
-        return self
-
-    def igual_a(self, sinal: Self) -> Self:
-        # TODO: Implementar
-        return self
-
     def mao(self, *dedos: Dedo) -> Self:
         self.conf_atual.dedos = list(dedos)
         return self
@@ -61,6 +53,10 @@ class SinalLibras:
 
     def movimento(self, *movimentos: Movimento) -> Self:
         self.conf_atual.movimentos = list(movimentos)
+        return self
+
+    def descricao(self, desc: str) -> Self:
+        self.conf_atual.descricao = desc
         return self
 
     def depois(self) -> Self:

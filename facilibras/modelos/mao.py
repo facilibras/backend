@@ -121,12 +121,24 @@ class Movimento(EnumUnico):
     BAIXO_ESQUERDA = auto()
 
 
+class Posicao(EnumUnico):
+    """
+    Representa a posição da mão em relação ao uma parte do corpo
+    """
+
+    QUALQUER = auto()
+    MESMO_LADO = auto()  # mão alinhada com o ombro do mesmo lado
+    LADO_OPPOSTO = auto()  # mão alinhada com o ombro oposto
+
+
 @dataclass
 class ConfiguracaoMao:
     dedos: list[Dedo] = field(default_factory=list)
     orientacao: Orientacao | None = None
     inclinacao: Inclinacao | None = None
+    posicao: Posicao = Posicao.QUALQUER
     movimentos: list[Movimento] = field(default_factory=list)
+    descricao: str | None = None
 
     def __repr__(self) -> str:
         todos = []
