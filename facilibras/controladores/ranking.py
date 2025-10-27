@@ -32,7 +32,7 @@ def converter_ranking_para_schema(periodo: Periodo, ranking) -> RankingSchema:
         usuarios.append(
             UsuarioRanking(
                 nome_ou_apelido=coluna.apelido,
-                imagem_perfil=coluna.url_img_perfil,
+                imagem_perfil=perfil + "/foto",
                 sinais_periodo=coluna.qtd_ex_completos,
                 total_sinais=coluna.qtd_ex_completos,
                 link_perfil=perfil,

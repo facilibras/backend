@@ -45,18 +45,28 @@ if __name__ == "__main__":
         if not somente_tabelas:
             # Usuarios
             nomes = ["Ana", "Beto", "Carlos", "Duda", "Eduardo"]
-            rank = [[1, 55, 3], [1, 55, 3, 4], [55, 2], [1, 2, 3, 4, 5, 6], [1, 2]]
+            rank = [
+                [1, 55, 3],
+                [1, 55, 3, 4],
+                [55, 2],
+                [1, 2, 3, 4, 5, 6],
+                list(range(2, 28)),
+            ]
             for idx, nome in enumerate(nomes):
                 qtd = len(rank[idx])
                 pontos_total = qtd * 100
-                nivel = 3
-                sobrando = pontos_total - 500
-                if pontos_total <= 100:
-                    nivel = 1
-                    sobrando = pontos_total
-                elif pontos_total <= 500:
-                    nivel = 2
-                    sobrando = pontos_total - 100
+                if nome == "Eduardo":
+                    nivel = 5
+                    sobrando = 100
+                else:
+                    nivel = 3
+                    sobrando = pontos_total - 500
+                    if pontos_total <= 100:
+                        nivel = 1
+                        sobrando = pontos_total
+                    elif pontos_total <= 500:
+                        nivel = 2
+                        sobrando = pontos_total - 100
 
                 perfil = Perfil(
                     apelido=nome,

@@ -11,7 +11,7 @@ from fastapi import HTTPException, UploadFile
 from facilibras.controladores.pontuacao import PONTOS_PRIMEIRA_VEZ, pontos_para_subir
 from facilibras.controladores.reconhecimento import reconhecer_video
 from facilibras.dependencias.dal import T_ExercicioDAO, T_SecaoDAO, T_UsuarioDAO
-from facilibras.modelos import Exercicio, ExercicioStatus, Secao
+from facilibras.modelos import Exercicio, ExercicioStatus, NomeConquista, Secao
 from facilibras.modelos.sinais import get_sinal
 from facilibras.schemas import (
     ExercicioSchema,
@@ -82,11 +82,33 @@ class ExercicioControle:
 
         return converter_exercicios_para_schema(exs, status)
 
+    def checar_conquista(self, conquista: NomeConquista, usuario) -> bool:
+        ja_tem = self.usuario_dao.buscar_conquista(conquista, usuario)
+        if ja_tem:
+            return False
+
+        if conquista == NomeConquista.PRIMEIRO_SINAL:
+            self.usuario_dao.adicionar_conquista(conquista, usuario.perfil)
+            return True
+
+        exs = self.listar_exercicios_por_secao(conquista.value, usuario.id)
+        vals = [ex.status for ex in exs]
+        todos_completos = all(
+            status == ExercicioStatus.COMPLETO.value for status in vals
+        )
+        if todos_completos:
+            self.usuario_dao.adicionar_conquista(conquista, usuario.perfil)
+            return True
+
+        return False
+
     def completar_exercicio(self, exercicio: Exercicio, id_usuario: int):
         usuario = self.usuario_dao.buscar_por_id(id_usuario)
         if usuario:
+            self.checar_conquista(NomeConquista.PRIMEIRO_SINAL, usuario)
             primeira_vez = self.exercicio_dao.completar_exercicio(exercicio, usuario)
-            print(primeira_vez)
+            self.checar_conquista(NomeConquista(exercicio.secao.nome), usuario)
+
             if primeira_vez:
                 if not usuario.perfil:
                     return

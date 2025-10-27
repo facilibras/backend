@@ -6,6 +6,7 @@ from facilibras.dependencias.db import T_Session
 from facilibras.modelos import (
     Conquista,
     ExercicioStatus,
+    NomeConquista,
     Perfil,
     ProgressoUsuario,
     Usuario,
@@ -92,3 +93,21 @@ class UsuarioDAO:
         stmt = stmt.order_by(func.count(ProgressoUsuario.exercicio_id).desc())
 
         return self.session.execute(stmt).all()
+
+    def buscar_conquista(self, conquista: NomeConquista, perfil: Perfil):
+        return (
+            self.session.query(Conquista)
+            .filter_by(perfil_id=perfil.id, nome=conquista)
+            .one_or_none()
+        )
+
+    def adicionar_conquista(self, conquista: NomeConquista, perfil: Perfil):
+        if conquista == NomeConquista.PRIMEIRO_SINAL:
+            descricao = "Realizou seu primeiro sinal!"
+        else:
+            descricao = f"Completou todos os sinais da categoria {conquista.value}!"
+
+        c = Conquista(nome=conquista, descricao=descricao)
+        perfil.conquistas.append(c)
+        self.session.add(perfil)
+        self.session.commit()
