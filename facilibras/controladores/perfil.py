@@ -64,7 +64,7 @@ class PerfilControle:
             exc_msg = f"Perfil não encontrado para usuário {id_usuario}"
             raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=exc_msg)
 
-        foto_url = perfil.url_img_perfil or ""
+        foto_url = perfil.url_img_perfil or "https://placehold.co/50x50"
         if foto_url.startswith("http"):
             return RedirectResponse(foto_url)
 
@@ -136,7 +136,7 @@ def converter_perfil_para_schema(perfil: Perfil, exs) -> PerfilSchema:
     return PerfilSchema(
         nome_ou_apelido=perfil.apelido,
         imagem_fundo=perfil.url_img_fundo or "",
-        imagem_perfil=f"/perfil/{perfil.id}/foto" or "https://placehold.co/50x50",
+        imagem_perfil=f"/perfil/{perfil.id}/foto",
         aprendendo_desde=perfil.criado_em.strftime("%d/%m/%Y"),
         progresso=p,
         conquistas=c,
