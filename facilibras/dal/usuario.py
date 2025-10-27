@@ -10,6 +10,7 @@ from facilibras.modelos import (
     ProgressoUsuario,
     Usuario,
 )
+from facilibras.schemas.perfil import AtualizarPerfilSchema
 
 
 class UsuarioDAO:
@@ -51,7 +52,24 @@ class UsuarioDAO:
 
         self.session.commit()
 
-    def alterar_perfil_usuario(self, perfil) -> Perfil: ...
+    def alterar_perfil_usuario(
+        self, perfil: Perfil, dados: AtualizarPerfilSchema, foto: str | None
+    ) -> list[str]:
+        campos = []
+        if dados.apelido:
+            perfil.apelido = dados.apelido
+            campos.append("Apelido")
+
+        if foto is not None:
+            perfil.url_img_perfil = foto
+            campos.append("Imagem de Perfil")
+
+        if dados.cor_img_fundo:
+            perfil.url_img_fundo = dados.cor_img_fundo
+            campos.append("Cor de Fundo")
+
+        self.session.commit()
+        return campos
 
     def ranking_com_perfil(self, inicio: datetime | None = None):
         stmt = (

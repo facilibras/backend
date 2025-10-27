@@ -19,5 +19,6 @@ from facilibras.schemas.generico import MensagemSchema as MensagemSchema
 from facilibras.schemas.usuario import CriarUsuario as CriarUsuario
 from facilibras.schemas.usuario import LoginSchema as LoginSchema
 from facilibras.schemas.usuario import UsuarioSchema as UsuarioSchema
+from facilibras.schemas.perfil import AtualizarPerfilSchema as AtualizarPerfilSchema
 from facilibras.schemas.ranking import Periodo as Periodo
 from facilibras.schemas.ranking import RankingSchema as RankingSchema

@@ -12,3 +12,5 @@ __pycache__
 .env
 .pytest_cache
 videos/
+imagens/
+aleatorios/

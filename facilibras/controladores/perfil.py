@@ -1,16 +1,24 @@
+import uuid
 from http import HTTPStatus
+from pathlib import Path
 
-from fastapi import HTTPException
+from fastapi import HTTPException, UploadFile
+from fastapi.responses import FileResponse, RedirectResponse
 
 from facilibras.controladores.pontuacao import calcular_porcentagem, pontos_para_subir
 from facilibras.dependencias.dal import T_ExercicioDAO, T_UsuarioDAO
 from facilibras.modelos import Perfil
+from facilibras.schemas.generico import MensagemSchema
 from facilibras.schemas.perfil import (
     AtividadeSchema,
+    AtualizarPerfilSchema,
     ConquistaSchema,
     PerfilSchema,
     ProgressoSchema,
 )
+
+PASTA_IMAGENS = Path("imagens")
+PASTA_IMAGENS.mkdir(exist_ok=True)
 
 
 class PerfilControle:
@@ -29,6 +37,66 @@ class PerfilControle:
         exs = self.exercicio_dao.listar_atividade(id_usuario)
 
         return converter_perfil_para_schema(perfil, exs)
+
+    def atualizar_perfil(
+        self,
+        id_usuario: int,
+        dados: AtualizarPerfilSchema,
+        arquivo: UploadFile | str | None,
+    ) -> MensagemSchema:
+        perfil = self.usuario_dao.buscar_perfil_usuario(id_usuario)
+        if not perfil:
+            exc_msg = f"Perfil não encontrado para usuário {id_usuario}"
+            raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=exc_msg)
+
+        caminho_local = None
+        if arquivo and not isinstance(arquivo, str):
+            caminho_local = salvar_imagem_perfil(arquivo)
+
+        campos = self.usuario_dao.alterar_perfil_usuario(perfil, dados, caminho_local)
+        s = "s" if len(campos) > 1 else ""
+        msg = f"Os campo{s} {",".join(campos)} foram alterados!"
+        return MensagemSchema(mensagem=msg)
+
+    def foto_perfil_usuario(self, id_usuario: int):
+        perfil = self.usuario_dao.buscar_perfil_usuario(id_usuario)
+        if not perfil:
+            exc_msg = f"Perfil não encontrado para usuário {id_usuario}"
+            raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=exc_msg)
+
+        foto_url = perfil.url_img_perfil or ""
+        if foto_url.startswith("http"):
+            return RedirectResponse(foto_url)
+
+        caminho_local = Path(foto_url)
+        if not caminho_local.exists():
+            raise HTTPException(
+                status_code=HTTPStatus.NOT_FOUND, detail="Imagem não encontrada"
+            )
+
+        return FileResponse(caminho_local)
+
+
+def salvar_imagem_perfil(arquivo: UploadFile) -> str:
+    if not arquivo or not arquivo.filename:
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST, detail="Nenhum arquivo enviado."
+        )
+
+    extensao = Path(arquivo.filename).suffix.lower()
+    if extensao not in {".jpg", ".jpeg", ".png"}:
+        raise HTTPException(
+            status_code=HTTPStatus.UNSUPPORTED_MEDIA_TYPE,
+            detail="Formato de imagem não suportado. Use JPG ou PNG.",
+        )
+
+    nome_arquivo = f"{uuid.uuid4()}{extensao}"
+    caminho_arquivo = PASTA_IMAGENS / nome_arquivo
+
+    with caminho_arquivo.open("wb") as f:
+        f.write(arquivo.file.read())
+
+    return str(caminho_arquivo)
 
 
 def converter_perfil_para_schema(perfil: Perfil, exs) -> PerfilSchema:

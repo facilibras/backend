@@ -31,3 +31,8 @@ class PerfilSchema(BaseSchema):
 
     atividade_recente: list[AtividadeSchema]
     conquistas: list[ConquistaSchema]
+
+
+class AtualizarPerfilSchema(BaseSchema):
+    apelido: str | None = None
+    cor_img_fundo: str | None = None
