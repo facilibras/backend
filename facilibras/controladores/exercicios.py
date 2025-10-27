@@ -15,7 +15,7 @@ from facilibras.modelos import Exercicio, ExercicioStatus, Secao
 from facilibras.modelos.sinais import get_sinal
 from facilibras.schemas import (
     ExercicioSchema,
-    FeedbackExercicioSchema,
+    FeedbackSchema,
     PalavraSchema,
     SecaoSchema,
 )
@@ -120,7 +120,7 @@ class ExercicioControle:
 
     def reconhecer_exercicio(
         self, nome_exercicio: str, video: UploadFile, usuario: int | None
-    ) -> FeedbackExercicioSchema:
+    ) -> FeedbackSchema:
         # Checa se realmente é um vídeo
         if not video.content_type or not video.content_type.startswith("video/"):
             raise HTTPException(
@@ -158,24 +158,19 @@ class ExercicioControle:
                 shutil.copyfileobj(video.file, buffer)
 
         # Usa o video para reconhecer
-        sucesso, feedback = reconhecer_video(sinal, caminho_arquivo_temp)
+        feedback = reconhecer_video(sinal, caminho_arquivo_temp)
 
         # Apaga o arquivo temporário
         os.remove(caminho_arquivo_temp)
 
-        if sucesso:
-            msg = "Parabéns! Você realizou o sinal corretamente"
+        if feedback.sucesso:
             if usuario is not None:
                 self.completar_exercicio(exercicio[0], usuario)
         else:
-            msg = feedback
             if usuario is not None:
                 self.tentativa_exercicio(exercicio[0], usuario)
 
-        return FeedbackExercicioSchema(
-            sucesso=sucesso,
-            mensagem=msg,
-        )
+        return feedback
 
 
 def distribuir_exercicios(

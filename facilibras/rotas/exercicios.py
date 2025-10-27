@@ -2,7 +2,7 @@ from fastapi import APIRouter, File, UploadFile
 
 from facilibras.dependencias.controladores import T_ExercicioControle
 from facilibras.dependencias.usuario import T_UsuarioOpcional
-from facilibras.schemas import ExercicioSchema, FeedbackExercicioSchema
+from facilibras.schemas import ExercicioSchema, FeedbackSchema
 
 router = APIRouter(prefix="/exercicios", tags=["exercícios"])
 
@@ -36,7 +36,7 @@ def pagina_exercicio(
     return controle.listar_exercicio_por_nome(exercicio, usuario_id)
 
 
-@router.post("/{exercicio}/reconhecer", response_model=FeedbackExercicioSchema)
+@router.post("/{exercicio}/reconhecer", response_model=FeedbackSchema)
 def reconhecer_exercicio(
     exercicio: str,
     controle: T_ExercicioControle,

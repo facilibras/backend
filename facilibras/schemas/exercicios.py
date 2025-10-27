@@ -1,9 +1,22 @@
+from pydantic import Field
+
 from facilibras.schemas import BaseSchema
 
 
+# TODO: Nao esquece de remover isso aqui antes do commit
 class FeedbackExercicioSchema(BaseSchema):
     sucesso: bool
     mensagem: str
+
+
+class Feedback(BaseSchema):
+    correto: bool
+    mensagem: str
+
+
+class FeedbackSchema(BaseSchema):
+    sucesso: bool
+    feedback: list[Feedback] = Field(default_factory=list)
 
 
 class PalavraSchema(BaseSchema):

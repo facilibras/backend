@@ -18,6 +18,7 @@ from facilibras.controladores.reconhecimento.validadores import (
 )
 from facilibras.modelos.sinais import SinalLibras
 from facilibras.modelos.sinais.base import Inclinacao, Movimento, Orientacao, Tipo
+from facilibras.schemas import Feedback, FeedbackSchema
 
 LIMIAR_CORRETO = 100
 LIMIAR_INCORRETO = 100
@@ -32,15 +33,15 @@ HORIZONTAIS = (Movimento.DIREITA, Movimento.ESQUERDA)
 TEMPO_TOTAL = 5
 
 
-def reconhecer_webcam(sinal: SinalLibras) -> tuple[bool, str]:
+def reconhecer_webcam(sinal: SinalLibras) -> FeedbackSchema:
     return reconhecer(sinal, Camera(0))
 
 
-def reconhecer_video(sinal: SinalLibras, caminho_video: str) -> tuple[bool, str]:
+def reconhecer_video(sinal: SinalLibras, caminho_video: str) -> FeedbackSchema:
     return reconhecer(sinal, Video(caminho_video))
 
 
-def reconhecer(sinal: SinalLibras, gerador: GeradorFrames) -> tuple[bool, str]:
+def reconhecer(sinal: SinalLibras, gerador: GeradorFrames) -> FeedbackSchema:
     sinal.preparar_reconhecimento()
 
     match sinal.tipo:
@@ -50,18 +51,20 @@ def reconhecer(sinal: SinalLibras, gerador: GeradorFrames) -> tuple[bool, str]:
             res, erros = reconhecer_com_movimento(sinal, gerador, TEMPO_TOTAL)
         case Tipo.COM_TRANSICAO:
             res, erros = reconhecer_com_transicao(sinal, gerador, TEMPO_TOTAL)
+        case _:
+            res, erros = False, []
 
-    return res, montar_feedback(erros)
+    return montar_feedback(res, erros)
 
 
 def reconhecer_estatico(
     sinal: SinalLibras, gerador: GeradorFrames, tempo_limite: int
-) -> tuple[bool, list[str]]:
+) -> tuple[bool, list[list]]:
     inicio = time.time()
     frame_idx = 0
     resultado = False
     melhor = float("inf")
-    feedback = []
+    feedback = [[False, ""]]
 
     with modelo_mao.Hands(
         min_detection_confidence=0.5, min_tracking_confidence=0.5
@@ -83,7 +86,9 @@ def reconhecer_estatico(
                 qtd_erros = len(erros)
                 if qtd_erros <= melhor:
                     melhor = qtd_erros
-                    feedback = erros
+                    feedback[0] = [False, "/".join(erros)]
+                if resultado:
+                    feedback[0] = [True, "Configuração da mão correta"]
 
             atingiu_tempo = time.time() - inicio >= tempo_limite
             if gerador.tipo == TipoGerador.CAMERA:
@@ -100,12 +105,13 @@ def reconhecer_estatico(
 
 def reconhecer_com_transicao(
     sinal: SinalLibras, gerador: GeradorFrames, tempo_limite: int
-) -> tuple[bool, list[str]]:
+) -> tuple[bool, list[list]]:
     inicio = time.time()
     frame_idx = 0
     conf_idx = 0
     total_confs = len(sinal.confs)
     melhor = float("inf")
+    # feedback = [[False, ""] for _ in range(total_confs)]
     feedback = []
 
     with modelo_mao.Hands(
@@ -150,18 +156,24 @@ def reconhecer_com_transicao(
 
     sucesso = conf_idx == total_confs
     if sucesso:
-        return True, []
+        return True, [
+            [True, "Configuração da mão: Correto"],
+            [True, "Movimento: Correto"],
+        ]
     if not feedback:
-        return False, ["Faltou movimento"]
+        return False, [
+            [True, "Configuração da mão: Correto"],
+            [False, "Movimento: Incorreto ou não detectado."],
+        ]
     return False, [
-        *feedback,
-        "Corrija a configuração da mão antes de fazer o movimento",
+        [False, "Configuração da mão: Incorreta (" + "/".join(feedback) + ")"],
+        [False, "Movimento: Corrija a configuração da mão antes de fazer o movimento"],
     ]
 
 
 def reconhecer_com_movimento(
     sinal: SinalLibras, gerador: GeradorFrames, tempo_limite: int
-):
+) -> tuple[bool, list[list]]:
     inicio = time.time()
     frames = []
     frame_idx = 0
@@ -214,7 +226,13 @@ def reconhecer_com_movimento(
 
     # Por fim, avalia se houve movimento
     if not janelas_continuas:
-        return False, feedback
+        return False, [
+            [False, "Configuração da mão: Incorreta (" + "/".join(feedback) + ")"],
+            [
+                False,
+                "Movimento: Corrija a configuração da mão antes de fazer o movimento",
+            ],
+        ]
 
     resultado = False
     teve_movimento = False
@@ -230,8 +248,14 @@ def reconhecer_com_movimento(
             break
 
     if not teve_movimento:
-        return resultado, ["Faltou movimento"]
-    return resultado, feedback
+        return False, [
+            [True, "Configuração da mão: Correto"],
+            [False, "Movimento: Incorreto ou não detectado."],
+        ]
+    return True, [
+        [True, "Configuração da mão: Correto"],
+        [True, "Movimento: Correto"],
+    ]
 
 
 def reconhecer_sequencia_movimentos(
@@ -387,9 +411,12 @@ def extrair_pontos_mao(imagem_np, modelo) -> dict[int, tuple[float, float, float
     return pontos
 
 
-def montar_feedback(mensagens: list[str]) -> str:
-    feedback = ", ".join([f"{i + 1}: {msg}" for i, msg in enumerate(mensagens)])
-    return feedback
+def montar_feedback(sucesso, feedbacks: list[list]) -> FeedbackSchema:
+    fs = FeedbackSchema(sucesso=sucesso)
+    for correto, mensagem in feedbacks:
+        fs.feedback.append(Feedback(correto=correto, mensagem=mensagem))
+
+    return fs
 
 
 def validar_sinal(

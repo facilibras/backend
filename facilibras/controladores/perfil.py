@@ -55,7 +55,7 @@ class PerfilControle:
 
         campos = self.usuario_dao.alterar_perfil_usuario(perfil, dados, caminho_local)
         s = "s" if len(campos) > 1 else ""
-        msg = f"Os campo{s} {",".join(campos)} foram alterados!"
+        msg = f"Os campo{s} {", ".join(campos)} foram alterados!"
         return MensagemSchema(mensagem=msg)
 
     def foto_perfil_usuario(self, id_usuario: int):
@@ -136,7 +136,7 @@ def converter_perfil_para_schema(perfil: Perfil, exs) -> PerfilSchema:
     return PerfilSchema(
         nome_ou_apelido=perfil.apelido,
         imagem_fundo=perfil.url_img_fundo or "",
-        imagem_perfil=perfil.url_img_perfil or "https://placehold.co/50x50",
+        imagem_perfil=f"/perfil/{perfil.id}/foto" or "https://placehold.co/50x50",
         aprendendo_desde=perfil.criado_em.strftime("%d/%m/%Y"),
         progresso=p,
         conquistas=c,
