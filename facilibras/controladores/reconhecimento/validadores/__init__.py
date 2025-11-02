@@ -14,15 +14,11 @@ from facilibras.controladores.reconhecimento.validadores.validacao import (
     Resultado as Resultado,
 )
 from facilibras.controladores.reconhecimento.validadores.validacao import (
-    Validando as Validando,
-)
-from facilibras.controladores.reconhecimento.validadores.validacao import (
     Valido as Valido,
 )
 
 # Inicializar os validadores
 
-import facilibras.controladores.reconhecimento.validadores.inclinacao as _
 import facilibras.controladores.reconhecimento.validadores.mao as _
-import facilibras.controladores.reconhecimento.validadores.movimento as _
-import facilibras.controladores.reconhecimento.validadores.orientacao as _
+import facilibras.controladores.reconhecimento.validadores.posicao as _
+import facilibras.controladores.reconhecimento.validadores.expressao as _

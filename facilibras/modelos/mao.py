@@ -3,11 +3,12 @@ from enum import Enum, auto
 from typing import override
 
 
-class EnumUnico(Enum):
+class Componente(Enum):
     """
     Classe base para criação de enums com identificadores únicos globais.
     """
 
+    @override
     def __new__(cls, value):
         """
         Padroniza o nome como CLASSE_VALOR para a identificação única de cada unidade.
@@ -26,7 +27,7 @@ class EnumUnico(Enum):
         return name
 
 
-class Dedo(EnumUnico):
+class Dedo(Componente):
     """
     Representa uma posição ou flexão específica de um dedo.
     """
@@ -70,7 +71,7 @@ class Dedo(EnumUnico):
     MEDIO_DIST_ANELAR = auto()
 
 
-class Mao(EnumUnico):
+class Mao(Componente):
     """
     Representa e identifica uma das mãos.
     """
@@ -79,7 +80,7 @@ class Mao(EnumUnico):
     DIREITA = auto()
 
 
-class Orientacao(EnumUnico):
+class Orientacao(Componente):
     """
     Representa as diferentes orientações da palma da mão.
     """
@@ -91,7 +92,7 @@ class Orientacao(EnumUnico):
     BAIXO = auto()
 
 
-class Inclinacao(EnumUnico):
+class Inclinacao(Componente):
     """
     Representa os diferentes graus de inclinação da palma da mão.
     """
@@ -102,7 +103,7 @@ class Inclinacao(EnumUnico):
     DENTRO_180 = auto()
 
 
-class Movimento(EnumUnico):
+class Movimento(Componente):
     """
     Representa os diferentes movimentos direcionais da mão.
     """
@@ -121,24 +122,46 @@ class Movimento(EnumUnico):
     BAIXO_ESQUERDA = auto()
 
 
-class Posicao(EnumUnico):
+class Posicao(Componente):
     """
     Representa a posição da mão em relação ao uma parte do corpo
     """
 
-    QUALQUER = auto()
+    BOCA = auto()
+    CENTRO = auto()
+    DISTANTE_AO_CORPO = auto()
+    LADO_ESQUERDO_BAIXO = auto()
+    LADO_ESQUERDO_CIMA = auto()
+    LADO_DIREITA_BAIXO = auto()
+    LADO_DIREITA_CIMA = auto()
+    LADO_OPOSTO = auto()  # mão alinhada com o ombro oposto
     MESMO_LADO = auto()  # mão alinhada com o ombro do mesmo lado
-    LADO_OPPOSTO = auto()  # mão alinhada com o ombro oposto
+    OMBRO_PRA_CIMA = auto()
+    ORELHA = auto()
+    PEITO = auto()
+    PROXIMO_AO_CORPO = auto()
+    QUALQUER = auto()
+    QUEIXO = auto()
+    SOMBRANCELHA = auto()
+    TESTA = auto()
+
+
+class Expressao(Componente):
+    BOCA_ABERTA = auto()
+    BOCA_FECHADA = auto()
+    BRAVO = auto()
+    QUALQUER = auto()
 
 
 @dataclass
-class ConfiguracaoMao:
+class Configuracao:
     dedos: list[Dedo] = field(default_factory=list)
-    orientacao: Orientacao | None = None
-    inclinacao: Inclinacao | None = None
+    orientacao: Orientacao = Orientacao.FRENTE
+    inclinacao: Inclinacao = Inclinacao.RETA
     posicao: Posicao = Posicao.QUALQUER
-    movimentos: list[Movimento] = field(default_factory=list)
+    expressao: Expressao = Expressao.QUALQUER
     descricao: str | None = None
+    ponto_ref: int = 0
 
     def __repr__(self) -> str:
         todos = []
@@ -148,7 +171,9 @@ class ConfiguracaoMao:
             todos.append(self.orientacao)
         if self.inclinacao:
             todos.append(self.inclinacao)
-        if self.movimentos:
-            todos.append(self.movimentos)
+        if self.posicao:
+            todos.append(self.posicao)
+        if self.expressao:
+            todos.append(self.expressao)
 
         return " - ".join(map(str, todos))

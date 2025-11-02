@@ -1,4 +1,4 @@
-from facilibras.modelos.mao import Dedo, Inclinacao, Movimento, Orientacao
+from facilibras.modelos.mao import Dedo, Inclinacao, Orientacao, Posicao
 from facilibras.modelos.sinais import Categoria, SinalLibras
 
 LetraA = (
@@ -170,7 +170,6 @@ LetraK = (
         Dedo.MINIMO_BAIXO,
     )
     .orientacao_palma(Orientacao.FRENTE)
-    .movimento(Movimento.CIMA)
 )
 
 LetraL = (
@@ -316,17 +315,22 @@ LetraW = (
     .orientacao_palma(Orientacao.FRENTE)
 )
 
+_mao_x = [
+    Dedo.POLEGAR_DENTRO,
+    Dedo.INDICADOR_FLEXIONADO,
+    Dedo.MEDIO_BAIXO,
+    Dedo.ANELAR_BAIXO,
+    Dedo.MINIMO_BAIXO,
+]
 LetraX = (
     SinalLibras(Categoria.ALFABETO, "letra_x")
-    .mao(
-        Dedo.POLEGAR_DENTRO,
-        Dedo.INDICADOR_FLEXIONADO,
-        Dedo.MEDIO_BAIXO,
-        Dedo.ANELAR_BAIXO,
-        Dedo.MINIMO_BAIXO,
-    )
+    .mao(*_mao_x)
     .orientacao_palma(Orientacao.BAIXO)
-    .movimento(Movimento.TRAS)
+    .posicao_mao(Posicao.DISTANTE_AO_CORPO, ponto_ref=0)
+    .depois()
+    .mao(*_mao_x)
+    .orientacao_palma(Orientacao.BAIXO)
+    .posicao_mao(Posicao.PROXIMO_AO_CORPO, ponto_ref=0)
 )
 
 LetraY = (
@@ -349,15 +353,29 @@ LetraY = (
     )
     .orientacao_palma(Orientacao.FRENTE)
 )
+
+_mao_z = [
+    Dedo.POLEGAR_DENTRO,
+    Dedo.INDICADOR_CIMA,
+    Dedo.MEDIO_BAIXO,
+    Dedo.ANELAR_BAIXO,
+    Dedo.MINIMO_BAIXO,
+]
 LetraZ = (
     SinalLibras(Categoria.ALFABETO, "letra_z")
-    .mao(
-        Dedo.POLEGAR_DENTRO,
-        Dedo.INDICADOR_CIMA,
-        Dedo.MEDIO_BAIXO,
-        Dedo.ANELAR_BAIXO,
-        Dedo.MINIMO_BAIXO,
-    )
+    .mao(*_mao_z)
     .orientacao_palma(Orientacao.FRENTE)
-    .movimento(Movimento.DIREITA, Movimento.BAIXO_ESQUERDA, Movimento.DIREITA)
+    .posicao_mao(Posicao.LADO_ESQUERDO_CIMA, ponto_ref=12)
+    .depois()
+    .mao(*_mao_z)
+    .orientacao_palma(Orientacao.FRENTE)
+    .posicao_mao(Posicao.LADO_DIREITA_CIMA, ponto_ref=12)
+    .depois()
+    .mao(*_mao_z)
+    .orientacao_palma(Orientacao.FRENTE)
+    .posicao_mao(Posicao.LADO_ESQUERDO_BAIXO, ponto_ref=12)
+    .depois()
+    .mao(*_mao_z)
+    .orientacao_palma(Orientacao.FRENTE)
+    .posicao_mao(Posicao.LADO_DIREITA_BAIXO, ponto_ref=12)
 )

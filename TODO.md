@@ -1,16 +1,14 @@
 # Sinais
-## Geral
-- [ ] Corrigir sinal da letra K (Orientacao.FRENTE -> Orientacao.LATERAL)
-- [ ] Corrigir sinal da letra P (Orientacao.LATERAL -> Orientacao.TRAS) ???
-- [ ] Variações de Sinais
+## Modelo
+- [ ] Funções de conveniência:
+    - [ ] `depois_de(Configuracao)`
+    - [ ] `configuracao_anterior(idx: int = -1)`
+    - [ ] `igual_a(Configuracao)`
 
 ## Corrigir Sinais
-= [ ] Letra P: Falsos positivos nos dedos para baixo (trocar y por x)
-- [ ] Letra Ç: Reconhece ambos sinais na lateral.
-- [ ] Letra O: Funciona mas dependendo do ângulo da mão não é instantâneo.
-- [ ] Letra X: Movimento
+- [ ] Letra K sem movimento atualmente
 
-## Melhorar
+## Feedback antigo
 - [ ] Polegar_dentro (BAIXO): *Falso negativo*
 - [ ] Indicador_cima (LATERAL): *Falso negativo* comum nos sinais com orientação lateral
 - [ ] Indicador_flexionado (BAIXO): *Falso positivo* quando p/ indicador para baixo
@@ -24,17 +22,3 @@
 
 > [!IMPORTANT]
 > Possivelmente inverter lógica da orientação lateral para lidar com falsos positivos relacionados a profundidade
-
-# Reconhecimento
-## Geral
-- [ ] Refatorar para uma classe de reconhecimento
-
-## Movimentos
-- [ ] Usar ponto de referência dependendo do sinal
-
-## Validadores
-- [ ] Integrar rotação matricial para verificar inclinação
-- [ ] Se não der certo, utilizar atan2 para verificar inclinações
-- [ ] Utilizar profundidade nas validações
-- [ ] Modularizar validadores em pacotes para cada dedo
-

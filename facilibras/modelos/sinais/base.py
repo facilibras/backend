@@ -2,19 +2,17 @@ from enum import Enum, StrEnum
 from typing import Self, Type, TypeVar
 
 from facilibras.modelos.mao import (
-    ConfiguracaoMao,
+    Configuracao,
     Dedo,
     Inclinacao,
-    Movimento,
     Orientacao,
+    Posicao,
 )
 
 
 class Tipo(Enum):
     ESTATICO = 1
-    COM_MOVIMENTO = 2
-    COM_TRANSICAO = 3
-    COMPLETO = 4
+    COM_TRANSICAO = 2
 
 
 class Categoria(StrEnum):
@@ -26,8 +24,8 @@ class SinalLibras:
     def __init__(self, categoria: Categoria | None, nome: str) -> None:
         self.nome = nome
         self.categoria = categoria
-        self.confs: list[ConfiguracaoMao] = []
-        self.conf_atual = ConfiguracaoMao()
+        self.confs: list[Configuracao] = []
+        self.conf_atual = Configuracao()
         self.configurando = True
 
         _sinais[nome] = self
@@ -51,8 +49,9 @@ class SinalLibras:
         self.conf_atual.inclinacao = inclinacao
         return self
 
-    def movimento(self, *movimentos: Movimento) -> Self:
-        self.conf_atual.movimentos = list(movimentos)
+    def posicao_mao(self, posicao: Posicao, ponto_ref: int):
+        self.conf_atual.posicao = posicao
+        self.conf_atual.ponto_ref = ponto_ref
         return self
 
     def descricao(self, desc: str) -> Self:
@@ -62,7 +61,7 @@ class SinalLibras:
     def depois(self) -> Self:
         self.configurando = True
         self.confs.append(self.conf_atual)
-        self.conf_atual = ConfiguracaoMao()
+        self.conf_atual = Configuracao()
         return self
 
     @property
@@ -73,10 +72,6 @@ class SinalLibras:
     def tipo(self) -> Tipo:
         if len(self.confs) > 1:
             return Tipo.COM_TRANSICAO
-
-        for conf in self.confs:
-            if conf.movimentos:
-                return Tipo.COM_MOVIMENTO
 
         return Tipo.ESTATICO
 
