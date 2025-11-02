@@ -1,3 +1,4 @@
+import time
 from abc import ABC, abstractmethod
 from enum import Enum
 
@@ -52,6 +53,26 @@ class Camera(GeradorFrames):
     @property
     def tipo(self) -> TipoGerador:
         return TipoGerador.CAMERA
+
+    def __iter__(self):
+        """Iterador que vai retornando frames até a fonte acabar."""
+        self.open()
+        inicio = None
+
+        while True:
+            ret, frame = self.cap.read()  # type: ignore
+            if not ret:
+                break
+
+            if inicio is None:
+                inicio = time.time()
+
+            if time.time() - inicio > 5:
+                break
+
+            yield frame
+
+        self.release()
 
 
 class Video(GeradorFrames):
