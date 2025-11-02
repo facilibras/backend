@@ -32,23 +32,29 @@ def reconhecer_interativamente(sinal: SinalLibras):
             cor = (0, 0, 255)
             msg = ""
             if pontos:
-                resultado = validar_sinal(sinal, pontos, 0)
-                msg = montar_feedback(resultado[1])
-                if resultado[0]:
+                resultado, erros = validar_sinal(sinal, pontos, 0)
+                msg = montar_feedback(resultado, [[resultado, "-".join(erros)]])
+                if resultado:
                     cor = (0, 255, 0)
 
             # Exibe o o frame
             if msg:
-                cv2.putText(
-                    frame,
-                    msg,
-                    (50 - 20, 50 + 40),
-                    cv2.FONT_HERSHEY_SIMPLEX,
-                    0.5,
-                    (0, 0, 0),
-                    1,
-                    cv2.LINE_AA,
-                )
+                y_base = 100
+                incremento = 20
+                for i, feed in enumerate(msg.feedback):
+                    y = y_base + i * incremento
+
+                    cv2.putText(
+                        frame,
+                        feed.mensagem,
+                        (30, y),
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        0.5,
+                        (0, 0, 0),
+                        1,
+                        cv2.LINE_AA,
+                    )
+
             cv2.circle(frame, (50, 50), radius=25, color=cor, thickness=-1)
             cv2.imshow("Pressione q para sair", frame)
             if cv2.waitKey(1) & 0xFF == ord("q"):

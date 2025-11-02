@@ -3,12 +3,6 @@ from pydantic import Field
 from facilibras.schemas import BaseSchema
 
 
-# TODO: Nao esquece de remover isso aqui antes do commit
-class FeedbackExercicioSchema(BaseSchema):
-    sucesso: bool
-    mensagem: str
-
-
 class Feedback(BaseSchema):
     correto: bool
     mensagem: str

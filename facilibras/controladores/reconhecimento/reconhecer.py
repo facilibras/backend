@@ -411,7 +411,7 @@ def extrair_pontos_mao(imagem_np, modelo) -> dict[int, tuple[float, float, float
     return pontos
 
 
-def montar_feedback(sucesso, feedbacks: list[list]) -> FeedbackSchema:
+def montar_feedback(sucesso: bool, feedbacks: list[list]) -> FeedbackSchema:
     fs = FeedbackSchema(sucesso=sucesso)
     for correto, mensagem in feedbacks:
         fs.feedback.append(Feedback(correto=correto, mensagem=mensagem))
