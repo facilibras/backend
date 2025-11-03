@@ -248,9 +248,9 @@
         "1": {
             "video": "https://drive.google.com/file/d/1WoEY2uttBIp1lDd8m3qhdZ6wgleh-SyD/preview",
             "instrucoes": [
-                "Posicione sua mão com a palma voltada para baixo.",
+                "Posicione sua mão com a palma voltada para baixo, centralizada.",
                 "Feche todos os dedos exceto o indicador. Curve ele como um gancho. ",
-                "Mantendo o formato da mão, movimente-a para a trás em direção ao corpo."
+                "Mantendo o formato da mão, movimente-a para a trás em direção ao peito."
             ]
         }
     },
@@ -272,7 +272,7 @@
             "instrucoes": [
                 "Posicione sua mão com a palma voltada para frente.",
                 "Feche a mão deixando apenas o indicador estendido.",
-                "Mantendo o formato da mão, desenhe um Z no ar."
+                "Mantendo o formato da mão, desenhe um Z no ar, passando pelos 4 quadrantes da tela."
             ]
         }
     },
@@ -296,7 +296,7 @@
             ]
         },
         "2": {
-            "video": "",
+            "video": "https://drive.google.com/file/d/1gGTntuVBwcjpPiE2wTwsimxHqKQrDpWh/preview",
             "instrucoes": [
                 "Posicione sua mão com a palma voltada para trás.",
                 "Feche a mão deixando apenas o indicador estendido."
@@ -313,7 +313,7 @@
             ]
         },
         "2": {
-            "video": "",
+            "video": "https://drive.google.com/file/d/1050kZUmTQjRG0x8z7wGYJbhNCWAZ5_KW/preview",
             "instrucoes": [
                 "Posicione sua mão com a palma voltada para trás.",
                 "Feche a mão e deixe somente o indicador e médio esticados."
@@ -347,7 +347,7 @@
             ]
         },
         "2": {
-            "video": "",
+            "video": "https://drive.google.com/file/d/1JbKS2K7WmOK07bjwLpBD2zl6-GOYGzH8/preview",
             "instrucoes": [
                 "Posicione sua mão com a palma voltada para trás.",
                 "Estique todos os dedos, exceto o dedo mínimo."
@@ -414,7 +414,7 @@
     "Oi": {
         "categoria": "Saudações",
         "1": {
-            "video": "",
+            "video": "https://drive.google.com/file/d/1f1OPysqhzuaYsG8wwNmV3UGxffrHIX8l/preview",
             "instrucoes": [
                 "Posicione sua mão com a palma voltada para frente.",
                 "Feche a mão, deixando apenas o dedo mínimo esticado.",
@@ -425,7 +425,7 @@
     "Tchau": {
         "categoria": "Saudações",
         "1": {
-            "video": "",
+            "video": "https://drive.google.com/file/d/1bhSCt6Vg3962KQ4G2OKp_T6b8QwkbI7G/preview",
             "instrucoes": [
                 "Posicione sua mão com a palma voltada para frente.",
                 "Deixe a mão aberta, com todos dedos esticados.",
@@ -436,7 +436,7 @@
     "Tudo bem": {
         "categoria": "Saudações",
         "1": {
-            "video": "",
+            "video": "https://drive.google.com/file/d/1jWL8pjN0SOp0ajbDPsIkT82BCb94CNNE/preview",
             "instrucoes": [
                 "Posicione sua mão com a palma voltada para trás e feche a mão na altura do queixo.",
                 "Abra sua mão, esticando todos os dedos.",
@@ -447,7 +447,7 @@
     "Seu": {
         "categoria": "Identidade",
         "1": {
-            "video": "",
+            "video": "https://drive.google.com/file/d/1mJvwQOGBCq6zhuyV6_C3-j5UU9Qy56Vs/preview",
             "instrucoes": [
                 "Posicione sua mão com a palma voltada para trás, inclinada para dentro do corpo.",
                 "Feche sua mão deixando somente o dedo indicador e médio esticados.",
@@ -458,7 +458,7 @@
     "Meu": {
         "categoria": "Identidade",
         "1": {
-            "video": "",
+            "video": "https://drive.google.com/file/d/1T6f_1z8guVvlRFyzpG6aTPnMVo9wkXPS/preview",
             "instrucoes": [
                 "Posicione sua mão com a palma voltada para trás, inclinada para dentro do corpo.",
                 "Abra sua mão e encoste sua palma algumas vezes no peito."
@@ -468,7 +468,7 @@
     "Eu": {
         "categoria": "Identidade",
         "1": {
-            "video": "",
+            "video": "https://drive.google.com/file/d/1anrnNXeead7YpdieIKfAEXdj9pKH7aPw/preview",
             "instrucoes": [
                 "Posicione sua mão com a palma voltada para trás.",
                 "Estique somente o dedo indicador.",
@@ -479,7 +479,7 @@
     "Você": {
         "categoria": "Identidade",
         "1": {
-            "video": "",
+            "video": "https://drive.google.com/file/d/17fkm-cQ4K0ShFUj4RXW03vXnqYifRkNb/preview",
             "instrucoes": [
                 "Posicione sua mão com a palma voltada para baixo.",
                 "Feche a mão deixando somente o indicador esticado.",
@@ -490,7 +490,7 @@
     "Nome": {
         "categoria": "Identidade",
         "1": {
-            "video": "",
+            "video": "https://drive.google.com/file/d/1dZkkm-pnRq2LBr7_p67bpGzrBfTJjN3T/preview",
             "instrucoes": [
                 "Posicione sua mão com a palma voltada para frente.",
                 "Estique os dedos indicador e médio esticados, juntando-os.",
@@ -501,9 +501,9 @@
     "Aprender": {
         "categoria": "Verbos",
         "1": {
-            "video": "",
+            "video": "https://drive.google.com/file/d/1zMUgxoSSafvWHPb-N_9CdndXqLU_uU9l/preview",
             "instrucoes": [
-                "Posicione sua mão com a palma voltada para o lado na frente da testa.",
+                "Posicione sua mão com a palma voltada para o frente, posicionada na frente da testa.",
                 "Feche a mão o suficiente a parecer com a letra C.",
                 "Abra e feche a mão algumas vezes."
             ]
@@ -512,7 +512,7 @@
     "Entender": {
         "categoria": "Verbos",
         "1": {
-            "video": "",
+            "video": "https://drive.google.com/file/d/1qP5_jpwIATtIZ5GCFnswc0iNRKkwdinC/preview",
             "instrucoes": [
                 "Posicione sua mão com a palma voltada para trás.",
                 "Leve sua mão aberta com os dedos juntos para a testa.",
@@ -523,7 +523,7 @@
     "Ouvir": {
         "categoria": "Verbos",
         "1": {
-            "video": "",
+            "video": "https://drive.google.com/file/d/1seHQWLXjgBJIkh8rZIJMAvieJKAvfTvp/preview",
             "instrucoes": [
                 "Posicione sua mão com a palma voltada para frente.",
                 "Abra a mão e a posicione na altura da orelha.",
@@ -534,9 +534,9 @@
     "Saber": {
         "categoria": "Verbos",
         "1": {
-            "video": "",
+            "video": "https://drive.google.com/file/d/1RM-soWqZtr48aFq2iqitwJVUjzNIBXYy/preview",
             "instrucoes": [
-                "Posicione sua mão com a palma voltada para trás.",
+                "Posicione sua mão com a palma voltada para dentro.",
                 "Leve sua mão aberta com os dedos juntos para a testa.",
                 "Encoste a ponta dos dedos na testa e, em seguida, afaste a mão enquanto a fecha."
             ]
@@ -545,7 +545,7 @@
     "Água": {
         "categoria": "Alimentos",
         "1": {
-            "video": "",
+            "video": "https://drive.google.com/file/d/1tKdlUid45Cw2s-0QCu4ccLvPoltDNEpm/preview",
             "instrucoes": [
                 "Posicione sua mão com a palma voltada para o lado na altura do queixo.",
                 "Curvando os dedos mínimo, anelar e médio e os conectando com o o polegar enquanto levanta o indicador.",
@@ -553,37 +553,59 @@
             ]
         }
     },
-    "Sim": {
-        "categoria": "Outros",
+    "Biscoito": {
+        "categoria": "Alimentos",
         "1": {
             "video": "",
             "instrucoes": [
-                "Posicione sua mão com a palma voltada para frente.",
-                "Feche todos os dedos, como na letra S.",
-                "Gire o pulso para baixo algumas vezes."
+                "Posicione sua mão com a palma voltada para o lado.",
+                "Feche a mão deixando apenas o dedo indicador levantado.",
+                "Encoste a ponta do indicador entre suas sombrancelhas."
             ]
         }
     },
-    "Não": {
-        "categoria": "Outros",
+    "Bolacha": {
+        "categoria": "Alimentos",
         "1": {
             "video": "",
             "instrucoes": [
-                "Posicione sua mão com a palma voltada para frente.",
-                "Feche a mão deixando somente o dedo indicador esticado.",
-                "Gire seu pulso de um lado para o outro.",
-                "Mexa também a sua cabeça, fazendo um sinal negativo."
+                "Posicione sua mão com a palma voltada para trás, inclinada em um ângulo de 90 graus.",
+                "Feche os demais dedos, mantendo apenas o polegar e o indicador abertos, simulando o gesto de segurar uma bolacha.",
+                "Leve a mão até a boca, como se estivesse prestes a comer a bolacha, e abra levemente a boca.",
+                "Finalize o movimento fechando a boca, como se estivesse mordendo a bolacha."
             ]
         }
     },
-    "Por favor": {
+    "Muro": {
         "categoria": "Outros",
         "1": {
             "video": "",
             "instrucoes": [
-                "Posicione ambas mãos com a palma voltada para trás.",
-                "Com todos os dedos esticados, enconste a ponta dos dedos médios.",
-                "Mantendo a posição da mão, movimente ela em direção a seu corpo."
+                "Posicione ambas mãos com as palmas voltadas para frente.",
+                "Mantenha as mãos paralelas, próximas ao centro do corpo, com todos os dedos esticados, exceto os polegares.",
+                "Desloque simultaneamente a mão esquerda para a esquerda e a direita para a direita, como se estivesse desenhando a extensão de um muro."
+            ]
+        }
+    },
+    "Porta": {
+        "categoria": "Outros",
+        "1": {
+            "video": "",
+            "instrucoes": [
+                "Posicione ambas as mãos com as palmas voltadas para frente, lado a lado, como se fossem duas portas.",
+                "Mantenha todos os dedos esticados para cima, com os polegares recolhidos dentro das palmas.",
+                "Em seguida, mova a mão esquerda para a esquerda, girando a palma para trás, como se estivesse abrindo uma das portas. A mão direita permanece parada, com a palma voltada para frente."
+            ]
+        }
+    },
+    "Bravo": {
+        "categoria": "Outros",
+        "1": {
+            "video": "",
+            "instrucoes": [
+                "Posicione a mão com a palma voltada para trás, inclinadas em um ângulo de 90 graus.",
+                "Mantenha todos os dedos flexionados, com as mãos próximas ao corpo, na altura do peito.",
+                "Adote uma expressão facial de irritação ou raiva: sobrancelhas franzidas e boca fechada."
             ]
         }
     },
