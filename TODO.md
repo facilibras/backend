@@ -1,12 +1,12 @@
 # Sinais
-## Modelo
-- [ ] Funções de conveniência:
-    - [ ] `depois_de(Configuracao)`
-    - [ ] `configuracao_anterior(idx: int = -1)`
-    - [ ] `igual_a(Configuracao)`
-
 ## Corrigir Sinais
 - [ ] Letra K sem movimento atualmente
+
+## Validadores
+- [x] Posição
+- [ ] Rosto
+- [ ] Mão
+
 
 ## Feedback antigo
 - [ ] Polegar_dentro (BAIXO): *Falso negativo*
@@ -20,5 +20,5 @@
 - [ ] Anelar_enc_polegar: **Funcional**, porém pensar em uma forma melhor
 - [ ] Minimo_baixo (BAIXO): **Funcional**, porém precisa refatorar
 
-> [!IMPORTANT]
-> Possivelmente inverter lógica da orientação lateral para lidar com falsos positivos relacionados a profundidade
+# Pontos Fracos
+- [ ] Sinal X: Por causa dos validadores PROXIMO_AO_CORPO e DISTANTE_AO_CORPO

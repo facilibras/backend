@@ -43,9 +43,10 @@ class GeradorFrames(ABC):
 
 
 class Camera(GeradorFrames):
-    def __init__(self, index=0):
+    def __init__(self, index=0, timeout=5):
         super().__init__()
         self.index = index
+        self.timeout = timeout
 
     def open(self):
         self.cap = cv2.VideoCapture(self.index)
@@ -67,7 +68,7 @@ class Camera(GeradorFrames):
             if inicio is None:
                 inicio = time.time()
 
-            if time.time() - inicio > 5:
+            if time.time() - inicio > self.timeout:
                 break
 
             yield frame

@@ -66,7 +66,7 @@ def reconhecer_estatico(
 
             # Valida sinal
             if pontos:
-                resultado, erros = validar_sinal(sinal, pontos, 0)
+                resultado, erros = validar_mao(sinal, pontos, 0)
                 qtd_erros = len(erros)
                 if qtd_erros <= melhor:
                     melhor = qtd_erros
@@ -114,7 +114,7 @@ def reconhecer_com_transicao(
             # Extrai os pontos
             pontos = extrair_pontos_mao(imagem_rgb, modelo)
             if pontos:
-                resultado, erros = validar_sinal(sinal, pontos, conf_idx)
+                resultado, erros = validar_mao(sinal, pontos, conf_idx)
                 qtd_erros = len(erros)
                 if qtd_erros <= melhor:
                     melhor = qtd_erros
@@ -170,6 +170,20 @@ def extrair_pontos_mao(imagem_np, modelo) -> dict[int, tuple[float, float, float
     return pontos
 
 
+def extrair_pontos_corpo(imagem, modelo) -> dict[int, tuple[float, float, float]]:
+    resultado = modelo.process(imagem)
+
+    # Para o caso de não encontrar um corpo
+    if not resultado.pose_landmarks:
+        return {}
+
+    pontos = {}
+    for i, landmark in enumerate(resultado.pose_landmarks.landmark):
+        pontos[i] = (landmark.x, landmark.y, landmark.z)
+
+    return pontos
+
+
 def montar_feedback(sucesso: bool, feedbacks: list[list]) -> FeedbackSchema:
     fs = FeedbackSchema(sucesso=sucesso)
     for correto, mensagem in feedbacks:
@@ -178,19 +192,19 @@ def montar_feedback(sucesso: bool, feedbacks: list[list]) -> FeedbackSchema:
     return fs
 
 
-def validar_sinal(
-    sinal: SinalLibras, pontos: dict[int, tuple[float, float, float]], conf_idx: int
+def validar_mao(
+    sinal: SinalLibras,
+    pontos: dict[int, tuple[float, float, float]],
+    conf_idx: int,
+    mao: Mao = Mao.DIREITA,
 ) -> tuple[bool, list[str]]:
     dedos = sinal.confs[conf_idx].dedos
-    orientacao = sinal.confs[conf_idx].orientacao or Orientacao.FRENTE
-    inclinacao = sinal.confs[conf_idx].inclinacao or Inclinacao.RETA
+    orientacao = sinal.confs[conf_idx].orientacao
+    inclinacao = sinal.confs[conf_idx].inclinacao
 
     validadores = [get_validador(dedo) for dedo in dedos]
     sucesso = True
     mensagens = []
-
-    # TODO: usar a mao verdadeira
-    mao = Mao.DIREITA
 
     for validador in validadores:
         resultado = validador(pontos, orientacao, inclinacao, mao)
@@ -199,3 +213,27 @@ def validar_sinal(
             mensagens.append(resultado.mensagem)
 
     return sucesso, mensagens
+
+
+def validar_posicao(
+    sinal: SinalLibras,
+    pos_dedo: tuple[float, float, float],
+    pos_anterior: tuple[float, float, float],
+    pontos_corpo: dict[int, tuple[float, float, float]],
+    conf_idx: int,
+    mao: Mao,
+) -> tuple[bool, str]:
+    validador = get_validador(sinal.confs[conf_idx].posicao)
+    resultado = validador(pos_dedo, pos_anterior, pontos_corpo, mao)
+
+    sucesso = True
+    mensagem = "Posição correta"
+    if type(resultado) is Invalido:
+        sucesso = False
+        mensagem = resultado.mensagem
+
+    return sucesso, mensagem
+
+
+def identificar_mao(corpo, mao) -> Mao:
+    return Mao.DIREITA
