@@ -18,7 +18,10 @@ from facilibras.controladores.reconhecimento.validadores.validacao import (
 )
 
 # Inicializar os validadores
-
-import facilibras.controladores.reconhecimento.validadores.mao as _
+import facilibras.controladores.reconhecimento.validadores.dedos.polegar as _
+import facilibras.controladores.reconhecimento.validadores.dedos.indicador as _
+import facilibras.controladores.reconhecimento.validadores.dedos.medio as _
+import facilibras.controladores.reconhecimento.validadores.dedos.anelar as _
+import facilibras.controladores.reconhecimento.validadores.dedos.minimo as _
 import facilibras.controladores.reconhecimento.validadores.posicao as _
 import facilibras.controladores.reconhecimento.validadores.expressao as _
