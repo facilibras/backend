@@ -7,7 +7,7 @@ from facilibras.controladores.reconhecimento.validadores import (
 from facilibras.controladores.reconhecimento.validadores.utils import (
     distancia,
 )
-from facilibras.modelos.mao import Dedo, Inclinacao, Orientacao
+from facilibras.modelos.mao import Dedo, Inclinacao, Mao, Orientacao
 
 T_Dedos = dict[int, tuple[float, float, float]]
 
@@ -18,7 +18,7 @@ exc = NotImplementedError(mensagem)
 
 @registrar_validador(Dedo.POLEGAR_CIMA)
 def validar_dedo_polegar_cima(
-    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao
+    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, mao: Mao
 ) -> Resultado:
     if not (
         (orientacao == Orientacao.FRENTE and inclinacao == Inclinacao.RETA)
@@ -47,7 +47,7 @@ def validar_dedo_polegar_cima(
 
 @registrar_validador(Dedo.POLEGAR_CURVADO)
 def validar_dedo_polegar_curvado(
-    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao
+    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, mao: Mao
 ) -> Resultado:
     if orientacao not in (Orientacao.FRENTE, Orientacao.LATERAL):
         raise exc
@@ -84,7 +84,7 @@ def validar_dedo_polegar_curvado(
 
 @registrar_validador(Dedo.POLEGAR_DENTRO)
 def validar_dedo_polegar_dentro(
-    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao
+    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, mao: Mao
 ) -> Resultado:
     if orientacao in (Orientacao.FRENTE, Orientacao.BAIXO):
         if inclinacao != Inclinacao.RETA:
@@ -143,7 +143,7 @@ def validar_dedo_polegar_dentro(
 
 @registrar_validador(Dedo.POLEGAR_FORA)
 def validar_dedo_polegar_fora(
-    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao
+    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, mao: Mao
 ) -> Resultado:
     if orientacao not in (Orientacao.FRENTE, Orientacao.BAIXO):
         raise exc

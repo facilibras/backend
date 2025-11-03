@@ -7,7 +7,7 @@ from facilibras.controladores.reconhecimento.validadores import (
 from facilibras.controladores.reconhecimento.validadores.utils import (
     distancia,
 )
-from facilibras.modelos.mao import Dedo, Inclinacao, Orientacao
+from facilibras.modelos.mao import Dedo, Inclinacao, Mao, Orientacao
 
 T_Dedos = dict[int, tuple[float, float, float]]
 
@@ -18,7 +18,7 @@ exc = NotImplementedError(mensagem)
 
 @registrar_validador(Dedo.MEDIO_BAIXO)
 def validar_dedo_medio_baixo(
-    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao
+    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, mao: Mao
 ) -> Resultado:
     if orientacao not in (
         Orientacao.FRENTE,
@@ -57,7 +57,7 @@ def validar_dedo_medio_baixo(
 
 @registrar_validador(Dedo.MEDIO_CIMA)
 def validar_dedo_medio_cima(
-    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao
+    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, mao: Mao
 ) -> Resultado:
     if orientacao not in (Orientacao.FRENTE, Orientacao.TRAS, Orientacao.LATERAL):
         raise exc
@@ -86,7 +86,7 @@ def validar_dedo_medio_cima(
 
 @registrar_validador(Dedo.MEDIO_CURVADO)
 def validar_dedo_medio_curvado(
-    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao
+    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, mao: Mao
 ) -> Resultado:
     if orientacao not in (Orientacao.FRENTE, Orientacao.LATERAL):
         raise exc
@@ -115,7 +115,7 @@ def validar_dedo_medio_curvado(
 
 @registrar_validador(Dedo.MEDIO_DIST_ANELAR)
 def validar_dedo_medio_dist_anelar(
-    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao
+    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, mao: Mao
 ) -> Resultado:
     if orientacao != Orientacao.FRENTE:
         raise exc
@@ -131,7 +131,7 @@ def validar_dedo_medio_dist_anelar(
 
 @registrar_validador(Dedo.MEDIO_ENC_POLEGAR)
 def validar_dedo_medio_enc_polegar(
-    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao
+    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, mao: Mao
 ) -> Resultado:
     if orientacao != Orientacao.LATERAL or inclinacao != Inclinacao.RETA:
         raise exc
@@ -151,7 +151,7 @@ def validar_dedo_medio_enc_polegar(
 
 @registrar_validador(Dedo.MEDIO_FLEXIONADO)
 def validar_dedo_medio_flexionado(
-    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao
+    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, mao: Mao
 ) -> Resultado:
     if orientacao != Orientacao.FRENTE:
         raise exc
@@ -171,7 +171,7 @@ def validar_dedo_medio_flexionado(
 
 @registrar_validador(Dedo.MEDIO_FRENTE_45)
 def validar_dedo_medio_frente_45(
-    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao
+    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, mao: Mao
 ) -> Resultado:
     if orientacao != Orientacao.FRENTE:
         raise exc

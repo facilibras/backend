@@ -4,7 +4,7 @@ from facilibras.controladores.reconhecimento.validadores import (
     Valido,
     registrar_validador,
 )
-from facilibras.modelos.mao import Dedo, Inclinacao, Orientacao
+from facilibras.modelos.mao import Dedo, Inclinacao, Mao, Orientacao
 
 T_Dedos = dict[int, tuple[float, float, float]]
 
@@ -15,7 +15,7 @@ exc = NotImplementedError(mensagem)
 
 @registrar_validador(Dedo.MINIMO_BAIXO)
 def validar_dedo_minimo_baixo(
-    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao
+    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, mao: Mao
 ) -> Resultado:
     if orientacao not in (
         Orientacao.FRENTE,
@@ -52,7 +52,7 @@ def validar_dedo_minimo_baixo(
 
 @registrar_validador(Dedo.MINIMO_CIMA)
 def validar_dedo_minimo_cima(
-    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao
+    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, mao: Mao
 ) -> Resultado:
     if orientacao not in (Orientacao.FRENTE, Orientacao.TRAS, Orientacao.BAIXO):
         raise exc
@@ -77,7 +77,7 @@ def validar_dedo_minimo_cima(
 
 @registrar_validador(Dedo.MINIMO_CURVADO)
 def validar_dedo_minimo_curvado(
-    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao
+    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, mao: Mao
 ) -> Resultado:
     if orientacao not in (Orientacao.FRENTE, Orientacao.LATERAL):
         raise exc
@@ -97,7 +97,7 @@ def validar_dedo_minimo_curvado(
 
 @registrar_validador(Dedo.MINIMO_FLEXIONADO)
 def validar_dedo_minimo_flexionado(
-    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao
+    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, mao: Mao
 ) -> Resultado:
     if orientacao != Orientacao.FRENTE or inclinacao != Inclinacao.RETA:
         raise exc

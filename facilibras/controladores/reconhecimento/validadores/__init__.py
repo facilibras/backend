@@ -11,6 +11,9 @@ from facilibras.controladores.reconhecimento.validadores.validacao import (
     Invalido as Invalido,
 )
 from facilibras.controladores.reconhecimento.validadores.validacao import (
+    Regiao as Regiao,
+)
+from facilibras.controladores.reconhecimento.validadores.validacao import (
     Resultado as Resultado,
 )
 from facilibras.controladores.reconhecimento.validadores.validacao import (

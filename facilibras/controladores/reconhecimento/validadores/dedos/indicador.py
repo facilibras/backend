@@ -6,9 +6,9 @@ from facilibras.controladores.reconhecimento.validadores import (
 )
 from facilibras.controladores.reconhecimento.validadores.utils import (
     distancia,
-    distancia_euclidiana,
+    distancia3,
 )
-from facilibras.modelos.mao import Dedo, Inclinacao, Orientacao
+from facilibras.modelos.mao import Dedo, Inclinacao, Mao, Orientacao
 
 T_Dedos = dict[int, tuple[float, float, float]]
 
@@ -19,7 +19,7 @@ exc = NotImplementedError(mensagem)
 
 @registrar_validador(Dedo.INDICADOR_BAIXO)
 def validar_dedo_indicador_baixo(
-    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao
+    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, mao: Mao
 ) -> Resultado:
     if orientacao not in (Orientacao.FRENTE, Orientacao.BAIXO, Orientacao.TRAS):
         raise exc
@@ -48,7 +48,7 @@ def validar_dedo_indicador_baixo(
 
 @registrar_validador(Dedo.INDICADOR_CIMA)
 def validar_dedo_indicador_cima(
-    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao
+    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, mao: Mao
 ) -> Resultado:
     if orientacao not in (Orientacao.FRENTE, Orientacao.TRAS, Orientacao.LATERAL):
         raise exc
@@ -72,7 +72,7 @@ def validar_dedo_indicador_cima(
 
 @registrar_validador(Dedo.INDICADOR_CURVADO)
 def validar_dedo_indicador_curvado(
-    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao
+    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, mao: Mao
 ) -> Resultado:
     if orientacao not in (Orientacao.FRENTE, Orientacao.LATERAL):
         raise exc
@@ -101,7 +101,7 @@ def validar_dedo_indicador_curvado(
 
 @registrar_validador(Dedo.INDICADOR_DIST_MEDIO)
 def validar_dedo_indicador_dist_medio(
-    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao
+    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, mao: Mao
 ) -> Resultado:
     if orientacao != Orientacao.FRENTE or inclinacao != Inclinacao.RETA:
         raise exc
@@ -117,7 +117,7 @@ def validar_dedo_indicador_dist_medio(
 
 @registrar_validador(Dedo.INDICADOR_ENC_MEDIO)
 def validar_dedo_indicador_enc_medio(
-    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao
+    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, mao: Mao
 ) -> Resultado:
     if orientacao != Orientacao.FRENTE or inclinacao != Inclinacao.RETA:
         raise exc
@@ -133,14 +133,14 @@ def validar_dedo_indicador_enc_medio(
 
 @registrar_validador(Dedo.INDICADOR_ENC_POLEGAR)
 def validar_dedo_indicador_enc_polegar(
-    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao
+    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, mao: Mao
 ) -> Resultado:
     if orientacao != Orientacao.LATERAL or inclinacao != Inclinacao.RETA:
         raise exc
 
     # Checa se os dedos estão distantes
-    dist_maxima = distancia_euclidiana(dedos[8], dedos[7])
-    dist_entre_pontas = distancia_euclidiana(dedos[8], dedos[4])
+    dist_maxima = distancia3(dedos[8], dedos[7])
+    dist_entre_pontas = distancia3(dedos[8], dedos[4])
     if dist_entre_pontas > dist_maxima:
         return Invalido("Indicador")
 
@@ -149,7 +149,7 @@ def validar_dedo_indicador_enc_polegar(
 
 @registrar_validador(Dedo.INDICADOR_FLEXIONADO)
 def validar_dedo_indicador_flexionado(
-    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao
+    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, mao: Mao
 ) -> Resultado:
     if orientacao not in (Orientacao.FRENTE, Orientacao.BAIXO):
         raise exc
@@ -175,7 +175,7 @@ def validar_dedo_indicador_flexionado(
 
 @registrar_validador(Dedo.INDICADOR_FRENTE_45)
 def validar_dedo_indicador_frente_45(
-    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao
+    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, mao: Mao
 ) -> Resultado:
     if orientacao != Orientacao.LATERAL:
         raise exc
@@ -197,7 +197,7 @@ def validar_dedo_indicador_frente_45(
 
 @registrar_validador(Dedo.INDICADOR_FRENTE_90)
 def validar_dedo_indicador_frente_90(
-    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao
+    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, mao: Mao
 ) -> Resultado:
     if orientacao != Orientacao.FRENTE:
         raise exc
@@ -215,7 +215,7 @@ def validar_dedo_indicador_frente_90(
 
 @registrar_validador(Dedo.INDICADOR_MEDIO_CRUZADO)
 def validar_dedo_indicador_medio_cruzado(
-    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao
+    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, mao: Mao
 ) -> Resultado:
     if orientacao != Orientacao.FRENTE:
         raise exc

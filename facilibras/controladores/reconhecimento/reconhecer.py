@@ -13,6 +13,7 @@ from facilibras.controladores.reconhecimento.validadores import (
     Invalido,
     get_validador,
 )
+from facilibras.modelos.mao import Mao
 from facilibras.modelos.sinais import SinalLibras
 from facilibras.modelos.sinais.base import Inclinacao, Orientacao, Tipo
 from facilibras.schemas import Feedback, FeedbackSchema
@@ -188,8 +189,11 @@ def validar_sinal(
     sucesso = True
     mensagens = []
 
+    # TODO: usar a mao verdadeira
+    mao = Mao.DIREITA
+
     for validador in validadores:
-        resultado = validador(pontos, orientacao, inclinacao)
+        resultado = validador(pontos, orientacao, inclinacao, mao)
         if type(resultado) is Invalido:
             sucesso = False
             mensagens.append(resultado.mensagem)
