@@ -315,22 +315,19 @@ LetraW = (
     .orientacao_palma(Orientacao.FRENTE)
 )
 
-_mao_x = [
-    Dedo.POLEGAR_DENTRO,
-    Dedo.INDICADOR_FLEXIONADO,
-    Dedo.MEDIO_BAIXO,
-    Dedo.ANELAR_BAIXO,
-    Dedo.MINIMO_BAIXO,
-]
 LetraX = (
     SinalLibras(Categoria.ALFABETO, "letra_x")
-    .mao(*_mao_x)
+    .mao(
+        Dedo.POLEGAR_DENTRO,
+        Dedo.INDICADOR_FLEXIONADO,
+        Dedo.MEDIO_BAIXO,
+        Dedo.ANELAR_BAIXO,
+        Dedo.MINIMO_BAIXO,
+    )
     .orientacao_palma(Orientacao.BAIXO)
     .posicao_mao(Posicao.DISTANTE_AO_CORPO, ponto_ref=0)
     .depois()
-    .mao(*_mao_x)
-    .orientacao_palma(Orientacao.BAIXO)
-    .posicao_mao(Posicao.PROXIMO_AO_CORPO, ponto_ref=0)
+    .configuracao_anterior(exceto_posicao=Posicao.PROXIMO_AO_CORPO)
 )
 
 LetraY = (
@@ -354,28 +351,21 @@ LetraY = (
     .orientacao_palma(Orientacao.FRENTE)
 )
 
-_mao_z = [
-    Dedo.POLEGAR_DENTRO,
-    Dedo.INDICADOR_CIMA,
-    Dedo.MEDIO_BAIXO,
-    Dedo.ANELAR_BAIXO,
-    Dedo.MINIMO_BAIXO,
-]
 LetraZ = (
     SinalLibras(Categoria.ALFABETO, "letra_z")
-    .mao(*_mao_z)
+    .mao(
+        Dedo.POLEGAR_DENTRO,
+        Dedo.INDICADOR_CIMA,
+        Dedo.MEDIO_BAIXO,
+        Dedo.ANELAR_BAIXO,
+        Dedo.MINIMO_BAIXO,
+    )
     .orientacao_palma(Orientacao.FRENTE)
     .posicao_mao(Posicao.LADO_ESQUERDO_CIMA, ponto_ref=12)
     .depois()
-    .mao(*_mao_z)
-    .orientacao_palma(Orientacao.FRENTE)
-    .posicao_mao(Posicao.LADO_DIREITA_CIMA, ponto_ref=12)
+    .configuracao_anterior(exceto_posicao=Posicao.LADO_DIREITA_CIMA)
     .depois()
-    .mao(*_mao_z)
-    .orientacao_palma(Orientacao.FRENTE)
-    .posicao_mao(Posicao.LADO_ESQUERDO_BAIXO, ponto_ref=12)
+    .configuracao_anterior(exceto_posicao=Posicao.LADO_ESQUERDO_BAIXO)
     .depois()
-    .mao(*_mao_z)
-    .orientacao_palma(Orientacao.FRENTE)
-    .posicao_mao(Posicao.LADO_DIREITA_BAIXO, ponto_ref=12)
+    .configuracao_anterior(exceto_posicao=Posicao.LADO_DIREITA_BAIXO)
 )

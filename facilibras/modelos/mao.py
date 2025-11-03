@@ -103,25 +103,6 @@ class Inclinacao(Componente):
     DENTRO_180 = auto()
 
 
-class Movimento(Componente):
-    """
-    Representa os diferentes movimentos direcionais da mão.
-    """
-
-    ESQUERDA = auto()
-    DIREITA = auto()
-    CIMA = auto()
-    BAIXO = auto()
-
-    FRENTE = auto()
-    TRAS = auto()
-
-    CIMA_DIREITA = auto()
-    CIMA_ESQUERDA = auto()
-    BAIXO_DIREITA = auto()
-    BAIXO_ESQUERDA = auto()
-
-
 class Posicao(Componente):
     """
     Representa a posição da mão em relação ao uma parte do corpo
@@ -172,7 +153,7 @@ class Configuracao:
         if self.inclinacao:
             todos.append(self.inclinacao)
         if self.posicao:
-            todos.append(self.posicao)
+            todos.append(f"{self.posicao} ({self.ponto_ref})")
         if self.expressao:
             todos.append(self.expressao)
 
