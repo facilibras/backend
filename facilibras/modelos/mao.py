@@ -130,7 +130,6 @@ class Posicao(Componente):
 class Expressao(Componente):
     BOCA_ABERTA = auto()
     BOCA_FECHADA = auto()
-    BRAVO = auto()
     QUALQUER = auto()
 
 
