@@ -16,7 +16,7 @@ LetraA = (
 LetraB = (
     SinalLibras(Categoria.ALFABETO, "letra_b")
     .mao(
-        Dedo.POLEGAR_DENTRO,
+        Dedo.POLEGAR_DENTRO_PALMA,
         Dedo.INDICADOR_ESTICADO,
         Dedo.MEDIO_ESTICADO,
         Dedo.ANELAR_ESTICADO,
@@ -74,7 +74,7 @@ LetraD = (
 LetraE = (
     SinalLibras(Categoria.ALFABETO, "letra_e")
     .mao(
-        Dedo.POLEGAR_DENTRO,
+        Dedo.POLEGAR_DENTRO_PALMA,
         Dedo.INDICADOR_FLEXIONADO,
         Dedo.MEDIO_FLEXIONADO,
         Dedo.ANELAR_FLEXIONADO,
@@ -110,7 +110,7 @@ LetraG = (
 LetraH = (
     SinalLibras(Categoria.ALFABETO, "letra_h")
     .mao(
-        Dedo.POLEGAR_DENTRO,
+        Dedo.POLEGAR_DENTRO_PALMA,
         Dedo.INDICADOR_ESTICADO,
         Dedo.MEDIO_ESTICADO,
         Dedo.ANELAR_DENTRO_PALMA,
@@ -120,7 +120,7 @@ LetraH = (
     .descricao("Configuração inicial do sinal")
     .depois()
     .mao(
-        Dedo.POLEGAR_DENTRO,
+        Dedo.POLEGAR_DENTRO_PALMA,
         Dedo.INDICADOR_ESTICADO,
         Dedo.MEDIO_ESTICADO,
         Dedo.ANELAR_DENTRO_PALMA,
@@ -133,7 +133,7 @@ LetraH = (
 LetraI = (
     SinalLibras(Categoria.ALFABETO, "letra_i")
     .mao(
-        Dedo.POLEGAR_DENTRO,
+        Dedo.POLEGAR_DENTRO_PALMA,
         Dedo.INDICADOR_DENTRO_PALMA,
         Dedo.MEDIO_DENTRO_PALMA,
         Dedo.ANELAR_DENTRO_PALMA,
@@ -145,7 +145,7 @@ LetraI = (
 LetraJ = (
     SinalLibras(Categoria.ALFABETO, "letra_j")
     .mao(
-        Dedo.POLEGAR_DENTRO,
+        Dedo.POLEGAR_DENTRO_PALMA,
         Dedo.INDICADOR_DENTRO_PALMA,
         Dedo.MEDIO_DENTRO_PALMA,
         Dedo.ANELAR_DENTRO_PALMA,
@@ -163,7 +163,7 @@ LetraJ = (
 LetraK = (
     SinalLibras(Categoria.ALFABETO, "letra_k")
     .mao(
-        Dedo.POLEGAR_DENTRO,
+        Dedo.POLEGAR_DENTRO_PALMA,
         Dedo.INDICADOR_ESTICADO,
         Dedo.MEDIO_FRENTE_45,
         Dedo.ANELAR_DENTRO_PALMA,
@@ -187,7 +187,7 @@ LetraL = (
 LetraM = (
     SinalLibras(Categoria.ALFABETO, "letra_m")
     .mao(
-        Dedo.POLEGAR_DENTRO,
+        Dedo.POLEGAR_DENTRO_PALMA,
         Dedo.INDICADOR_ESTICADO,
         Dedo.MEDIO_ESTICADO,
         Dedo.ANELAR_ESTICADO,
@@ -200,7 +200,7 @@ LetraM = (
 LetraN = (
     SinalLibras(Categoria.ALFABETO, "letra_n")
     .mao(
-        Dedo.POLEGAR_DENTRO,
+        Dedo.POLEGAR_DENTRO_PALMA,
         Dedo.INDICADOR_ESTICADO,
         Dedo.MEDIO_ESTICADO,
         Dedo.ANELAR_DENTRO_PALMA,
@@ -224,7 +224,7 @@ LetraO = (
 LetraP = (
     SinalLibras(Categoria.ALFABETO, "letra_p")
     .mao(
-        Dedo.POLEGAR_DENTRO,
+        Dedo.POLEGAR_DENTRO_PALMA,
         Dedo.INDICADOR_ESTICADO,
         Dedo.MEDIO_ESTICADO,
         Dedo.ANELAR_DENTRO_PALMA,
@@ -250,7 +250,7 @@ LetraQ = (
 LetraR = (
     SinalLibras(Categoria.ALFABETO, "letra_r")
     .mao(
-        Dedo.POLEGAR_DENTRO,
+        Dedo.POLEGAR_DENTRO_PALMA,
         Dedo.INDICADOR_MEDIO_CRUZADO,
         Dedo.ANELAR_DENTRO_PALMA,
         Dedo.MINIMO_DENTRO_PALMA,
@@ -261,7 +261,7 @@ LetraR = (
 LetraS = (
     SinalLibras(Categoria.ALFABETO, "letra_s")
     .mao(
-        Dedo.POLEGAR_DENTRO,
+        Dedo.POLEGAR_DENTRO_PALMA,
         Dedo.INDICADOR_DENTRO_PALMA,
         Dedo.MEDIO_DENTRO_PALMA,
         Dedo.ANELAR_DENTRO_PALMA,
@@ -273,7 +273,7 @@ LetraS = (
 LetraT = (
     SinalLibras(Categoria.ALFABETO, "letra_t")
     .mao(
-        Dedo.POLEGAR_DENTRO,
+        Dedo.POLEGAR_DENTRO_PALMA,
         Dedo.INDICADOR_FRENTE_90,
         Dedo.MEDIO_ESTICADO,
         Dedo.ANELAR_ESTICADO,
@@ -285,7 +285,7 @@ LetraT = (
 LetraU = (
     SinalLibras(Categoria.ALFABETO, "letra_u")
     .mao(
-        Dedo.POLEGAR_DENTRO,
+        Dedo.POLEGAR_DENTRO_PALMA,
         Dedo.INDICADOR_ENC_MEDIO,
         Dedo.ANELAR_DENTRO_PALMA,
         Dedo.MINIMO_DENTRO_PALMA,
@@ -296,7 +296,7 @@ LetraU = (
 LetraV = (
     SinalLibras(Categoria.ALFABETO, "letra_v")
     .mao(
-        Dedo.POLEGAR_DENTRO,
+        Dedo.POLEGAR_DENTRO_PALMA,
         Dedo.INDICADOR_DIST_MEDIO,
         Dedo.ANELAR_DENTRO_PALMA,
         Dedo.MINIMO_DENTRO_PALMA,
@@ -307,7 +307,7 @@ LetraV = (
 LetraW = (
     SinalLibras(Categoria.ALFABETO, "letra_w")
     .mao(
-        Dedo.POLEGAR_DENTRO,
+        Dedo.POLEGAR_DENTRO_PALMA,
         Dedo.INDICADOR_DIST_MEDIO,
         Dedo.MEDIO_DIST_ANELAR,
         Dedo.MINIMO_DENTRO_PALMA,
@@ -318,18 +318,18 @@ LetraW = (
 LetraX = (
     SinalLibras(Categoria.ALFABETO, "letra_x")
     .mao(
-        Dedo.POLEGAR_DENTRO,
+        Dedo.POLEGAR_DENTRO_PALMA,
         Dedo.INDICADOR_FLEXIONADO,
         Dedo.MEDIO_DENTRO_PALMA,
         Dedo.ANELAR_DENTRO_PALMA,
         Dedo.MINIMO_DENTRO_PALMA,
     )
     .orientacao_palma(Orientacao.BAIXO)
-    .posicao_mao(Posicao.DISTANTE_AO_CORPO, ponto_ref=0)
+    .posicao_mao(Posicao.DISTANTE_AO_CORPO, ponto_ref=6)
     .descricao("Configuração inicial do sinal")
     .depois()
     .configuracao_anterior()
-    .posicao_mao(Posicao.PROXIMO_AO_CORPO)
+    .posicao_mao(Posicao.PROXIMO_AO_CORPO, ponto_ref=6)
     .descricao("Movimento para trás")
 )
 
@@ -359,7 +359,7 @@ LetraY = (
 LetraZ = (
     SinalLibras(Categoria.ALFABETO, "letra_z")
     .mao(
-        Dedo.POLEGAR_DENTRO,
+        Dedo.POLEGAR_DENTRO_PALMA,
         Dedo.INDICADOR_ESTICADO,
         Dedo.MEDIO_DENTRO_PALMA,
         Dedo.ANELAR_DENTRO_PALMA,

@@ -16,26 +16,26 @@ app = typer.Typer(add_completion=False)
 
 LETRAS_VALIDAS = set(ascii_lowercase + "ç")
 NUMEROS_VALIDOS = {f"{i}" for i in range(10)} | {f"{i}_2" for i in range(1, 5)}
-ALIMENTOS_VALIDOS = {"biscoito", "bolacha"}
+ALIMENTOS_VALIDOS = {"água", "biscoito", "bolacha"}
 
 
 def validar_letra(letra: str):
     if letra.lower() not in LETRAS_VALIDAS:
-        exc = "A letra deve ser uma das seguintes:" + "".join(sorted(LETRAS_VALIDAS))
+        exc = "A letra deve ser uma das seguintes:" + " ".join(sorted(LETRAS_VALIDAS))
         raise typer.BadParameter(exc)
     return letra
 
 
 def validar_numero(numero: str):
     if numero not in NUMEROS_VALIDOS:
-        exc = "O número deve ser um das seguintes:" + "".join(sorted(NUMEROS_VALIDOS))
+        exc = "O número deve ser um das seguintes:" + " ".join(sorted(NUMEROS_VALIDOS))
         raise typer.BadParameter(exc)
     return numero
 
 
 def validar_alimento(alimento: str):
-    if alimento not in NUMEROS_VALIDOS:
-        exc = "O alimento deve ser um das seguintes:" + "".join(
+    if alimento not in ALIMENTOS_VALIDOS:
+        exc = "O alimento deve ser um das seguintes:" + " ".join(
             sorted(ALIMENTOS_VALIDOS)
         )
         raise typer.BadParameter(exc)
@@ -91,7 +91,7 @@ def numero(
     ),
 ) -> bool:
     typer.echo(f"Reconhecendo o número: {numero.upper()}")
-    sinal = get_sinal(f"número_{letra.lower()}")
+    sinal = get_sinal(f"número_{numero.lower()}")
     return reconhecer(sinal, video)
 
 

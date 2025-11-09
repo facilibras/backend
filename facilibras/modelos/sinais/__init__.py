@@ -8,5 +8,6 @@ from facilibras.modelos.sinais.base import get_sinal as get_sinal
 from facilibras.modelos.sinais.base import listar_sinais as listar_sinais
 
 # Importa todos os sinais cadastrados
+from facilibras.modelos.sinais import alimentos as _
 from facilibras.modelos.sinais import alfabeto as _
 from facilibras.modelos.sinais import numeros as _

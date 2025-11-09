@@ -19,7 +19,8 @@ class Tipo(Enum):
 
 class Categoria(StrEnum):
     ALFABETO = "alfabeto"
-    NUMEROS = "numeros"
+    NUMEROS = "números"
+    ALIMENTOS = "alimentos"
 
 
 class SinalLibras:
@@ -79,22 +80,27 @@ class SinalLibras:
 
     def configuracao_anterior(
         self, idx: int = -1, *, exceto_posicao: Posicao | None = None
-    ):
+    ) -> Self:
         self.conf_atual = deepcopy(self.confs[idx])
         if exceto_posicao:
             self.conf_atual.posicao = exceto_posicao
         return self
 
-    def igual_a(self, configuracao: Configuracao):
+    def igual_a(self, sinal: Self, conf_idx: int = 0) -> Self:
+        if sinal.configurando and conf_idx == 0:
+            configuracao = sinal.conf_atual
+        else:
+            configuracao = sinal.confs[conf_idx]
+
         self.conf_atual = deepcopy(configuracao)
         return self
 
     @property
-    def possui_transicao(self):
+    def possui_transicao(self) -> bool:
         return len(self.confs) > 1
 
     @property
-    def possui_expressao_facial(self):
+    def possui_expressao_facial(self) -> bool:
         return any(conf.expressao != Expressao.QUALQUER for conf in self.confs)
 
     @property
