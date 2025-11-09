@@ -1,39 +1,99 @@
+import facilibras.controladores.reconhecimento.validadores.utils as utils
 from facilibras.controladores.reconhecimento.validadores import (
+    CombinacaoImpossivelError,
     Invalido,
     Resultado,
     Valido,
     registrar_validador,
-)
-from facilibras.controladores.reconhecimento.validadores.utils import (
-    distancia,
-    distancia3,
 )
 from facilibras.modelos.mao import Dedo, Inclinacao, Mao, Orientacao
 
 T_Dedos = dict[int, tuple[float, float, float]]
 
 x, y, z = range(3)
-mensagem = "Nenhum sinal cadastrado no momento deve chegar aqui"
-exc = NotImplementedError(mensagem)
 
 
-@registrar_validador(Dedo.INDICADOR_BAIXO)
-def validar_dedo_indicador_baixo(
+@registrar_validador(Dedo.INDICADOR_CURVADO)
+def validar_dedo_indicador_curvado(
     dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, mao: Mao
 ) -> Resultado:
-    if orientacao not in (Orientacao.FRENTE, Orientacao.BAIXO, Orientacao.TRAS):
-        raise exc
+    msg = "Indicador deve estar curvadoa"
 
-    # Verifica se está para cima
-    if orientacao in (Orientacao.FRENTE, Orientacao.BAIXO):
+    def frente() -> Resultado:
         para_cima = dedos[8][y] < dedos[6][y]
         if para_cima:
-            return Invalido("Indicador")
+            return Invalido(msg)
+        return Valido()
 
-    elif orientacao == Orientacao.TRAS:
-        if inclinacao != Inclinacao.DENTRO_90:
-            raise exc
+    def frente_dentro_45() -> Resultado:
+        return frente()
 
+    def lateral() -> Resultado:
+        para_cima = dedos[8][y] < dedos[6][y]
+        if para_cima:
+            return Invalido(msg)
+
+        if mao == Mao.DIREITA:
+            para_lado = dedos[7][x] > dedos[5][x]
+        else:
+            para_lado = dedos[7][x] < dedos[5][x]
+
+        if para_lado:
+            return Invalido(msg)
+
+        return Valido()
+
+    def tras_dentro_45() -> Resultado:
+        if mao == Mao.DIREITA:
+            esticado = dedos[8][x] < dedos[6][x]
+        else:
+            esticado = dedos[8][x] > dedos[6][x]
+
+        if esticado:
+            return Invalido(msg)
+
+        return Valido()
+
+    match (orientacao, inclinacao):
+        case (Orientacao.FRENTE, Inclinacao.RETA):
+            return frente()
+        case (Orientacao.FRENTE, Inclinacao.DENTRO_45):
+            return frente_dentro_45()
+        case (Orientacao.LATERAL, Inclinacao.RETA):
+            return lateral()
+        case (Orientacao.TRAS, Inclinacao.DENTRO_45):
+            return tras_dentro_45()
+        case _:
+            raise CombinacaoImpossivelError(orientacao, inclinacao)
+
+
+@registrar_validador(Dedo.INDICADOR_DENTRO_PALMA)
+def validar_dedo_indicador_dentro_palma(
+    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, mao: Mao
+) -> Resultado:
+    msg = "Indicador deve estar dentro da palma"
+
+    def baixo() -> Resultado:
+        para_cima = dedos[8][y] < dedos[6][y]
+        if para_cima:
+            return Invalido(msg)
+        return Valido()
+
+    def cima_dentro_90() -> Resultado: ...
+
+    def frente() -> Resultado:
+        para_cima = dedos[8][y] < dedos[6][y]
+        if para_cima:
+            return Invalido(msg)
+        return Valido()
+
+    def frente_dentro_45() -> Resultado: ...
+
+    def lateral() -> Resultado: ...
+
+    def tras() -> Resultado: ...
+
+    def tras_dentro_90() -> Resultado:
         mao_direita = dedos[9][x] < dedos[0][x]
         if mao_direita:
             para_cima = dedos[8][x] < dedos[7][x]
@@ -41,192 +101,258 @@ def validar_dedo_indicador_baixo(
             para_cima = dedos[8][x] > dedos[7][x]
 
         if para_cima:
-            return Invalido("Indicador")
+            return Invalido(msg)
 
-    return Valido()
+        return Valido()
 
+    def tras_dentro_270() -> Resultado: ...
 
-@registrar_validador(Dedo.INDICADOR_CIMA)
-def validar_dedo_indicador_cima(
-    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, mao: Mao
-) -> Resultado:
-    if orientacao not in (Orientacao.FRENTE, Orientacao.TRAS, Orientacao.LATERAL):
-        raise exc
-
-    # Verifica se está para baixo
-    if orientacao in (Orientacao.FRENTE, Orientacao.LATERAL):
-        if dedos[8][y] > dedos[6][y]:
-            return Invalido("Indicador")
-
-    elif orientacao == Orientacao.TRAS:
-        if inclinacao == Inclinacao.DENTRO_180:
-            para_baixo = dedos[8][y] < dedos[6][y]
-        elif inclinacao in (Inclinacao.RETA, Inclinacao.DENTRO_45):
-            para_baixo = dedos[8][y] > dedos[6][y]
-
-        if para_baixo:
-            return Invalido("Indicador")
-
-    return Valido()
-
-
-@registrar_validador(Dedo.INDICADOR_CURVADO)
-def validar_dedo_indicador_curvado(
-    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, mao: Mao
-) -> Resultado:
-    if orientacao not in (Orientacao.FRENTE, Orientacao.LATERAL):
-        raise exc
-
-    # Verifica se está para cima
-    para_cima = dedos[8][y] < dedos[6][y]
-    if para_cima:
-        return Invalido("Indicador")
-
-    # Verifica se está curvado demais (somente lateral)
-    if orientacao == Orientacao.LATERAL:
-        if inclinacao != Inclinacao.RETA:
-            raise exc
-
-        mao_direita = dedos[5][x] < dedos[0][x]
-        if mao_direita:
-            para_baixo = dedos[7][x] > dedos[5][x]
-        else:
-            para_baixo = dedos[7][x] < dedos[5][x]
-
-        if para_baixo:
-            return Invalido("Indicador")
-
-    return Valido()
+    match (orientacao, inclinacao):
+        case (Orientacao.BAIXO, Inclinacao.RETA):
+            return baixo()
+        case (Orientacao.CIMA, Inclinacao.DENTRO_90):
+            return cima_dentro_90()
+        case (Orientacao.FRENTE, Inclinacao.RETA):
+            return frente()
+        case (Orientacao.FRENTE, Inclinacao.DENTRO_45):
+            return frente_dentro_45()
+        case (Orientacao.LATERAL, Inclinacao.RETA):
+            return lateral()
+        case (Orientacao.TRAS, Inclinacao.RETA):
+            return tras()
+        case (Orientacao.TRAS, Inclinacao.DENTRO_90):
+            return tras_dentro_90()
+        case (Orientacao.TRAS, Inclinacao.DENTRO_270):
+            return tras_dentro_270()
+        case _:
+            raise CombinacaoImpossivelError(orientacao, inclinacao)
 
 
 @registrar_validador(Dedo.INDICADOR_DIST_MEDIO)
 def validar_dedo_indicador_dist_medio(
     dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, mao: Mao
 ) -> Resultado:
-    if orientacao != Orientacao.FRENTE or inclinacao != Inclinacao.RETA:
-        raise exc
+    msg = "Indicador deve estar distante do dedo médio"
 
-    # Checa se os dedos estão próximos
-    dist_entre_pontas = distancia(dedos[8][x], dedos[12][x])
-    dist_entre_origens = distancia(dedos[5][x], dedos[9][x])
-    if dist_entre_pontas < dist_entre_origens:
-        return Invalido("Indicador")
+    def frente() -> Resultado:
+        dist_entre_pontas = utils.distancia(dedos[8][x], dedos[12][x])
+        dist_entre_origens = utils.distancia(dedos[5][x], dedos[9][x])
+        if dist_entre_pontas < dist_entre_origens:
+            return Invalido(msg)
 
-    return Valido()
+        return Valido()
+
+    match (orientacao, inclinacao):
+        case (Orientacao.FRENTE, Inclinacao.RETA):
+            return frente()
+        case _:
+            raise CombinacaoImpossivelError(orientacao, inclinacao)
 
 
 @registrar_validador(Dedo.INDICADOR_ENC_MEDIO)
 def validar_dedo_indicador_enc_medio(
     dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, mao: Mao
 ) -> Resultado:
-    if orientacao != Orientacao.FRENTE or inclinacao != Inclinacao.RETA:
-        raise exc
+    msg = "Indicador deve estar encostado no dedo médio"
 
-    # Checa se os dedos estão distantes
-    dist_entre_pontas = distancia(dedos[8][x], dedos[12][x])
-    dist_entre_origens = distancia(dedos[5][x], dedos[9][x])
-    if dist_entre_pontas > dist_entre_origens:
-        return Invalido("Indicador")
+    def frente() -> Resultado:
+        dist_entre_pontas = utils.distancia(dedos[8][x], dedos[12][x])
+        dist_entre_origens = utils.distancia(dedos[5][x], dedos[9][x])
+        if dist_entre_pontas > dist_entre_origens:
+            return Invalido(msg)
 
-    return Valido()
+        return Valido()
+
+    match (orientacao, inclinacao):
+        case (Orientacao.FRENTE, Inclinacao.RETA):
+            return frente()
+        case _:
+            raise CombinacaoImpossivelError(orientacao, inclinacao)
 
 
 @registrar_validador(Dedo.INDICADOR_ENC_POLEGAR)
 def validar_dedo_indicador_enc_polegar(
     dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, mao: Mao
 ) -> Resultado:
-    if orientacao != Orientacao.LATERAL or inclinacao != Inclinacao.RETA:
-        raise exc
+    msg = "Indicador deve estar encostado no dedo médio"
 
-    # Checa se os dedos estão distantes
-    dist_maxima = distancia3(dedos[8], dedos[7])
-    dist_entre_pontas = distancia3(dedos[8], dedos[4])
-    if dist_entre_pontas > dist_maxima:
-        return Invalido("Indicador")
+    def lateral() -> Resultado:
+        dist_maxima = utils.distancia3(dedos[8], dedos[7])
+        dist_entre_pontas = utils.distancia3(dedos[8], dedos[4])
+        if dist_entre_pontas > dist_maxima:
+            return Invalido(msg)
 
-    return Valido()
+        return Valido()
+
+    match (orientacao, inclinacao):
+        case (Orientacao.LATERAL, Inclinacao.RETA):
+            return lateral()
+        case _:
+            raise CombinacaoImpossivelError(orientacao, inclinacao)
+
+
+@registrar_validador(Dedo.INDICADOR_ESTICADO)
+def validar_dedo_indicador_esticado(
+    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, mao: Mao
+) -> Resultado:
+    msg = "Indicador deve estar esticado"
+
+    def frente() -> Resultado:
+        if dedos[8][y] > dedos[6][y]:
+            return Invalido(msg)
+        return Valido()
+
+    def frente_dentro_45() -> Resultado:
+        return frente()
+
+    def lateral() -> Resultado:
+        return frente()
+
+    def lateral_fora_90() -> Resultado: ...
+
+    def tras() -> Resultado:
+        return frente()
+
+    def tras_dentro_45() -> Resultado:
+        return frente()
+
+    def tras_dentro_90() -> Resultado:
+        if mao == Mao.DIREITA:
+            dentro = dedos[8][x] > dedos[6][x]
+        else:
+            dentro = dedos[8][x] < dedos[6][x]
+
+        if dentro:
+            return Invalido(msg)
+        return Valido()
+
+    def tras_dentro_180() -> Resultado:
+        if dedos[8][y] < dedos[6][y]:
+            return Invalido(msg)
+        return Valido()
+
+    match (orientacao, inclinacao):
+        case (Orientacao.FRENTE, Inclinacao.RETA):
+            return frente()
+        case (Orientacao.FRENTE, Inclinacao.DENTRO_45):
+            return frente_dentro_45()
+        case (Orientacao.LATERAL, Inclinacao.RETA):
+            return lateral()
+        case (Orientacao.LATERAL, Inclinacao.FORA_90):
+            return lateral_fora_90()
+        case (Orientacao.TRAS, Inclinacao.RETA):
+            return tras()
+        case (Orientacao.TRAS, Inclinacao.DENTRO_45):
+            return tras_dentro_45()
+        case (Orientacao.TRAS, Inclinacao.DENTRO_90):
+            return tras_dentro_90()
+        case (Orientacao.TRAS, Inclinacao.DENTRO_180):
+            return tras_dentro_180()
+        case _:
+            raise CombinacaoImpossivelError(orientacao, inclinacao)
 
 
 @registrar_validador(Dedo.INDICADOR_FLEXIONADO)
 def validar_dedo_indicador_flexionado(
     dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, mao: Mao
 ) -> Resultado:
-    if orientacao not in (Orientacao.FRENTE, Orientacao.BAIXO):
-        raise exc
+    msg = "Indicador deve estar flexionado"
 
-    if orientacao == Orientacao.FRENTE:
-        # Verifica se está dobrado
-        dobrado = dedos[8][y] > dedos[5][y]
-        if dobrado:
-            return Invalido("Indicador")
-
-        # Verifica se está para cima
-        para_cima = dedos[8][y] < dedos[6][y]
-        if para_cima:
-            return Invalido("Indicador")
-
-    elif orientacao == Orientacao.BAIXO:
+    def baixo() -> Resultado:
         flexionado = dedos[8][y] > dedos[5][y]
         if not flexionado:
-            return Invalido("Indicador")
+            return Invalido(msg)
+        return Valido()
 
-    return Valido()
+    def frente() -> Resultado:
+        dobrado = dedos[8][y] > dedos[5][y]
+        if dobrado:
+            return Invalido(msg)
 
+        para_cima = dedos[8][y] < dedos[6][y]
+        if para_cima:
+            return Invalido(msg)
+        return Valido()
 
-@registrar_validador(Dedo.INDICADOR_FRENTE_45)
-def validar_dedo_indicador_frente_45(
-    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, mao: Mao
-) -> Resultado:
-    if orientacao != Orientacao.LATERAL:
-        raise exc
+    def lateral() -> Resultado:
+        return frente()
 
-    # Verifica se está para baixo
-    para_baixo = dedos[8][y] < dedos[5][y]
-    if para_baixo:
-        return Invalido("Indicador")
+    def tras_dentro_90() -> Resultado: ...
 
-    # Verifica angulo insuficiente
-    dist_ponta = distancia(dedos[8][x], dedos[7][x])
-    dist_origem = distancia(dedos[7][x], dedos[5][x])
-
-    if dist_origem < dist_ponta:
-        return Invalido("Indicador")
-
-    return Valido()
+    match (orientacao, inclinacao):
+        case (Orientacao.BAIXO, Inclinacao.RETA):
+            return baixo()
+        case (Orientacao.FRENTE, Inclinacao.RETA):
+            return frente()
+        case (Orientacao.LATERAL, Inclinacao.RETA):
+            return lateral()
+        case (Orientacao.TRAS, Inclinacao.DENTRO_90):
+            return tras_dentro_90()
+        case _:
+            raise CombinacaoImpossivelError(orientacao, inclinacao)
 
 
 @registrar_validador(Dedo.INDICADOR_FRENTE_90)
 def validar_dedo_indicador_frente_90(
     dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, mao: Mao
 ) -> Resultado:
-    if orientacao != Orientacao.FRENTE:
-        raise exc
+    msg = "Indicador deve estar para a frente"
 
-    # TODO: Utilizar profundidade
-    # Compara distância entre dedo e articulação polegar
-    dist_dedo = distancia(dedos[8][y], dedos[5][y])
-    dist_mao = distancia(dedos[5][y], dedos[2][y])
+    def frente() -> Resultado:
+        dist_dedo = utils.distancia(dedos[8][y], dedos[5][y])
+        dist_mao = utils.distancia(dedos[5][y], dedos[2][y])
 
-    if dist_dedo > dist_mao:
-        return Invalido("Indicador")
+        if dist_dedo > dist_mao:
+            return Invalido(msg)
 
-    return Valido()
+        return Valido()
+
+    def lateral() -> Resultado:
+        dobrado = dedos[8][y] > dedos[6][y]
+        if dobrado:
+            return Invalido(msg)
+
+        if mao == Mao.DIREITA:
+            reto = dedos[8][x] > dedos[2][x]
+        else:
+            reto = dedos[8][x] < dedos[2][x]
+
+        if reto:
+            return Invalido(msg)
+        return Valido()
+
+    def tras_dentro_90() -> Resultado: ...
+
+    match (orientacao, inclinacao):
+        case (Orientacao.FRENTE, Inclinacao.RETA):
+            return frente()
+        case (Orientacao.LATERAL, Inclinacao.RETA):
+            return lateral()
+        case (Orientacao.TRAS, Inclinacao.DENTRO_90):
+            return tras_dentro_90()
+        case _:
+            raise CombinacaoImpossivelError(orientacao, inclinacao)
 
 
 @registrar_validador(Dedo.INDICADOR_MEDIO_CRUZADO)
 def validar_dedo_indicador_medio_cruzado(
     dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, mao: Mao
 ) -> Resultado:
-    if orientacao != Orientacao.FRENTE:
-        raise exc
+    msg = "Indicador e médio devem estar cruzados"
 
-    mao_direita = dedos[2] < dedos[17]
-    if mao_direita:
-        distantes = dedos[8][x] < dedos[12][x]
-    else:
-        distantes = dedos[8][x] > dedos[12][x]
+    def frente() -> Resultado:
+        if mao == Mao.DIREITA:
+            distantes = dedos[8][x] < dedos[12][x]
+        else:
+            distantes = dedos[8][x] > dedos[12][x]
 
-    if distantes:
-        return Invalido("Indicador")
+        if distantes:
+            return Invalido(msg)
 
-    return Valido()
+        return Valido()
+
+    match (orientacao, inclinacao):
+        case (Orientacao.FRENTE, Inclinacao.RETA):
+            return frente()
+        case _:
+            raise CombinacaoImpossivelError(orientacao, inclinacao)

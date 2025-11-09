@@ -19,8 +19,7 @@ from facilibras.controladores.reconhecimento.validadores import (
     get_validador,
 )
 from facilibras.modelos.mao import Mao
-from facilibras.modelos.sinais import SinalLibras
-from facilibras.modelos.sinais.base import Inclinacao, Orientacao, Tipo
+from facilibras.modelos.sinais import SinalLibras, Tipo
 from facilibras.schemas import Feedback, FeedbackSchema
 
 TEMPO_TOTAL = 5
@@ -52,7 +51,7 @@ def reconhecer_estatico(
     inicio = time.time()
     frame_idx = 0
     pos_anterior = (0, 0, 0)
-    resultado = False
+    resultado, res_mao, res_posicao, res_rosto = False, False, False, False
     melhor = float("inf")
     feedback = [[False, ""]]
 
@@ -78,7 +77,7 @@ def reconhecer_estatico(
             if pontos_mao and pontos_corpo:
                 # identifica mão e dedo
                 mao = identificar_mao(pontos_mao, pontos_corpo)
-                pos_dedo = pontos_corpo[sinal.confs[0].ponto_ref]
+                pos_dedo = pontos_mao[sinal.confs[0].ponto_ref]
 
                 # Valida essencial
                 res_mao, erros = validar_mao(sinal, pontos_mao, 0)
@@ -93,11 +92,9 @@ def reconhecer_estatico(
                 # Valida rosto (se necessãrio)
                 if sinal.confs[0].possui_expressao_facial:
                     pontos_rosto = extrair_pontos_rosto(imagem_rgb, mr)
-                    resultado_rosto, feedback_rosto = validar_rosto(
-                        sinal, pontos_rosto, 0
-                    )
-                    resultado = resultado and resultado_rosto
-                    if not resultado_rosto:
+                    res_rosto, feedback_rosto = validar_rosto(sinal, pontos_rosto, 0)
+                    resultado = resultado and res_rosto
+                    if not res_rosto:
                         erros.append(feedback_rosto)
 
                 # Monta o feedback
