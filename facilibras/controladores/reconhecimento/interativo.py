@@ -11,10 +11,12 @@ from facilibras.controladores.reconhecimento.mp_modelos import (
 from facilibras.controladores.reconhecimento.reconhecer import (
     extrair_pontos_corpo,
     extrair_pontos_mao,
+    extrair_pontos_rosto,
     identificar_mao,
     montar_feedback,
     validar_mao,
     validar_posicao,
+    validar_rosto,
 )
 from facilibras.modelos.sinais import SinalLibras
 from facilibras.schemas.exercicios import Feedback
@@ -25,17 +27,11 @@ def reconhecer_interativamente(sinal: SinalLibras) -> bool:
     frame_idx = 0
     reconheceu = False
     pos_anterior = (-1, -1, -1)
-    modelo_rosto_contexto = (
+    contexto_rosto = (
         modelo_rosto.FaceMesh() if sinal.possui_expressao_facial else nullcontext()
     )
 
-    with (
-        modelo_mao.Hands(
-            min_detection_confidence=0.5, min_tracking_confidence=0.5
-        ) as mm,
-        modelo_corpo.Pose() as mc,
-        modelo_rosto_contexto as _,
-    ):
+    with modelo_mao.Hands() as mm, modelo_corpo.Pose() as mc, contexto_rosto as mr:
         for frame in Camera(0, 30):
             # Pula frame
             frame_idx += 1
@@ -64,6 +60,7 @@ def reconhecer_interativamente(sinal: SinalLibras) -> bool:
                 resultado_posicao, feed_pos = validar_posicao(
                     sinal, pos_dedo, pos_anterior, pontos_corpo, 0, mao
                 )
+                pos_anterior = pos_dedo
                 if not resultado_posicao:
                     msg.feedback.append(
                         Feedback(
@@ -72,8 +69,28 @@ def reconhecer_interativamente(sinal: SinalLibras) -> bool:
                         )
                     )
 
-                # Res final
                 resultado = resultado_mao and resultado_posicao
+
+                if sinal.confs[0].possui_expressao_facial:
+                    pontos_rosto = extrair_pontos_rosto(frame, mr)
+                    if pontos_rosto:
+                        resultado_rosto, feed_rosto = validar_rosto(
+                            sinal, pontos_rosto, 0
+                        )
+                    else:
+                        resultado_rosto, feed_rosto = False, "Rosto não detectado"
+
+                    if not resultado_rosto:
+                        msg.feedback.append(
+                            Feedback(
+                                correto=resultado_rosto,
+                                mensagem=feed_rosto.replace("ç", "c").replace("ã", "a"),
+                            )
+                        )
+
+                    resultado = resultado and resultado_rosto
+
+                # Res final
                 if resultado:
                     cor = (0, 255, 0)
                     reconheceu = True

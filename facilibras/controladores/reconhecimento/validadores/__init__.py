@@ -6,6 +6,9 @@ from facilibras.controladores.reconhecimento.validadores.validacao import (
 from facilibras.controladores.reconhecimento.validadores.validacao import (
     registrar_validador as registrar_validador,
 )
+from facilibras.controladores.reconhecimento.validadores.validacao import (
+    CombinacaoImpossivelError as CombinacaoImpossivelError,
+)
 
 from facilibras.controladores.reconhecimento.validadores.validacao import (
     Invalido as Invalido,

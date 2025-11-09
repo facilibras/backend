@@ -5,6 +5,7 @@ import typer
 
 from facilibras.modelos.sinais import (
     Categoria,
+    SinalLibras,
     construir_sinal,
     get_sinal,
     listar_sinais,
@@ -14,6 +15,8 @@ app = typer.Typer(add_completion=False)
 
 
 LETRAS_VALIDAS = set(ascii_lowercase + "ç")
+NUMEROS_VALIDOS = {f"{i}" for i in range(10)} | {f"{i}_2" for i in range(1, 5)}
+ALIMENTOS_VALIDOS = {"biscoito", "bolacha"}
 
 
 def validar_letra(letra: str):
@@ -23,20 +26,28 @@ def validar_letra(letra: str):
     return letra
 
 
-@app.command()
-def letra(
-    letra: str = typer.Argument(..., callback=validar_letra),
-    video: str | None = typer.Option(
-        None, "--video", "-v", help="URL do vídeo associado à letra"
-    ),
-):
+def validar_numero(numero: str):
+    if numero not in NUMEROS_VALIDOS:
+        exc = "O número deve ser um das seguintes:" + "".join(sorted(NUMEROS_VALIDOS))
+        raise typer.BadParameter(exc)
+    return numero
+
+
+def validar_alimento(alimento: str):
+    if alimento not in NUMEROS_VALIDOS:
+        exc = "O alimento deve ser um das seguintes:" + "".join(
+            sorted(ALIMENTOS_VALIDOS)
+        )
+        raise typer.BadParameter(exc)
+    return alimento
+
+
+def reconhecer(sinal: SinalLibras, video: str | None):
     from facilibras.controladores.reconhecimento import (
         reconhecer_video,
         reconhecer_webcam,
     )
 
-    typer.echo(f"Reconhecendo a letra: {letra.upper()}")
-    sinal = get_sinal(f"letra_{letra.lower()}")
     if video:
         if not Path(video).exists():
             typer.secho("Caminho do vídeo não encontrado!", fg=typer.colors.BRIGHT_RED)
@@ -56,6 +67,44 @@ def letra(
         for f in feedback.feedback:
             cor = typer.colors.BRIGHT_GREEN if f.correto else typer.colors.BRIGHT_RED
             typer.secho(f.mensagem, fg=cor)
+
+    return feedback.sucesso
+
+
+@app.command()
+def letra(
+    letra: str = typer.Argument(..., callback=validar_letra),
+    video: str | None = typer.Option(
+        None, "--video", "-v", help="URL do vídeo associado à letra"
+    ),
+) -> bool:
+    typer.echo(f"Reconhecendo a letra: {letra.upper()}")
+    sinal = get_sinal(f"letra_{letra.lower()}")
+    return reconhecer(sinal, video)
+
+
+@app.command()
+def numero(
+    numero: str = typer.Argument(..., callback=validar_numero),
+    video: str | None = typer.Option(
+        None, "--video", "-v", help="URL do vídeo associado ao numero"
+    ),
+) -> bool:
+    typer.echo(f"Reconhecendo o número: {numero.upper()}")
+    sinal = get_sinal(f"número_{letra.lower()}")
+    return reconhecer(sinal, video)
+
+
+@app.command()
+def alimento(
+    alimento: str = typer.Argument(..., callback=validar_alimento),
+    video: str | None = typer.Option(
+        None, "--video", "-v", help="URL do vídeo associado ao alimento"
+    ),
+) -> bool:
+    typer.echo(f"Reconhecendo o alimento: {alimento.upper()}")
+    sinal = get_sinal(f"alimento_{alimento.lower()}")
+    return reconhecer(sinal, video)
 
 
 @app.command()

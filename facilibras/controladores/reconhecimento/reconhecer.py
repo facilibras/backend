@@ -1,4 +1,5 @@
 import time
+from contextlib import nullcontext
 
 import cv2
 
@@ -8,7 +9,11 @@ from facilibras.controladores.reconhecimento.frames import (
     TipoGerador,
     Video,
 )
-from facilibras.controladores.reconhecimento.mp_modelos import modelo_mao
+from facilibras.controladores.reconhecimento.mp_modelos import (
+    modelo_corpo,
+    modelo_mao,
+    modelo_rosto,
+)
 from facilibras.controladores.reconhecimento.validadores import (
     Invalido,
     get_validador,
@@ -46,13 +51,16 @@ def reconhecer_estatico(
 ) -> tuple[bool, list[list]]:
     inicio = time.time()
     frame_idx = 0
+    pos_anterior = (0, 0, 0)
     resultado = False
     melhor = float("inf")
     feedback = [[False, ""]]
 
-    with modelo_mao.Hands(
-        min_detection_confidence=0.5, min_tracking_confidence=0.5
-    ) as modelo:
+    contexto_rosto = (
+        modelo_rosto.FaceMesh() if sinal.possui_expressao_facial else nullcontext()
+    )
+
+    with modelo_mao.Hands() as mm, modelo_corpo.Pose() as mc, contexto_rosto as mr:
         for frame in gerador:
             # Pula frame
             frame_idx += 1
@@ -62,23 +70,52 @@ def reconhecer_estatico(
             # Processa frame
             frame = cv2.flip(frame, 1)
             imagem_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            pontos = extrair_pontos_mao(imagem_rgb, modelo)
 
-            # Valida sinal
-            if pontos:
-                resultado, erros = validar_mao(sinal, pontos, 0)
+            # Extrai pontos
+            pontos_mao = extrair_pontos_mao(imagem_rgb, mm)
+            pontos_corpo = extrair_pontos_corpo(imagem_rgb, mc)
+
+            if pontos_mao and pontos_corpo:
+                # identifica mão e dedo
+                mao = identificar_mao(pontos_mao, pontos_corpo)
+                pos_dedo = pontos_corpo[sinal.confs[0].ponto_ref]
+
+                # Valida essencial
+                res_mao, erros = validar_mao(sinal, pontos_mao, 0)
+                res_posicao, feedback_posicao = validar_posicao(
+                    sinal, pos_dedo, pos_anterior, pontos_corpo, 0, mao
+                )
+                resultado = res_mao and res_posicao
+                pos_anterior = pos_dedo
+                if not res_posicao:
+                    erros.append(feedback_posicao)
+
+                # Valida rosto (se necessãrio)
+                if sinal.confs[0].possui_expressao_facial:
+                    pontos_rosto = extrair_pontos_rosto(imagem_rgb, mr)
+                    resultado_rosto, feedback_rosto = validar_rosto(
+                        sinal, pontos_rosto, 0
+                    )
+                    resultado = resultado and resultado_rosto
+                    if not resultado_rosto:
+                        erros.append(feedback_rosto)
+
+                # Monta o feedback
                 qtd_erros = len(erros)
                 if qtd_erros <= melhor:
                     melhor = qtd_erros
-                    feedback[0] = [False, "/".join(erros)]
+                    feedback[0] = [False, " / ".join(erros)]
                 if resultado:
-                    feedback[0] = [True, "Configuração da mão correta"]
+                    feedback[0] = [True, "Todas etapas roconhecidas"]
 
+            # Lõgica exclusiva da webcam
             atingiu_tempo = time.time() - inicio >= tempo_limite
             if gerador.tipo == TipoGerador.CAMERA:
                 cv2.imshow("Reconhecendo...", frame)
                 if resultado or (cv2.waitKey(1) & 0xFF == ord("q")) or atingiu_tempo:
                     break
+
+            # Se deve ou não encerrar o reconhecimento
             elif resultado or atingiu_tempo:
                 break
 
@@ -184,6 +221,22 @@ def extrair_pontos_corpo(imagem, modelo) -> dict[int, tuple[float, float, float]
     return pontos
 
 
+def extrair_pontos_rosto(imagem, modelo) -> dict[int, tuple[float, float, float]]:
+    resultado = modelo.process(imagem)
+
+    # Para o caso de não encontrar nenhum rosto
+    if not resultado.multi_face_landmarks:
+        return {}
+
+    rosto = resultado.multi_face_landmarks[0]
+
+    pontos = {}
+    for i, landmark in enumerate(rosto.landmark):
+        pontos[i] = (landmark.x, landmark.y, landmark.z)
+
+    return pontos
+
+
 def montar_feedback(sucesso: bool, feedbacks: list[list]) -> FeedbackSchema:
     fs = FeedbackSchema(sucesso=sucesso)
     for correto, mensagem in feedbacks:
@@ -228,6 +281,23 @@ def validar_posicao(
 
     sucesso = True
     mensagem = "Posição correta"
+    if type(resultado) is Invalido:
+        sucesso = False
+        mensagem = resultado.mensagem
+
+    return sucesso, mensagem
+
+
+def validar_rosto(
+    sinal: SinalLibras,
+    pontos: dict[int, tuple[float, float, float]],
+    conf_idx: int,
+) -> tuple[bool, str]:
+    validador = get_validador(sinal.confs[conf_idx].expressao)
+    resultado = validador(pontos)
+
+    sucesso = True
+    mensagem = "Expressão facial correta"
     if type(resultado) is Invalido:
         sucesso = False
         mensagem = resultado.mensagem
