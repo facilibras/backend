@@ -17,6 +17,7 @@ app = typer.Typer(add_completion=False)
 LETRAS_VALIDAS = set(ascii_lowercase + "ç")
 NUMEROS_VALIDOS = {f"{i}" for i in range(10)} | {f"{i}_2" for i in range(1, 5)}
 ALIMENTOS_VALIDOS = {"água", "biscoito", "bolacha"}
+SAUDACOES_VALIDAS = {"tudo_bem"}
 
 
 def validar_letra(letra: str):
@@ -40,6 +41,15 @@ def validar_alimento(alimento: str):
         )
         raise typer.BadParameter(exc)
     return alimento
+
+
+def validar_saudacao(saud: str):
+    if saud not in SAUDACOES_VALIDAS:
+        exc = "A saudação deve ser uma das seguintes:" + " ".join(
+            sorted(SAUDACOES_VALIDAS)
+        )
+        raise typer.BadParameter(exc)
+    return saud
 
 
 def reconhecer(sinal: SinalLibras, video: str | None):
@@ -103,7 +113,19 @@ def alimento(
     ),
 ) -> bool:
     typer.echo(f"Reconhecendo o alimento: {alimento.upper()}")
-    sinal = get_sinal(f"alimento_{alimento.lower()}")
+    sinal = get_sinal(alimento.lower())
+    return reconhecer(sinal, video)
+
+
+@app.command()
+def saudacao(
+    saudacao: str = typer.Argument(..., callback=validar_saudacao),
+    video: str | None = typer.Option(
+        None, "--video", "-v", help="URL do vídeo associado a saudação"
+    ),
+) -> bool:
+    typer.echo(f"Reconhecendo a saudação: {saudacao.upper()}")
+    sinal = get_sinal(saudacao.lower())
     return reconhecer(sinal, video)
 
 

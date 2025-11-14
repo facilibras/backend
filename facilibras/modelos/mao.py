@@ -141,12 +141,17 @@ class Configuracao:
     inclinacao: Inclinacao = Inclinacao.RETA
     posicao: Posicao = Posicao.QUALQUER
     expressao: Expressao = Expressao.QUALQUER
-    descricao: str | None = None
+    descricao: str = "Configuração do sinal"
     ponto_ref: int = 0
+    mao: Mao | None = None
 
     @property
     def possui_expressao_facial(self) -> bool:
         return self.expressao != Expressao.QUALQUER
+
+    @property
+    def possui_posicao(self) -> bool:
+        return self.posicao != Posicao.QUALQUER
 
     def __repr__(self) -> str:
         todos = []

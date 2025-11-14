@@ -22,7 +22,17 @@ from facilibras.modelos.mao import Mao
 from facilibras.modelos.sinais import SinalLibras, Tipo
 from facilibras.schemas import Feedback, FeedbackSchema
 
+# constantes
 TEMPO_TOTAL = 5
+MAXIMO_ERRADO = 50
+
+# feedback
+INCORRETA = "Incorreta"
+CORRETA = "Correta"
+TAB = "   "
+F_MAO = TAB + "Configuração da mão: "
+F_POS = TAB + "Posição da mão: "
+F_EXP = TAB + "Expressão facial: "
 
 
 def reconhecer_webcam(sinal: SinalLibras) -> FeedbackSchema:
@@ -37,23 +47,30 @@ def reconhecer(sinal: SinalLibras, gerador: GeradorFrames) -> FeedbackSchema:
     sinal.preparar_reconhecimento()
 
     match sinal.tipo:
-        case Tipo.ESTATICO:
-            res, erros = reconhecer_estatico(sinal, gerador, TEMPO_TOTAL)
-        case Tipo.COM_TRANSICAO:
+        case Tipo.UMA_MAO:
             res, erros = reconhecer_com_transicao(sinal, gerador, TEMPO_TOTAL)
+        case Tipo.DUAS_MAOS:
+            pass
 
     return montar_feedback(res, erros)
 
 
-def reconhecer_estatico(
+def reconhecer_duas_maos(
+    sinal: SinalLibras, gerador: GeradorFrames, tempo_limite: int
+) -> tuple[bool, list[list]]: ...
+
+
+def reconhecer_com_transicao(
     sinal: SinalLibras, gerador: GeradorFrames, tempo_limite: int
 ) -> tuple[bool, list[list]]:
     inicio = time.time()
     frame_idx = 0
+    conf_idx = 0
     pos_anterior = (0, 0, 0)
-    resultado, res_mao, res_posicao, res_rosto = False, False, False, False
-    melhor = float("inf")
-    feedback = [[False, ""]]
+    ultimo_correto = 0
+    total_confs = len(sinal.confs)
+    melhor = [float("inf")] * total_confs
+    feedback = [[] for _ in range(total_confs)]
 
     contexto_rosto = (
         modelo_rosto.FaceMesh() if sinal.possui_expressao_facial else nullcontext()
@@ -75,89 +92,70 @@ def reconhecer_estatico(
             pontos_corpo = extrair_pontos_corpo(imagem_rgb, mc)
 
             if pontos_mao and pontos_corpo:
-                # identifica mão e dedo
+                # Identifica mão e dedo
                 mao = identificar_mao(pontos_mao, pontos_corpo)
-                pos_dedo = pontos_mao[sinal.confs[0].ponto_ref]
+                pos_dedo = pontos_mao[sinal.confs[conf_idx].ponto_ref]
 
                 # Valida essencial
-                res_mao, erros = validar_mao(sinal, pontos_mao, 0)
+                res_mao, erros = validar_mao(sinal, pontos_mao, conf_idx)
                 res_posicao, feedback_posicao = validar_posicao(
-                    sinal, pos_dedo, pos_anterior, pontos_corpo, 0, mao
+                    sinal, pos_dedo, pos_anterior, pontos_corpo, conf_idx, mao
                 )
+
                 resultado = res_mao and res_posicao
                 pos_anterior = pos_dedo
                 if not res_posicao:
                     erros.append(feedback_posicao)
 
                 # Valida rosto (se necessãrio)
-                if sinal.confs[0].possui_expressao_facial:
+                if sinal.confs[conf_idx].possui_expressao_facial:
                     pontos_rosto = extrair_pontos_rosto(imagem_rgb, mr)
-                    res_rosto, feedback_rosto = validar_rosto(sinal, pontos_rosto, 0)
+                    res_rosto, feedback_rosto = validar_rosto(
+                        sinal, pontos_rosto, conf_idx
+                    )
                     resultado = resultado and res_rosto
                     if not res_rosto:
                         erros.append(feedback_rosto)
 
-                # Monta o feedback
+                # Checa se deve atualizar feedback
                 qtd_erros = len(erros)
-                if qtd_erros <= melhor:
-                    melhor = qtd_erros
-                    feedback[0] = [False, " / ".join(erros)]
-                if resultado:
-                    feedback[0] = [True, "Todas etapas roconhecidas"]
+                if qtd_erros <= melhor[conf_idx]:
+                    melhor[conf_idx] = qtd_erros
+                    feedback[conf_idx] = []
 
-            # Lõgica exclusiva da webcam
-            atingiu_tempo = time.time() - inicio >= tempo_limite
-            if gerador.tipo == TipoGerador.CAMERA:
-                cv2.imshow("Reconhecendo...", frame)
-                if resultado or (cv2.waitKey(1) & 0xFF == ord("q")) or atingiu_tempo:
-                    break
+                    # Feedback mão
+                    if res_mao:
+                        feedback[conf_idx].append([True, F_MAO + CORRETA])
+                    else:
+                        feedback[conf_idx].append([False, F_MAO + INCORRETA])
+                        if sinal.simples:
+                            for erro in erros:
+                                feedback[conf_idx].append([False, TAB + erro])
 
-            # Se deve ou não encerrar o reconhecimento
-            elif resultado or atingiu_tempo:
-                break
+                    # Feedback posição
+                    if sinal.confs[conf_idx].possui_posicao:
+                        if res_posicao:
+                            feedback[conf_idx].append([True, F_POS + CORRETA])
+                        else:
+                            feedback[conf_idx].append([False, F_POS + INCORRETA])
 
-    cv2.destroyAllWindows()
-
-    return resultado, feedback
-
-
-def reconhecer_com_transicao(
-    sinal: SinalLibras, gerador: GeradorFrames, tempo_limite: int
-) -> tuple[bool, list[list]]:
-    inicio = time.time()
-    frame_idx = 0
-    conf_idx = 0
-    total_confs = len(sinal.confs)
-    melhor = float("inf")
-    # feedback = [[False, ""] for _ in range(total_confs)]
-    feedback = []
-
-    with modelo_mao.Hands(
-        min_detection_confidence=0.5, min_tracking_confidence=0.5
-    ) as modelo:
-        for frame in gerador:
-            # Pula frame
-            frame_idx += 1
-            if frame_idx % 3 != 0:
-                continue
-
-            # Processa frame
-            frame = cv2.flip(frame, 1)
-            imagem_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-            # Extrai os pontos
-            pontos = extrair_pontos_mao(imagem_rgb, modelo)
-            if pontos:
-                resultado, erros = validar_mao(sinal, pontos, conf_idx)
-                qtd_erros = len(erros)
-                if qtd_erros <= melhor:
-                    melhor = qtd_erros
-                    feedback = erros
+                    # Feedback expressão facial
+                    if sinal.confs[conf_idx].possui_expressao_facial:
+                        if res_rosto:
+                            feedback[conf_idx].append([True, F_EXP + CORRETA])
+                        else:
+                            feedback[conf_idx].append([False, F_EXP + INCORRETA])
 
                 # Transição ocorreu
                 if resultado:
                     conf_idx += 1
+                    ultimo_correto = frame_idx
 
+                # Não ocorreu dentro de um determinado intervalo
+                elif frame_idx - ultimo_correto > MAXIMO_ERRADO:
+                    conf_idx = 0
+
+            # Lógica exclusiva do reconhecimento por webcam
             atingiu_tempo = time.time() - inicio >= tempo_limite
             if gerador.tipo == TipoGerador.CAMERA:
                 cv2.imshow("Reconhecendo...", frame)
@@ -167,26 +165,40 @@ def reconhecer_com_transicao(
                     or atingiu_tempo
                 ):
                     break
+
+            # Se deve ou não encerrar o reconhecimento
             elif conf_idx == total_confs or atingiu_tempo:
                 break
 
     cv2.destroyAllWindows()
 
     sucesso = conf_idx == total_confs
+    feedback_final = []
+
     if sucesso:
-        return True, [
-            [True, "Configuração da mão: Correto"],
-            [True, "Movimento: Correto"],
-        ]
-    if not feedback:
-        return False, [
-            [True, "Configuração da mão: Correto"],
-            [False, "Movimento: Incorreto ou não detectado."],
-        ]
-    return False, [
-        [False, "Configuração da mão: Incorreta (" + "/".join(feedback) + ")"],
-        [False, "Movimento: Corrija a configuração da mão antes de fazer o movimento"],
-    ]
+        for idx, conf in enumerate(sinal.confs):
+            feedback_final.append([True, f"{idx+1}: " + conf.descricao])
+            feedback_final.append([True, F_MAO + CORRETA])
+
+            if conf.possui_posicao:
+                feedback_final.append([True, F_POS + CORRETA])
+
+            if conf.possui_expressao_facial:
+                feedback_final.append([True, F_EXP + CORRETA])
+
+        return True, feedback_final
+
+    for idx, feed_conf in enumerate(feedback):
+        msg = f"{idx+1}: " + sinal.confs[idx].descricao
+        print(feed_conf)
+
+        if melhor[idx] == 0:
+            feedback_final.append([True, msg])
+        else:
+            feedback_final.append([False, msg])
+            feedback_final.extend(feed_conf)
+
+    return False, feedback_final
 
 
 def extrair_pontos_mao(imagem_np, modelo) -> dict[int, tuple[float, float, float]]:

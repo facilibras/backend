@@ -122,7 +122,10 @@ def validar_dedo_polegar_dentro_palma(
         return lateral()
 
     def tras_dentro_90() -> Resultado:
-        return lateral()
+        dentro_palma = dedos[4][y] >= dedos[2][y]
+        if dentro_palma:
+            return Valido()
+        return Invalido(msg)
 
     def tras_dentro_180() -> Resultado:
         if mao == Mao.DIREITA:

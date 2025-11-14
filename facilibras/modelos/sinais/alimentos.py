@@ -2,7 +2,7 @@ from facilibras.modelos.mao import Dedo, Expressao, Inclinacao, Orientacao, Posi
 from facilibras.modelos.sinais import Categoria, SinalLibras
 
 Agua = (
-    SinalLibras(Categoria.ALIMENTOS, "alimento_água")
+    SinalLibras(Categoria.ALIMENTOS, "água")
     .mao(
         Dedo.POLEGAR_DENTRO_PALMA,
         Dedo.INDICADOR_ESTICADO,
@@ -26,7 +26,7 @@ Agua = (
 )
 
 Biscoito = (
-    SinalLibras(Categoria.ALIMENTOS, "alimento_biscoito")
+    SinalLibras(Categoria.ALIMENTOS, "biscoito")
     .mao(
         Dedo.POLEGAR_DENTRO_PALMA,
         Dedo.INDICADOR_ESTICADO,
@@ -39,7 +39,7 @@ Biscoito = (
 )
 
 Bolacha = (
-    SinalLibras(Categoria.ALIMENTOS, "alimento_bolacha")
+    SinalLibras(Categoria.ALIMENTOS, "bolacha")
     .mao(
         Dedo.POLEGAR_CURVADO,
         Dedo.INDICADOR_CURVADO,

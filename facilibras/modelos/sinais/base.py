@@ -7,20 +7,23 @@ from facilibras.modelos.mao import (
     Dedo,
     Expressao,
     Inclinacao,
+    Mao,
     Orientacao,
     Posicao,
 )
 
 
 class Tipo(Enum):
-    ESTATICO = 1
-    COM_TRANSICAO = 2
+    UMA_MAO = 1
+    DUAS_MAOS = 2
 
 
 class Categoria(StrEnum):
     ALFABETO = "alfabeto"
     NUMEROS = "números"
     ALIMENTOS = "alimentos"
+    SAUDACOES = "saudações"
+    OUTROS = "outros"
 
 
 class SinalLibras:
@@ -95,6 +98,10 @@ class SinalLibras:
         self.conf_atual = deepcopy(configuracao)
         return self
 
+    def par_config(self, idx_config: int) -> tuple[Configuracao, Configuracao]:
+        msg = "Apenas sinais de duas mãos devem chamar essa função"
+        raise TypeError(msg)
+
     @property
     def possui_transicao(self) -> bool:
         return len(self.confs) > 1
@@ -104,11 +111,18 @@ class SinalLibras:
         return any(conf.expressao != Expressao.QUALQUER for conf in self.confs)
 
     @property
-    def tipo(self) -> Tipo:
-        if len(self.confs) > 1:
-            return Tipo.COM_TRANSICAO
+    def possui_posicao(self) -> bool:
+        return any(conf.posicao != Posicao.QUALQUER for conf in self.confs)
 
-        return Tipo.ESTATICO
+    @property
+    def tipo(self) -> Tipo:
+        return Tipo.UMA_MAO
+
+    @property
+    def simples(self) -> bool:
+        return not (
+            self.possui_expressao_facial or self.possui_transicao or self.possui_posicao
+        )
 
     def __str__(self) -> str:
         s = "Configurações Necessárias p/ Reconhecer:"
@@ -119,6 +133,43 @@ class SinalLibras:
             s += f"\n{len(self.confs) + 1}: {self.conf_atual}"
 
         return s
+
+
+class SinalLibras2Maos(SinalLibras):
+    def __init__(self, categoria: Categoria | None, nome: str) -> None:
+        super().__init__(categoria, nome)
+        self.configurando_mao: Mao | None = Mao.ESQUERDA
+
+    def mao_direita(self, *dedos: Dedo) -> Self:
+        if self.configurando_mao == Mao.ESQUERDA:
+            self.depois()
+
+        self.configurando_mao = Mao.DIREITA
+        self.conf_atual.mao = Mao.DIREITA
+        return super().mao(*dedos)
+
+    def mao_esquerda(self, *dedos: Dedo) -> Self:
+        if self.configurando_mao == Mao.ESQUERDA:
+            self.depois()
+
+        self.configurando_mao = Mao.ESQUERDA
+        self.conf_atual.mao = Mao.ESQUERDA
+        return super().mao(*dedos)
+
+    def depois(self) -> Self:
+        self.configurando_mao = None
+        return super().depois()
+
+    def par_config(self, idx_config: int) -> tuple[Configuracao, Configuracao]:
+        idx = 2 * idx_config
+        if idx + 1 < len(self.confs):
+            return self.confs[idx], self.confs[idx + 1]
+        msg = f"Index: {idx_config} fora do range de pares"
+        raise ValueError(msg)
+
+    @property
+    def tipo(self) -> Tipo:
+        return Tipo.DUAS_MAOS
 
 
 _sinais: dict[str, SinalLibras] = {}
