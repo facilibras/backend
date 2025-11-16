@@ -22,6 +22,8 @@ PASTA_IMAGENS.mkdir(exist_ok=True)
 
 
 class PerfilControle:
+    """Classe contendo lógica de negócio no contexto de perfil."""
+
     def __init__(
         self, exercicio_dao: T_ExercicioDAO, usuario_dao: T_UsuarioDAO
     ) -> None:
@@ -29,6 +31,8 @@ class PerfilControle:
         self.exercicio_dao = exercicio_dao
 
     def listar_perfil(self, id_usuario: int) -> PerfilSchema:
+        """Buscar perfil de um usuário"""
+
         perfil = self.usuario_dao.buscar_perfil_usuario(id_usuario)
         if not perfil:
             exc_msg = f"Perfil não encontrado para usuário {id_usuario}"
@@ -44,6 +48,8 @@ class PerfilControle:
         dados: AtualizarPerfilSchema,
         arquivo: UploadFile | str | None,
     ) -> MensagemSchema:
+        """Atualizar informações do perfil de um usuário."""
+
         perfil = self.usuario_dao.buscar_perfil_usuario(id_usuario)
         if not perfil:
             exc_msg = f"Perfil não encontrado para usuário {id_usuario}"
@@ -59,6 +65,8 @@ class PerfilControle:
         return MensagemSchema(mensagem=msg)
 
     def foto_perfil_usuario(self, id_usuario: int):
+        """Buscar imagem do perfil do usuário."""
+
         perfil = self.usuario_dao.buscar_perfil_usuario(id_usuario)
         if not perfil:
             exc_msg = f"Perfil não encontrado para usuário {id_usuario}"
@@ -78,6 +86,8 @@ class PerfilControle:
 
 
 def salvar_imagem_perfil(arquivo: UploadFile) -> str:
+    """Salvar imagem no servidor."""
+
     if not arquivo or not arquivo.filename:
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST, detail="Nenhum arquivo enviado."
@@ -100,6 +110,8 @@ def salvar_imagem_perfil(arquivo: UploadFile) -> str:
 
 
 def converter_perfil_para_schema(perfil: Perfil, exs) -> PerfilSchema:
+    """Converter o modelo do perfil para schema."""
+
     p = ProgressoSchema(
         qtd_sinais_aprendidos=perfil.qtd_ex_completos,
         nivel=perfil.nivel,

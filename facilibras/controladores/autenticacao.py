@@ -17,12 +17,14 @@ hasher = PasswordHash.recommended()
 
 
 def usuario_autenticado(token: T_Token):
-    """Retorna o usuário autenticado através do token"""
+    """Retorna informações do usuário autenticado através do token"""
+
     return AutenticacaoControle.decodificar_token(token)
 
 
 def usuario_opcional(token: T_TokenOpcional = None):
-    """Retorna o usuário autenticado ou visitante através do token"""
+    """Retorna informações do usuário autenticado ou visitante através do token"""
+    
     if token is None:
         return None
 
@@ -30,6 +32,8 @@ def usuario_opcional(token: T_TokenOpcional = None):
 
 
 class AutenticacaoControle:
+    """Classe contendo lógica de negócio no contexto de autenticação"""
+
     def __init__(self, dao: T_UsuarioDAO) -> None:
         self.dao = dao
 
@@ -67,6 +71,8 @@ class AutenticacaoControle:
         return {"id": id_usuario, "nome": nome, "super": super}
 
     def registrar_usuario(self, dados_usuario: CriarUsuario) -> Usuario:
+        """Registrar usuário no banco de dados."""
+
         # Checa se o usuário já está cadastrado
         usuario = self.dao.buscar_por_email(dados_usuario.email)
         if usuario:
@@ -101,6 +107,8 @@ class AutenticacaoControle:
         return self.dao.criar(novo_usuario)
 
     def autenticar_usuario(self, dados_login: LoginSchema) -> Token:
+        """Autenticar credenciais do usuário retornando token de acesso"""
+
         usuario = self.dao.buscar_por_email(dados_login.email)
 
         if not usuario or not self.validar_senha(dados_login.senha, usuario.senha):
@@ -118,7 +126,11 @@ class AutenticacaoControle:
         return Token(token=self.criar_token(dados), tipo="Bearer")
 
     def gerar_hash_senha(self, senha_pura: str) -> str:
+        """Criar hash com base na senha enviada pelo usuário"""
+
         return hasher.hash(senha_pura)
 
     def validar_senha(self, senha_pura: str, senha_hash: str) -> bool:
+        """Validar se senha enviada para autenticação está válida"""
+        
         return hasher.verify(senha_pura, senha_hash)

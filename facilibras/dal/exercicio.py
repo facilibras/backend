@@ -21,15 +21,21 @@ opt = (
 
 
 class ExercicioDAO:
+    """Classe de acesso de dados no contexto de exercícios."""
+
     def __init__(self, session: T_Session) -> None:
         self.session = session
 
     def listar_todos(self) -> Sequence[Exercicio]:
+        """Listar todos os exercícios."""
+        
         stmt = select(Exercicio).options(*opt)
 
         return self.session.scalars(stmt).all()
 
     def listar_por_secao(self, secao: int) -> Sequence[Exercicio]:
+        """"Listar todos exercícios filtrado por seção."""
+        
         stmt = (
             select(Exercicio)
             .where(Exercicio.secao_id == secao, Exercicio.eh_variacao.is_(False))
@@ -40,11 +46,15 @@ class ExercicioDAO:
         return self.session.scalars(stmt).all()
 
     def listar_por_nome(self, nome: str) -> Sequence[Exercicio]:
+        """Buscar exercício pelo nome."""
+
         stmt = select(Exercicio).where(Exercicio.titulo == nome).options(*opt)
 
         return self.session.scalars(stmt).all()
 
     def listar_atividade(self, id_usuario: int) -> Sequence[RowMapping]:
+        """Buscar exercícios com progresso do usuário."""
+
         stmt = (
             select(Exercicio.titulo, ProgressoUsuario.criado_em)
             .join(ProgressoUsuario.exercicio)
@@ -59,6 +69,8 @@ class ExercicioDAO:
     def listar_status_exercicios(
         self, exercicios: Sequence[Exercicio], id_usuario: int
     ) -> dict[int, ExercicioStatus]:
+        """Buscar status do exercício acessador do usuário"""
+
         exercicio_ids = [e.id for e in exercicios]
         status = {}
 
@@ -76,6 +88,8 @@ class ExercicioDAO:
     def listar_exercicio_usuario(
         self, exercicio: Exercicio, usuario: int
     ) -> ProgressoUsuario | None:
+        """Listar exercícios acessados pelo usuário."""
+
         stmt = select(ProgressoUsuario).where(
             ProgressoUsuario.usuario_id == usuario,
             ProgressoUsuario.exercicio == exercicio,
@@ -86,6 +100,7 @@ class ExercicioDAO:
     def alterar_exercicio_usuario(
         self, progresso: ProgressoUsuario, status: ExercicioStatus
     ):
+        """Trocar status do exercício acessado pelo usuário."""
         progresso.status = status
         self.session.add(progresso)
         self.session.commit()
@@ -93,6 +108,8 @@ class ExercicioDAO:
     def criar_exercicio_usuario(
         self, exercicio: Exercicio, usuario: Usuario, status: ExercicioStatus
     ) -> ProgressoUsuario:
+        """Criar registro de vínculo do exercício com usuário."""
+
         progresso = ProgressoUsuario(
             status=status, usuario=usuario, exercicio=exercicio
         )
@@ -103,6 +120,8 @@ class ExercicioDAO:
         return progresso
 
     def tentativa_exercicio(self, exercicio: Exercicio, usuario: Usuario):
+        """Registrar tentativa de realização do exercício."""
+
         progresso_usuario = self.listar_exercicio_usuario(exercicio, usuario.id)
         if progresso_usuario:
             if progresso_usuario.status not in (
@@ -116,6 +135,8 @@ class ExercicioDAO:
             self.criar_exercicio_usuario(exercicio, usuario, ExercicioStatus.INCOMPLETO)
 
     def completar_exercicio(self, exercicio: Exercicio, usuario: Usuario):
+        """Alterar status do exercício para completo."""
+
         progresso_usuario = self.listar_exercicio_usuario(exercicio, usuario.id)
         if progresso_usuario:
             primeira_vez = str(progresso_usuario.status) != "C"

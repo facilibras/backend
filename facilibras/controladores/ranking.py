@@ -5,10 +5,14 @@ from facilibras.schemas.ranking import Periodo, RankingSchema, UsuarioRanking
 
 
 class RankingControle:
+    """Classe contendo lógica de negócio no contexto de ranking."""
+
     def __init__(self, usuario_dao: T_UsuarioDAO) -> None:
         self.usuario_dao = usuario_dao
 
     def listar_ranking(self, periodo: Periodo) -> RankingSchema:
+        """Buscar ranking baseado na pontuação global."""
+
         agora = datetime.now()  # noqa: DTZ005
         hoje_inicio = datetime(agora.year, agora.month, agora.day)  # noqa: DTZ001
         semana_inicio = hoje_inicio - timedelta(days=7)
@@ -26,6 +30,8 @@ class RankingControle:
 
 
 def converter_ranking_para_schema(periodo: Periodo, ranking) -> RankingSchema:
+    """Converter modelo do ranking para schema."""
+    
     usuarios = []
     for coluna in ranking:
         perfil = "/perfil/" + str(coluna.usuario_id)

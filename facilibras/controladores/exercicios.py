@@ -24,6 +24,8 @@ TEMP_DIR = "videos"
 
 
 class ExercicioControle:
+    """Classe contendo lógica de negócio no contexto de exercícios."""
+
     def __init__(
         self,
         exercicio_dao: T_ExercicioDAO,
@@ -35,10 +37,15 @@ class ExercicioControle:
         self.usuario_dao = usuario_dao
 
     def listar_secoes(self) -> list[SecaoSchema]:
+        """Listar seções dos exercícios."""
+
         secoes = self.secao_dao.listar_todas_com_quantidade()
         return converter_secao_para_schema(secoes)
 
     def listar_exercicios(self, id_usuario: int | None) -> Sequence[ExercicioSchema]:
+        """Listar todos os exercícios cadastrados ou todos os exercícios 
+        acessados pelo usuário."""
+        
         status = {}
         exs = self.exercicio_dao.listar_todos()
         if id_usuario:
@@ -50,6 +57,9 @@ class ExercicioControle:
     def listar_exercicio_por_nome(
         self, nome: str, id_usuario: int | None
     ) -> ExercicioSchema | None:
+        """Listar todos os exercícios cadastrados ou todos os exercícios 
+        acessados pelo usuário com filtro no nome do exercício."""
+
         status = {}
         exs = self.exercicio_dao.listar_por_nome(nome)
         if id_usuario:
@@ -67,6 +77,9 @@ class ExercicioControle:
     def listar_exercicios_por_secao(
         self, nome_secao: str, id_usuario: int | None
     ) -> Sequence[ExercicioSchema]:
+        """Listar todos os exercícios cadastrados ou todos os exercícios 
+        acessados pelo usuário com filtro na seção do exercício."""
+        
         secao = self.secao_dao.listar_por_nome(nome_secao)
         if not secao:
             exc_msg = f"Seção com nome {nome_secao} não encontrado"
@@ -83,6 +96,9 @@ class ExercicioControle:
         return converter_exercicios_para_schema(exs, status)
 
     def checar_conquista(self, conquista: NomeConquista, usuario) -> bool:
+        """Verificar se o usuário já possui a conquista com filtor no
+        nome da conquista."""
+
         ja_tem = self.usuario_dao.buscar_conquista(conquista, usuario)
         if ja_tem:
             return False
@@ -103,6 +119,8 @@ class ExercicioControle:
         return False
 
     def completar_exercicio(self, exercicio: Exercicio, id_usuario: int):
+        """Alterar status do exercício para completo para um usuário."""
+
         usuario = self.usuario_dao.buscar_por_id(id_usuario)
         if usuario:
             self.checar_conquista(NomeConquista.PRIMEIRO_SINAL, usuario)
@@ -136,6 +154,8 @@ class ExercicioControle:
                 )
 
     def tentativa_exercicio(self, exercicio: Exercicio, id_usuario: int):
+        """Validar tentativa de realização do exercício do usuário."""
+
         usuario = self.usuario_dao.buscar_por_id(id_usuario)
         if usuario:
             self.exercicio_dao.tentativa_exercicio(exercicio, usuario)
@@ -143,6 +163,8 @@ class ExercicioControle:
     def reconhecer_exercicio(
         self, nome_exercicio: str, video: UploadFile, usuario: int | None
     ) -> FeedbackSchema:
+        """Enviar vídeo para o reconhecimento e retonar feedback."""
+
         # Checa se realmente é um vídeo
         if not video.content_type or not video.content_type.startswith("video/"):
             raise HTTPException(
@@ -198,6 +220,8 @@ class ExercicioControle:
 def distribuir_exercicios(
     exercicios: Sequence[ExercicioSchema],
 ) -> list[ExercicioSchema]:
+    """Reorganizar lista de exercícios"""
+
     grupos = defaultdict(list)
     for ex in exercicios:
         grupos[ex.secao].append(ex)
@@ -221,6 +245,8 @@ def converter_exercicios_para_schema(
     exercicios: Sequence[Exercicio],
     status_por_exercicio: dict[int, ExercicioStatus] | dict[int, None],
 ) -> Sequence[ExercicioSchema]:
+    """Converter modelo do exercício para schema"""
+
     exercicio_schemas = []
     for exercicio in exercicios:
         palavras = [
@@ -255,4 +281,5 @@ def converter_exercicios_para_schema(
 
 
 def converter_secao_para_schema(secoes: list[tuple[Secao, int]]) -> list[SecaoSchema]:
+    """Converter modelo da seção para schema"""
     return [SecaoSchema(nome=secao.nome, qtd_ex=qtd_ex) for secao, qtd_ex in secoes]

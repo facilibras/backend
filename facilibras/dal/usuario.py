@@ -15,6 +15,8 @@ from facilibras.schemas.perfil import AtualizarPerfilSchema
 
 
 class UsuarioDAO:
+    """Classe de acesso de dados no contexto de usuário."""
+
     def __init__(self, session: T_Session) -> None:
         self.session = session
 
