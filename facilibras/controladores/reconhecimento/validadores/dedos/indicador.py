@@ -87,25 +87,37 @@ def validar_dedo_indicador_dentro_palma(
             return Invalido(msg)
         return Valido()
 
-    def frente_dentro_45() -> Resultado: ...
+    def frente_dentro_45() -> Resultado:
+        return frente()
 
-    def lateral() -> Resultado: ...
+    def lateral() -> Resultado: 
+        return frente()
 
-    def tras() -> Resultado: ...
-
-    def tras_dentro_90() -> Resultado:
-        mao_direita = dedos[9][x] < dedos[0][x]
-        if mao_direita:
-            para_cima = dedos[8][x] < dedos[7][x]
-        else:
-            para_cima = dedos[8][x] > dedos[7][x]
-
+    def tras() -> Resultado:
+        para_cima = dedos[8][y] < dedos[5][y]
         if para_cima:
             return Invalido(msg)
-
         return Valido()
 
-    def tras_dentro_270() -> Resultado: ...
+    def tras_dentro_90() -> Resultado:
+        if mao == Mao.DIREITA:
+            esticado = dedos[8][x] < dedos[7][x]
+        else:
+            esticado = dedos[8][x] > dedos[7][x]
+
+        if esticado:
+            return Invalido(msg)
+        return Valido()
+
+    def tras_dentro_270() -> Resultado: 
+        if mao == Mao.DIREITA:
+            esticado = dedos[8][x] > dedos[7][x]
+        else:
+            esticado = dedos[8][x] < dedos[7][x]
+
+        if esticado:
+            return Invalido(msg)
+        return Valido()
 
     match (orientacao, inclinacao):
         case (Orientacao.BAIXO, Inclinacao.RETA):
@@ -208,7 +220,15 @@ def validar_dedo_indicador_esticado(
     def lateral() -> Resultado:
         return frente()
 
-    def lateral_fora_90() -> Resultado: ...
+    def lateral_fora_90() -> Resultado:
+        if mao == Mao.DIREITA:
+            dobrado = dedos[6][x] < dedos[5][x] and dedos[8][x] > dedos[6][x]
+        else:
+            dobrado = dedos[6][x] > dedos[5][x] and dedos[8][x] < dedos[6][x]
+        
+        if dobrado:
+            return Invalido(msg)
+        return Valido()
 
     def tras() -> Resultado:
         return frente()
@@ -277,7 +297,15 @@ def validar_dedo_indicador_flexionado(
     def lateral() -> Resultado:
         return frente()
 
-    def tras_dentro_90() -> Resultado: ...
+    def tras_dentro_90() -> Resultado:
+        if mao == Mao.DIREITA:
+            esticado = dedos[8][x] < dedos[6][x]
+        else:
+            esticado = dedos[8][x] > dedos[6][x]
+
+        if esticado:
+            return Invalido(msg)
+        return Valido()
 
     match (orientacao, inclinacao):
         case (Orientacao.BAIXO, Inclinacao.RETA):
@@ -321,7 +349,13 @@ def validar_dedo_indicador_frente_90(
             return Invalido(msg)
         return Valido()
 
-    def tras_dentro_90() -> Resultado: ...
+    def tras_dentro_90() -> Resultado:
+        dist_5_2 = utils.distancia(dedos[5][x], dedos[2][x])
+        dist_8_5 = utils.distancia(dedos[8][x], dedos[5][x])
+        esticado = dist_5_2 < dist_8_5
+        if esticado:
+            return Invalido(msg)
+        return Valido()
 
     match (orientacao, inclinacao):
         case (Orientacao.FRENTE, Inclinacao.RETA):
