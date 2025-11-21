@@ -14,3 +14,6 @@ from facilibras.modelos.sinais import alfabeto as _
 from facilibras.modelos.sinais import numeros as _
 from facilibras.modelos.sinais import saudacoes as _
 from facilibras.modelos.sinais import outros as _
+from facilibras.modelos.sinais import identidade as _
+from facilibras.modelos.sinais import frases as _
+from facilibras.modelos.sinais import verbos as _

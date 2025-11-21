@@ -1,9 +1,8 @@
 from facilibras.modelos.mao import Dedo, Inclinacao, Orientacao, Posicao
 from facilibras.modelos.sinais import Categoria, SinalLibras
 
-
-Oi = (
-    SinalLibras(Categoria.SAUDACOES, "oi")
+Oi_Tudo_Bem = (
+    SinalLibras(Categoria.FRASES, "oi_tudo_bem")
     .mao(
         Dedo.POLEGAR_DENTRO_PALMA,
         Dedo.INDICADOR_DENTRO_PALMA,
@@ -13,7 +12,7 @@ Oi = (
     )
     .orientacao_palma(Orientacao.FRENTE)
     .posicao_mao(Posicao.LADO_OPOSTO, ponto_ref=6)
-    .descricao("Configuração inicial da mão")
+    .descricao("Configuração do sinal do Oi")
     .depois()
     .mao(
         Dedo.POLEGAR_DENTRO_PALMA,
@@ -25,47 +24,7 @@ Oi = (
     .orientacao_palma(Orientacao.FRENTE)
     .posicao_mao(Posicao.MESMO_LADO, ponto_ref=20)
     .descricao("Movimento de dentro para fora")
-)
-
-Tchau = (
-    SinalLibras(Categoria.SAUDACOES, "tchau")
-    .mao(
-        Dedo.POLEGAR_ESTICADO,
-        Dedo.INDICADOR_ESTICADO,
-        Dedo.MEDIO_ESTICADO,
-        Dedo.ANELAR_ESTICADO,
-        Dedo.MINIMO_ESTICADO,
-    )
-    .orientacao_palma(Orientacao.FRENTE)
-    .posicao_mao(Posicao.MESMO_LADO, ponto_ref=20)
-    .descricao("Configuração inicial da mão")
     .depois()
-    .mao(
-        Dedo.POLEGAR_ESTICADO,
-        Dedo.INDICADOR_ESTICADO,
-        Dedo.MEDIO_ESTICADO,
-        Dedo.ANELAR_ESTICADO,
-        Dedo.MINIMO_ESTICADO,
-    )
-    .orientacao_palma(Orientacao.FRENTE)
-    .posicao_mao(Posicao.CENTRO, ponto_ref=12)
-    .descricao("Gire o pulso para dentro do corpo")
-    .depois()
-    .mao(
-        Dedo.POLEGAR_ESTICADO,
-        Dedo.INDICADOR_ESTICADO,
-        Dedo.MEDIO_ESTICADO,
-        Dedo.ANELAR_ESTICADO,
-        Dedo.MINIMO_ESTICADO,
-    )
-    .orientacao_palma(Orientacao.FRENTE)
-    .posicao_mao(Posicao.MESMO_LADO, ponto_ref=20)
-    .descricao("Gire o pulso para fora do corpo")
-)
-
-
-TudoBem = (
-    SinalLibras(Categoria.SAUDACOES, "tudo_bem")
     .mao(
         Dedo.POLEGAR_DENTRO_PALMA,
         Dedo.INDICADOR_DENTRO_PALMA,

@@ -268,7 +268,7 @@
     "Z": {
         "categoria": "Alfabeto",
         "1": {
-            "video": "https://drive.google.com/file/d/1KHjkYdgtsvrWqwIIu5wtBFvIHd-CZShp/preview",
+            "video": "https://drive.google.com/file/d/1BlZMND4aQSjIWOnoTNNZzk10zOGzgO7R/preview",
             "instrucoes": [
                 "Posicione sua mão com a palma voltada para frente.",
                 "Feche a mão deixando apenas o indicador estendido.",
@@ -330,7 +330,7 @@
             ]
         },
         "2": {
-            "video": "",
+            "video": "https://drive.google.com/file/d/145Bf3RDIlIsKAvAAyK4FizhVcHvFKY1g/preview",
             "instrucoes": [
                 "Posicione sua mão com a palma voltada para trás.",
                 "Estique o dedo indicador, médio e anelar. Feche os demais dedos."
@@ -361,13 +361,6 @@
             "instrucoes": [
                 "Posicione sua mão com a palma voltada para o lado.",
                 "Feche a mão deixando apenas o dedo indicador e o médio estendids. Flexione eles como em um 'gancho'."
-            ]
-        },
-        "2": {
-            "video": "",
-            "instrucoes": [
-                "Posicione sua mão com a palma voltada para trás.",
-                "Estique todos os dedos."
             ]
         }
     },
@@ -556,7 +549,7 @@
     "Biscoito": {
         "categoria": "Alimentos",
         "1": {
-            "video": "",
+            "video": "https://drive.google.com/file/d/1tm73AU0JUMsTfYmpd34NiqazKCKIlVd6/preview",
             "instrucoes": [
                 "Posicione sua mão com a palma voltada para o lado.",
                 "Feche a mão deixando apenas o dedo indicador levantado.",
@@ -567,7 +560,7 @@
     "Bolacha": {
         "categoria": "Alimentos",
         "1": {
-            "video": "",
+            "video": "https://drive.google.com/file/d/1_rBXWJUneZuTA95gQMjrL2zYGpdDCnMR/preview",
             "instrucoes": [
                 "Posicione sua mão com a palma voltada para trás, inclinada em um ângulo de 90 graus.",
                 "Feche os demais dedos, mantendo apenas o polegar e o indicador abertos, simulando o gesto de segurar uma bolacha.",
@@ -579,7 +572,7 @@
     "Muro": {
         "categoria": "Outros",
         "1": {
-            "video": "",
+            "video": "https://drive.google.com/file/d/1fxiFtCdAqd9g6LdJ8zQFBbp99VyN03k2/preview",
             "instrucoes": [
                 "Posicione ambas mãos com as palmas voltadas para frente.",
                 "Mantenha as mãos paralelas, próximas ao centro do corpo, com todos os dedos esticados, exceto os polegares.",
@@ -590,7 +583,7 @@
     "Porta": {
         "categoria": "Outros",
         "1": {
-            "video": "",
+            "video": "https://drive.google.com/file/d/1609nEyXjMb07T1-8hAAxi8mk6QedDkRO/preview",
             "instrucoes": [
                 "Posicione ambas as mãos com as palmas voltadas para frente, lado a lado, como se fossem duas portas.",
                 "Mantenha todos os dedos esticados para cima, com os polegares recolhidos dentro das palmas.",
@@ -598,21 +591,10 @@
             ]
         }
     },
-    "Bravo": {
-        "categoria": "Outros",
-        "1": {
-            "video": "",
-            "instrucoes": [
-                "Posicione a mão com a palma voltada para trás, inclinadas em um ângulo de 90 graus.",
-                "Mantenha todos os dedos flexionados, com as mãos próximas ao corpo, na altura do peito.",
-                "Adote uma expressão facial de irritação ou raiva: sobrancelhas franzidas e boca fechada."
-            ]
-        }
-    },
-    "Oi Tudo bem?": {
+    "Oi Tudo bem": {
         "categoria": "Frases",
         "1": {
-            "video": "",
+            "video": "https://drive.google.com/file/d/1WE95PmsCVYlJ9Lwx1TXAOg0HwJ1hvsue/preview",
             "instrucoes": [
                 "Sinal Oi: Posicione sua mão com a palma voltada para frente.",
                 "Sinal Oi: Feche a mão, deixando apenas o dedo mínimo esticado.",

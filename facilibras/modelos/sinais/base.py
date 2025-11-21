@@ -24,6 +24,9 @@ class Categoria(StrEnum):
     ALIMENTOS = "alimentos"
     SAUDACOES = "saudações"
     OUTROS = "outros"
+    VERBOS = "verbos"
+    IDENTIDADE = "identidade"
+    FRASES = "frases"
 
 
 class SinalLibras:
