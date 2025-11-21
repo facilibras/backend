@@ -7,6 +7,7 @@ from facilibras.modelos.sinais.base import construir_sinal as construir_sinal
 from facilibras.modelos.sinais.base import get_componente as get_componente
 from facilibras.modelos.sinais.base import get_sinal as get_sinal
 from facilibras.modelos.sinais.base import listar_sinais as listar_sinais
+from facilibras.modelos.sinais.base import qtd_sinais as qtd_sinais
 
 # Importa todos os sinais cadastrados
 from facilibras.modelos.sinais import alimentos as _

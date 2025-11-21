@@ -190,6 +190,10 @@ def listar_sinais() -> None:
     print(", ".join(_sinais.keys()))
 
 
+def qtd_sinais() -> int:
+    return len(_sinais)
+
+
 T = TypeVar("T", bound=Enum)
 
 
