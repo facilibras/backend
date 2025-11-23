@@ -79,7 +79,15 @@ def validar_dedo_indicador_dentro_palma(
             return Invalido(msg)
         return Valido()
 
-    def cima_dentro_90() -> Resultado: ...
+    def cima_dentro_90() -> Resultado:
+        if mao == Mao.DIREITA:
+            esticado = dedos[8][x] < dedos[6][x]
+        else:
+            esticado = dedos[8][x] > dedos[6][x]
+        
+        if esticado:
+            return Invalido(msg)
+        return Valido()
 
     def frente() -> Resultado:
         para_cima = dedos[8][y] < dedos[6][y]

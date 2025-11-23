@@ -76,7 +76,8 @@ def validar_dedo_anelar_dentro_palma(
     def lateral() -> Resultado:
         return frente()
 
-    def lateral_fora_90() -> Resultado: ...
+    def lateral_fora_90() -> Resultado:
+        return cima_dentro_90()
 
     def tras() -> Resultado:
         return frente()
@@ -230,10 +231,17 @@ def validar_dedo_anelar_flexionado(
         para_cima = dedos[16][y] < dedos[15][y]
         if para_cima:
             return Invalido(msg)
-
         return Valido()
 
-    def tras_dentro_90() -> Resultado: ...
+    def tras_dentro_90() -> Resultado:
+        if mao == Mao.DIREITA:
+            esticado = dedos[16][x] < dedos[14][x]
+        else:
+            esticado = dedos[16][x] > dedos[14][x]
+
+        if esticado:
+            return Invalido(msg)
+        return Valido()
 
     match (orientacao, inclinacao):
         case (Orientacao.FRENTE, Inclinacao.RETA):

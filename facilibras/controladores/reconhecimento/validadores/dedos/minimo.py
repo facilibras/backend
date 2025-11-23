@@ -84,7 +84,15 @@ def validar_dedo_minimo_dentro_palma(
     def lateral() -> Resultado:
         return frente()
 
-    def lateral_fora_90() -> Resultado: ...
+    def lateral_fora_90() -> Resultado:
+        if mao == Mao.DIREITA:
+            esticado = dedos[20][x] > dedos[18][x]
+        else:
+            esticado = dedos[20][x] < dedos[18][x]
+
+        if esticado:
+            return Invalido(msg)
+        return Valido()
 
     def tras() -> Resultado:
         return frente()

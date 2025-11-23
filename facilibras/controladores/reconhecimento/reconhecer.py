@@ -254,6 +254,18 @@ def montar_feedback(sucesso: bool, feedbacks: list[list]) -> FeedbackSchema:
     return fs
 
 
+def identificar_mao(corpo, mao) -> Mao:
+    from facilibras.config.env import get_variavel_ambiente_atual
+
+    if get_variavel_ambiente_atual("SOMENTE_DIREITA", int):
+        return Mao.DIREITA
+    return identificar_pela_pose(corpo, mao)
+
+
+def identificar_pela_pose(corpo, mao) -> Mao:
+    ...
+
+
 def validar_mao(
     sinal: SinalLibras,
     pontos: dict[int, tuple[float, float, float]],
@@ -312,7 +324,3 @@ def validar_rosto(
         mensagem = resultado.mensagem
 
     return sucesso, mensagem
-
-
-def identificar_mao(corpo, mao) -> Mao:
-    return Mao.DIREITA
