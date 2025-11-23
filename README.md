@@ -1,19 +1,21 @@
 # Facilibras (Backend)
 
-Backend do Facilibras
+Gerencia autenticação, exercícios, categorias de sinais, registro de desempenho e o processamento necessário para avaliar os sinais realizados pelo usuário.
 
 ## Bibliotecas Utilizadas
 - FastAPI (Framework Web)
 - MediaPipe (Reconhecimento dos Gestos)
+- SQLAlchemy (ORM)
+- Alembic (Migrações)
 
 ## Como Iniciar o Backend
 1. Instale as dependências:
    ```bash
    pip install -r requirements.txt
    ```
-2. Crie o banco de dados PostgreSQL
+2. Crie um banco de dados PostgreSQL
     ```sql
-    CREATE DATABASE facilibras;
+    CREATE DATABASE facilibras; -- apenas exemplo
     ```
 
 3. Configure as variáveis de ambiente:
@@ -29,22 +31,22 @@ Backend do Facilibras
    ```
 5. Inicie o servidor FastAPI:
    ```bash
-   fastapi dev facilibras/main.py
+   python -m fastapi dev facilibras/main.py
    ```
 ## Executar pela linha de comando
 ```bash
-# Reconhece a letra G utiliza a webcam
+# Reconhece o sinal referente à letra G utiliza a webcam
 python -m facilibras letra G
 
-# Reconhece a letra Y a partir de um video
-python -m facilibras letra Y --video exemplo.mp4
+# Reconhece o sinal referente ao alimento 'Bolacha' a partir de um vídeo
+python -m facilibras alimento bolacha --video caminho_video.mp4
 
 # Lista todas os sinais que podem ser reconhecidos
 python -m facilibras sinais
 
-# Lista todas os sinais da categoria ALFABETO
-python -m facilibras sinais --categoria alfabeto
-
 # Validar interativamente um sinal
 python -m facilibras interativo -o FRENTE -d POLEGAR_CIMA -d INDICADOR_BAIXO
+
+# Para ver todos os comandos
+python -m facilibras --help
 ```
