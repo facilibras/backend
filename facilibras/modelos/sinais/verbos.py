@@ -1,7 +1,6 @@
 from facilibras.modelos.mao import Dedo, Inclinacao, Orientacao, Posicao
 from facilibras.modelos.sinais import Categoria, SinalLibras
 
-
 Entender = (
     SinalLibras(Categoria.VERBOS, "entender")
     .mao(
@@ -12,7 +11,7 @@ Entender = (
     )
     .orientacao_palma(Orientacao.TRAS)
     .inclinacao_palma(Inclinacao.DENTRO_45)
-    .posicao_mao(Posicao.TESTA, ponto_ref=12)
+    .posicao_mao(Posicao.TESTA, ponto_ref=8)
     .descricao("Configuração inicial da mão")
     .depois()
     .mao(
@@ -23,7 +22,7 @@ Entender = (
     )
     .orientacao_palma(Orientacao.FRENTE)
     .inclinacao_palma(Inclinacao.DENTRO_45)
-    .posicao_mao(Posicao.TESTA, ponto_ref=12)
+    .posicao_mao(Posicao.TESTA, ponto_ref=20)
     .descricao("Virar a palma para frente")
 )
 
@@ -63,7 +62,7 @@ Aprender = (
     )
     .orientacao_palma(Orientacao.FRENTE)
     .inclinacao_palma(Inclinacao.DENTRO_45)
-    .posicao_mao(Posicao.TESTA, ponto_ref=9)
+    .posicao_mao(Posicao.TESTA, ponto_ref=10)
     .descricao("Configuração inicial da mão")
     .depois()
     .mao(
@@ -93,7 +92,6 @@ Aprender = (
 Saber = (
     SinalLibras(Categoria.VERBOS, "saber")
     .mao(
-        Dedo.POLEGAR_ESTICADO,
         Dedo.INDICADOR_ESTICADO,
         Dedo.MEDIO_ESTICADO,
         Dedo.ANELAR_ESTICADO,

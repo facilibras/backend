@@ -133,13 +133,18 @@ def validar_posicao_lado_oposto(
     """
     Considera válido se cada mão estiver no lado oposto ao seu lado natural
     (mão esquerda no lado direito e mão direita no lado esquerdo)
+    e se o ponto de referência não está no meio (cabeça)
     """
     if mao == Mao.ESQUERDA:
-        correto = utils.ponto_em_regiao(pos_dedo, Regiao.DIREITA)
+        lado_correto = utils.ponto_em_regiao(pos_dedo, Regiao.DIREITA)
     else:  # mao == Mao.DIREITA:
-        correto = utils.ponto_em_regiao(pos_dedo, Regiao.ESQUERDA)
+        lado_correto = utils.ponto_em_regiao(pos_dedo, Regiao.ESQUERDA)
 
-    if correto:
+    min_x = min(corpo[6][x], corpo[3][x])
+    max_x = max(corpo[6][x], corpo[3][x])
+    dentro_rosto = min_x <= pos_dedo[x] <= max_x
+
+    if lado_correto and not dentro_rosto:
         return Valido()
     return Invalido("Mão deve estar no lado oposto do seu lado natural")
 
@@ -151,13 +156,18 @@ def validar_posicao_mesmo_lado(
     """
     Considera válido se não houver cruzamento de lados entre as mãos
     (mão esquerda no lado esquerdo e mão direita no lado direito)
+    e se o ponto de referência não está no meio (cabeça)
     """
     if mao == Mao.ESQUERDA:
-        correto = utils.ponto_em_regiao(pos_dedo, Regiao.ESQUERDA)
+        lado_correto = utils.ponto_em_regiao(pos_dedo, Regiao.ESQUERDA)
     else:  # mao == Mao.DIREITA:
-        correto = utils.ponto_em_regiao(pos_dedo, Regiao.DIREITA)
+        lado_correto = utils.ponto_em_regiao(pos_dedo, Regiao.DIREITA)
 
-    if correto:
+    min_x = min(corpo[6][x], corpo[3][x])
+    max_x = max(corpo[6][x], corpo[3][x])
+    dentro_rosto = min_x <= pos_dedo[x] <= max_x
+
+    if lado_correto and not dentro_rosto:
         return Valido()
     return Invalido("Mão não deve estar cruzando lado oposto do corpo.")
 
@@ -307,8 +317,8 @@ def validar_posicao_sombrancelha(
     Considera válido se estiver na região das sombrancelhas
     (a partir da área entre sombrancelhas, nariz e testa)
     """
-    olho_dir = corpo[1]
-    olho_esq = corpo[4]
+    olho_dir = corpo[5]
+    olho_esq = corpo[2]
     nariz = corpo[0]
 
     # linha dos olhos (altura de referência)
@@ -316,7 +326,7 @@ def validar_posicao_sombrancelha(
 
     altura = abs(y_olho - nariz[y])
     y_min = y_olho - altura
-    y_max = y_olho
+    y_max = nariz[y]
 
     # entre olhos
     x_min = min(olho_dir[x], olho_esq[x])

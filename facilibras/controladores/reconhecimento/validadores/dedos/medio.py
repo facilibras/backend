@@ -15,7 +15,7 @@ x, y, z = range(3)
 
 @registrar_validador(Dedo.MEDIO_CURVADO)
 def validar_dedo_medio_curvado(
-    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, mao: Mao
+    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, _: Mao
 ) -> Resultado:
     msg = "Médio deve estar curvado"
 
@@ -63,7 +63,7 @@ def validar_dedo_medio_dentro_palma(
             esticado = dedos[12][x] < dedos[10][x]
         else:
             esticado = dedos[12][x] > dedos[10][x]
-        
+
         if esticado:
             return Invalido(msg)
         return Valido()
@@ -80,7 +80,7 @@ def validar_dedo_medio_dentro_palma(
     def lateral() -> Resultado:
         return frente()
 
-    def lateral_fora_90() -> Resultado: 
+    def lateral_fora_90() -> Resultado:
         return cima_dentro_90()
 
     def tras() -> Resultado:
@@ -149,7 +149,7 @@ def validar_dedo_medio_dentro_palma(
 
 @registrar_validador(Dedo.MEDIO_DIST_ANELAR)
 def validar_dedo_medio_dist_anelar(
-    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, mao: Mao
+    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, _: Mao
 ) -> Resultado:
     msg = "Médio deve estar distante do anelar"
 
@@ -170,7 +170,7 @@ def validar_dedo_medio_dist_anelar(
 
 @registrar_validador(Dedo.MEDIO_ENC_POLEGAR)
 def validar_dedo_medio_enc_polegar(
-    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, mao: Mao
+    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, _: Mao
 ) -> Resultado:
     msg = "Médio deve estar encostando o polegar"
 
@@ -208,10 +208,10 @@ def validar_dedo_medio_esticado(
         return frente()
 
     def lateral() -> Resultado:
-        return lateral()
+        return frente()
 
     def lateral_fora_90() -> Resultado:
-        fora_90 = dedos[5][y] < dedos[9][y]
+        fora_90 = dedos[5][y] < dedos[9][y] and dedos[9][y] < dedos[13][y]
         if not fora_90:
             return Invalido(msg)
         return Valido()
@@ -220,7 +220,11 @@ def validar_dedo_medio_esticado(
         return frente()
 
     def tras_dentro_45() -> Resultado:
-        para_baixo = dedos[12][x] > dedos[10][x]
+        if mao == Mao.DIREITA:
+            para_baixo = dedos[12][x] > dedos[10][x]
+        else:
+            para_baixo = dedos[12][x] < dedos[10][x]
+
         if para_baixo:
             return Invalido(msg)
         return Valido()
@@ -269,22 +273,23 @@ def validar_dedo_medio_flexionado(
         para_cima = dedos[12][y] < dedos[10][y]
         if para_cima:
             return Invalido(msg)
-
         return Valido()
 
     def lateral() -> Resultado:
-        return frente()
+        flex = dedos[12][y] > dedos[11][y]
+        if not flex:
+            return Invalido(msg)
+        return Valido()
 
     def tras_dentro_90() -> Resultado:
         if mao == Mao.DIREITA:
             esticado = dedos[12][x] < dedos[10][x]
         else:
             esticado = dedos[12][x] > dedos[10][x]
-            
+
         if esticado:
             return Invalido(msg)
         return Valido()
-
 
     match (orientacao, inclinacao):
         case (Orientacao.FRENTE, Inclinacao.RETA):
@@ -299,7 +304,7 @@ def validar_dedo_medio_flexionado(
 
 @registrar_validador(Dedo.MEDIO_FRENTE_45)
 def validar_dedo_medio_frente_45(
-    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, mao: Mao
+    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, _: Mao
 ) -> Resultado:
     msg = "Médio deve estar levemente para frente"
 

@@ -74,8 +74,9 @@ def validar_dedo_indicador_dentro_palma(
     msg = "Indicador deve estar dentro da palma"
 
     def baixo() -> Resultado:
-        para_cima = dedos[8][y] < dedos[6][y]
-        if para_cima:
+        esticado = dedos[8][y] < dedos[5][y]
+        dentro = dedos[8][y] < dedos[7][y]
+        if esticado or not dentro:
             return Invalido(msg)
         return Valido()
 
@@ -84,7 +85,7 @@ def validar_dedo_indicador_dentro_palma(
             esticado = dedos[8][x] < dedos[6][x]
         else:
             esticado = dedos[8][x] > dedos[6][x]
-        
+
         if esticado:
             return Invalido(msg)
         return Valido()
@@ -98,7 +99,7 @@ def validar_dedo_indicador_dentro_palma(
     def frente_dentro_45() -> Resultado:
         return frente()
 
-    def lateral() -> Resultado: 
+    def lateral() -> Resultado:
         return frente()
 
     def tras() -> Resultado:
@@ -117,7 +118,7 @@ def validar_dedo_indicador_dentro_palma(
             return Invalido(msg)
         return Valido()
 
-    def tras_dentro_270() -> Resultado: 
+    def tras_dentro_270() -> Resultado:
         if mao == Mao.DIREITA:
             esticado = dedos[8][x] > dedos[7][x]
         else:
@@ -150,7 +151,7 @@ def validar_dedo_indicador_dentro_palma(
 
 @registrar_validador(Dedo.INDICADOR_DIST_MEDIO)
 def validar_dedo_indicador_dist_medio(
-    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, mao: Mao
+    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, _: Mao
 ) -> Resultado:
     msg = "Indicador deve estar distante do dedo médio"
 
@@ -171,7 +172,7 @@ def validar_dedo_indicador_dist_medio(
 
 @registrar_validador(Dedo.INDICADOR_ENC_MEDIO)
 def validar_dedo_indicador_enc_medio(
-    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, mao: Mao
+    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, _: Mao
 ) -> Resultado:
     msg = "Indicador deve estar encostado no dedo médio"
 
@@ -192,13 +193,13 @@ def validar_dedo_indicador_enc_medio(
 
 @registrar_validador(Dedo.INDICADOR_ENC_POLEGAR)
 def validar_dedo_indicador_enc_polegar(
-    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, mao: Mao
+    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, _: Mao
 ) -> Resultado:
-    msg = "Indicador deve estar encostado no dedo médio"
+    msg = "Indicador deve estar encostado no dedo polegar"
 
     def lateral() -> Resultado:
-        dist_maxima = utils.distancia3(dedos[8], dedos[7])
-        dist_entre_pontas = utils.distancia3(dedos[8], dedos[4])
+        dist_maxima = utils.distancia2(dedos[8], dedos[6])
+        dist_entre_pontas = utils.distancia2(dedos[8], dedos[4])
         if dist_entre_pontas > dist_maxima:
             return Invalido(msg)
 
@@ -230,10 +231,10 @@ def validar_dedo_indicador_esticado(
 
     def lateral_fora_90() -> Resultado:
         if mao == Mao.DIREITA:
-            dobrado = dedos[6][x] < dedos[5][x] and dedos[8][x] > dedos[6][x]
+            dobrado = dedos[6][x] < dedos[5][x] and dedos[8][x] > dedos[7][x]
         else:
-            dobrado = dedos[6][x] > dedos[5][x] and dedos[8][x] < dedos[6][x]
-        
+            dobrado = dedos[6][x] > dedos[5][x] and dedos[8][x] < dedos[7][x]
+
         if dobrado:
             return Invalido(msg)
         return Valido()
@@ -303,7 +304,11 @@ def validar_dedo_indicador_flexionado(
         return Valido()
 
     def lateral() -> Resultado:
-        return frente()
+        # Somente checa para cima por causa de ter oclusão do indicador nessa orientação
+        para_cima = dedos[8][y] < dedos[6][y]
+        if para_cima:
+            return Invalido(msg)
+        return Valido()
 
     def tras_dentro_90() -> Resultado:
         if mao == Mao.DIREITA:

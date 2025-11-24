@@ -1,7 +1,6 @@
 from facilibras.modelos.mao import Dedo, Inclinacao, Orientacao, Posicao
 from facilibras.modelos.sinais import Categoria, SinalLibras
 
-
 Meu = (
     SinalLibras(Categoria.IDENTIDADE, "meu")
     .mao(
@@ -44,7 +43,7 @@ Seu = (
 Eu = (
     SinalLibras(Categoria.IDENTIDADE, "eu")
     .mao(
-        Dedo.POLEGAR_ESTICADO,
+        Dedo.POLEGAR_DENTRO_PALMA,
         Dedo.INDICADOR_FRENTE_90,
         Dedo.MEDIO_DENTRO_PALMA,
         Dedo.ANELAR_DENTRO_PALMA,

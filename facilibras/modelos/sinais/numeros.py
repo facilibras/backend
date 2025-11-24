@@ -30,7 +30,7 @@ Numero2 = (
 )
 
 Numero3 = (
-    SinalLibras(Categoria.NUMEROS, "número_4")
+    SinalLibras(Categoria.NUMEROS, "número_3")
     .mao(
         Dedo.POLEGAR_DENTRO_PALMA,
         Dedo.INDICADOR_ESTICADO,

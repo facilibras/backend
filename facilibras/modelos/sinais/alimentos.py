@@ -12,6 +12,7 @@ Agua = (
     )
     .orientacao_palma(Orientacao.LATERAL)
     .posicao_mao(Posicao.BOCA, ponto_ref=8)
+    .descricao("Configuração inicial do sinal")
     .depois()
     .mao(
         Dedo.POLEGAR_DENTRO_PALMA,
@@ -21,8 +22,10 @@ Agua = (
         Dedo.MINIMO_DENTRO_PALMA,
     )
     .orientacao_palma(Orientacao.LATERAL)
+    .descricao("Movimento do indicador levemente para frente")
     .depois()
     .configuracao_anterior(0)
+    .descricao("Voltar a configuração inicial do sinal")
 )
 
 Biscoito = (

@@ -10,7 +10,7 @@ Oi_Tudo_Bem = (
         Dedo.ANELAR_DENTRO_PALMA,
         Dedo.MINIMO_ESTICADO,
     )
-    .orientacao_palma(Orientacao.FRENTE)
+    .orientacao_palma(Orientacao.LATERAL)
     .posicao_mao(Posicao.LADO_OPOSTO, ponto_ref=6)
     .descricao("Configuração do sinal do Oi")
     .depois()

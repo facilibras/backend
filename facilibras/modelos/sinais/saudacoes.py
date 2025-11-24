@@ -1,7 +1,6 @@
 from facilibras.modelos.mao import Dedo, Inclinacao, Orientacao, Posicao
 from facilibras.modelos.sinais import Categoria, SinalLibras
 
-
 Oi = (
     SinalLibras(Categoria.SAUDACOES, "oi")
     .mao(
@@ -11,7 +10,7 @@ Oi = (
         Dedo.ANELAR_DENTRO_PALMA,
         Dedo.MINIMO_ESTICADO,
     )
-    .orientacao_palma(Orientacao.FRENTE)
+    .orientacao_palma(Orientacao.LATERAL)
     .posicao_mao(Posicao.LADO_OPOSTO, ponto_ref=6)
     .descricao("Configuração inicial da mão")
     .depois()

@@ -276,13 +276,8 @@ def validar_dedo_polegar_esticado(
         return Valido()
 
     def tras_dentro_90() -> Resultado:
-        dentro_palma = dedos[4][y] > dedos[2][y]
+        dentro_palma = dedos[4][y] > dedos[3][y]
         if dentro_palma:
-            return Invalido(msg)
-
-        dist_min = utils.distancia(dedos[5][y], dedos[9][y]) * 1.8
-        dist_pol_ind = utils.distancia(dedos[3][y], dedos[5][y])
-        if dist_pol_ind <= dist_min:
             return Invalido(msg)
         return Valido()
 

@@ -14,7 +14,7 @@ x, y, z = range(3)
 
 @registrar_validador(Dedo.MINIMO_CURVADO)
 def validar_dedo_minimo_curvado(
-    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, mao: Mao
+    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, _: Mao
 ) -> Resultado:
     msg = "Minimo deve estar curvado"
 
@@ -86,9 +86,9 @@ def validar_dedo_minimo_dentro_palma(
 
     def lateral_fora_90() -> Resultado:
         if mao == Mao.DIREITA:
-            esticado = dedos[20][x] > dedos[18][x]
-        else:
             esticado = dedos[20][x] < dedos[18][x]
+        else:
+            esticado = dedos[20][x] > dedos[18][x]
 
         if esticado:
             return Invalido(msg)
@@ -220,11 +220,10 @@ def validar_dedo_minimo_flexionado(
 
     def tras_dentro_90() -> Resultado:
         if mao == Mao.DIREITA:
-            esticado = dedos[20][y] < dedos[18][y]
+            esticado = dedos[20][x] < dedos[19][x]
         else:
-            esticado = dedos[20][y] > dedos[18][y]
+            esticado = dedos[20][x] > dedos[19][x]
 
-        # Oclusão não permite lógica mais complexa sem introduzir falsos positivos
         if esticado:
             return Invalido(msg)
         return Valido()

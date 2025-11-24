@@ -14,7 +14,7 @@ x, y, z = range(3)
 
 @registrar_validador(Dedo.ANELAR_CURVADO)
 def validar_dedo_anelar_curvado(
-    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, mao: Mao
+    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, _: Mao
 ) -> Resultado:
     msg = "Anelar deve estar curvado"
 
@@ -141,11 +141,12 @@ def validar_dedo_anelar_dentro_palma(
 
 @registrar_validador(Dedo.ANELAR_ENC_POLEGAR)
 def validar_dedo_anelar_enc_polegar(
-    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, mao: Mao
+    dedos: T_Dedos, orientacao: Orientacao, inclinacao: Inclinacao, _: Mao
 ) -> Resultado:
     msg = "Anelar deve estar perto do polegar"
 
     def lateral() -> Resultado:
+        # Bastante falso positivos para não falhar sinal O
         para_cima = dedos[16][y] < dedos[14][y]
         if para_cima:
             return Invalido(msg)
