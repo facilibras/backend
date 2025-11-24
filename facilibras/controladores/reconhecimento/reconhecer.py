@@ -18,6 +18,7 @@ from facilibras.controladores.reconhecimento.validadores import (
     Invalido,
     get_validador,
 )
+from facilibras.controladores.reconhecimento.validadores.utils import distancia2
 from facilibras.modelos.mao import Mao
 from facilibras.modelos.sinais import SinalLibras, Tipo
 from facilibras.schemas import Feedback, FeedbackSchema
@@ -97,7 +98,7 @@ def reconhecer_com_transicao(
                 pos_dedo = pontos_mao[sinal.confs[conf_idx].ponto_ref]
 
                 # Valida essencial
-                res_mao, erros = validar_mao(sinal, pontos_mao, conf_idx)
+                res_mao, erros = validar_mao(sinal, pontos_mao, conf_idx, mao)
                 res_posicao, feedback_posicao = validar_posicao(
                     sinal, pos_dedo, pos_anterior, pontos_corpo, conf_idx, mao
                 )
@@ -254,16 +255,39 @@ def montar_feedback(sucesso: bool, feedbacks: list[list]) -> FeedbackSchema:
     return fs
 
 
-def identificar_mao(corpo, mao) -> Mao:
+def identificar_mao(mao, corpo) -> Mao:
     from facilibras.config.env import get_variavel_ambiente_atual
 
-    if get_variavel_ambiente_atual("SOMENTE_DIREITA", int):
+    if get_variavel_ambiente_atual("SOMENTE_DIREITA", int, 0):
+        identificada = Mao.DIREITA
+    else:
+        identificada = identificar_pela_pose(mao, corpo)
+
+    # TODO: Adicionar Log e loggar qual mão foi a identificada
+    return identificada
+
+
+def identificar_pela_pose(pontos_mao: dict, pontos_corpo: dict) -> Mao:
+    if not pontos_mao or not pontos_corpo:
+        return Mao.DIREITA  # não importa pois vai ser ignorado
+
+    # pulso da mão detectada
+    pulso_detectado = pontos_mao[0]
+    pulso_esq = 15
+    pulso_dir = 16
+
+    # se algum desses índices não existe na pose, assume direita
+    if pulso_esq not in pontos_corpo or pulso_dir not in pontos_corpo:
         return Mao.DIREITA
-    return identificar_pela_pose(corpo, mao)
 
+    # ve qual mão está mais próxima do pulso
+    dist_esq = distancia2(pulso_detectado, pontos_corpo[pulso_esq])
+    dist_dir = distancia2(pulso_detectado, pontos_corpo[pulso_dir])
 
-def identificar_pela_pose(corpo, mao) -> Mao:
-    ...
+    # Invertido pq o frame foi espelhado
+    if dist_esq < dist_dir:
+        return Mao.DIREITA
+    return Mao.ESQUERDA
 
 
 def validar_mao(

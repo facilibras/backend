@@ -1,27 +1,33 @@
 # Sinais
-## Corrigir Sinais
-- [ ] Letra K sem movimento atualmente
+## Observações sobre sinais
+- Sempre começar com config. errada para o algoritmo de detectar mão sincronizar
+- Letra X - Por causa dos validadores PROXIMO_AO_CORPO e DISTANTE_AO_CORPO
+    - Puxar de cima do queixo para baixo do queixo
 
-## Validadores
-- [x] Posição
-- [x] Rosto
-- [ ] Mão
-    - [x] Alfabeto
-    - [x] Números
-    - [ ] Restante
+- Tchau - Mînimo fora do corpo e girar o corpo de forma a trazer ele pra dentro
+- Entender - Comecar com indicador na testa e minimo fora da testa
 
- > [!IMPORTANT]
- > Considerar utilizar lógica equivalente do `MINIMO + Orientacao(BAIXO)` para outros dedos
+## Sinal bom para feedback
+- Letra B - Sinal perfeito para demonstrar mão esq/dir
+    - B é o L da mão esquerda e vice-versa
+- **Letra F** - mostra profundidade
+    - Comecar com todos esticados
+    - Inclinar pra frente o indicador
+- Letra G - simples e consegue mostrar bem o feedback em vários dedos
+- **Número 9** - Sinal perfeito para demonstrar mão esq/dir enquanto mostra feedback negativo
+    - Joinha pra baixo
+- **Água** - muito bom pra mostrar transições
+- Nome: Bom para mostrar sinal que depende de lados opostos
 
-## Feedback antigo
-- [ ] Polegar_dentro (BAIXO): *Falso negativo*
-- [ ] Indicador_cima (LATERAL): *Falso negativo* comum nos sinais com orientação lateral
-- [ ] Indicador_flexionado (BAIXO): *Falso positivo* quando p/ indicador para baixo
-- [ ] Indicador_frente_90 (FRENTE): *Falso positivo* quando p/ indicador para baixo
-- [ ] Medio_enc_polegar: **Funcional**, porém pensar em uma forma melhor
-- [ ] Medio_frente_45: **Funcional**, mas precisa deixar mais estrito
-- [ ] Anelar_baixo (LATERAL): *Falso negativo* comum nos sinais com orientação lateral
-- [ ] Anelar_enc_polegar: **Funcional**, porém pensar em uma forma melhor
+## Sinais para evitar
+- Letra K - Evitar pois aceita mesmo sem movimento
+- Número 7 - Evitar pois precisa de profundidade
+- Seu - Mesmo sem movimento ele passa (usar somente se não for mostrar feedback negativo)
+- Oi - Funciona muito bem mas de vez em quando dá **falsos positivos**
 
-# Pontos Fracos
-- [ ] Sinal X: Por causa dos validadores PROXIMO_AO_CORPO e DISTANTE_AO_CORPO
+
+# TODO
+## Terminar
+- [ ] Refatorar frases para usar os modelos das palavras em vez de criar do zero
+- [ ] Outros
+
