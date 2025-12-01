@@ -51,14 +51,9 @@ def reconhecer(sinal: SinalLibras, gerador: GeradorFrames) -> FeedbackSchema:
         case Tipo.UMA_MAO:
             res, erros = reconhecer_com_transicao(sinal, gerador, TEMPO_TOTAL)
         case Tipo.DUAS_MAOS:
-            pass
+            res, erros = reconhecer_duas_maos(sinal, gerador, TEMPO_TOTAL)
 
     return montar_feedback(res, erros)
-
-
-def reconhecer_duas_maos(
-    sinal: SinalLibras, gerador: GeradorFrames, tempo_limite: int
-) -> tuple[bool, list[list]]: ...
 
 
 def reconhecer_com_transicao(
@@ -202,6 +197,104 @@ def reconhecer_com_transicao(
     return False, feedback_final
 
 
+def reconhecer_duas_maos(
+    sinal: SinalLibras, gerador: GeradorFrames, tempo_limite: int
+) -> tuple[bool, list[list]]:
+    inicio = time.time()
+    frame_idx = 0
+    conf_idx = 0
+    pos_anterior = (0, 0, 0)
+    total_confs = len(sinal.confs)
+
+    with modelo_mao.Hands() as mm, modelo_corpo.Pose() as mc:
+        for frame in gerador:
+            # Pula frame
+            frame_idx += 1
+            if frame_idx % 3 != 0:
+                continue
+
+            # Processa frame
+            frame = cv2.flip(frame, 1)
+            imagem_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+            # Extrai pontos
+            pontos_esq, pontos_dir = extrair_pontos_duas_maos(imagem_rgb, mm)
+            pontos_corpo = extrair_pontos_corpo(imagem_rgb, mc)
+
+            if pontos_esq and pontos_dir and pontos_corpo:
+                # Extrai ponto de referência para cada mão
+                pos_dedo_esq = pontos_esq[sinal.confs[conf_idx].ponto_ref]
+                pos_dedo_dir = pontos_dir[sinal.confs[conf_idx + 1].ponto_ref]
+
+                # Valida mão esquerda/direita
+                res_esq, _ = validar_mao(sinal, pontos_esq, conf_idx, Mao.ESQUERDA)
+                res_dir, _ = validar_mao(sinal, pontos_dir, conf_idx + 1, Mao.DIREITA)
+
+                # Valida posição das mãos
+                res_pos_esq, _ = validar_posicao(
+                    sinal,
+                    pos_dedo_esq,
+                    pos_anterior,
+                    pontos_corpo,
+                    conf_idx,
+                    Mao.ESQUERDA,
+                )
+                res_pos_dir, _ = validar_posicao(
+                    sinal,
+                    pos_dedo_dir,
+                    pos_anterior,
+                    pontos_corpo,
+                    conf_idx + 1,
+                    Mao.DIREITA,
+                )
+
+                res_mao = res_esq and res_dir
+                res_posicao = res_pos_esq and res_pos_dir
+                resultado = res_mao and res_posicao
+
+                # Transição ocorreu
+                if resultado:
+                    conf_idx += 2
+
+            # Lógica exclusiva do reconhecimento por webcam
+            atingiu_tempo = time.time() - inicio >= tempo_limite
+            if gerador.tipo == TipoGerador.CAMERA:
+                cv2.imshow("Reconhecendo...", frame)
+                if (
+                    conf_idx == total_confs
+                    or (cv2.waitKey(1) & 0xFF == ord("q"))
+                    or atingiu_tempo
+                ):
+                    break
+
+            # Se deve ou não encerrar o reconhecimento
+            elif conf_idx >= total_confs or atingiu_tempo:
+                break
+
+    cv2.destroyAllWindows()
+
+    sucesso = conf_idx == total_confs
+    feedback_final = []
+
+    if sucesso:
+        for conf in sinal.confs:
+            feedback_final.append([True, conf.descricao])  # noqa: PERF401
+
+        return True, feedback_final
+
+    passo = 0
+    for idx in range(total_confs):
+        if idx % 2 == 0:
+            passo += 1
+            sucesso = idx < conf_idx
+            feedback_final.append([sucesso, f"{passo} - Simultaneamente faça:"])
+            feedback_final.append([sucesso, sinal.confs[idx].descricao])
+        else:
+            feedback_final.append([sucesso, sinal.confs[idx].descricao])
+
+    return False, feedback_final
+
+
 def extrair_pontos_mao(imagem_np, modelo) -> dict[int, tuple[float, float, float]]:
     resultados = modelo.process(imagem_np)
 
@@ -215,6 +308,28 @@ def extrair_pontos_mao(imagem_np, modelo) -> dict[int, tuple[float, float, float
             pontos[i] = (landmark.x, landmark.y, landmark.z)
 
     return pontos
+
+
+def extrair_pontos_duas_maos(imagem_np, modelo):
+    resultados = modelo.process(imagem_np)
+
+    if not resultados.multi_hand_landmarks:
+        return {}, {}
+
+    maos_detectadas = []
+    for hand_landmarks in resultados.multi_hand_landmarks:
+        pontos = {i: (lm.x, lm.y, lm.z) for i, lm in enumerate(hand_landmarks.landmark)}
+        x_pulso = hand_landmarks.landmark[0].x
+        maos_detectadas.append((x_pulso, pontos))
+
+    maos_detectadas.sort(key=lambda m: m[0])
+    esquerda, direita = {}, {}
+
+    if len(maos_detectadas) == 2:
+        esquerda = maos_detectadas[0][1]
+        direita = maos_detectadas[1][1]
+
+    return esquerda, direita
 
 
 def extrair_pontos_corpo(imagem, modelo) -> dict[int, tuple[float, float, float]]:
@@ -263,7 +378,6 @@ def identificar_mao(mao, corpo) -> Mao:
     else:
         identificada = identificar_pela_pose(mao, corpo)
 
-    # TODO: Adicionar Log e loggar qual mão foi a identificada
     return identificada
 
 

@@ -152,7 +152,7 @@ class SinalLibras2Maos(SinalLibras):
         return super().mao(*dedos)
 
     def mao_esquerda(self, *dedos: Dedo) -> Self:
-        if self.configurando_mao == Mao.ESQUERDA:
+        if self.configurando_mao == Mao.DIREITA:
             self.depois()
 
         self.configurando_mao = Mao.ESQUERDA

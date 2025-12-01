@@ -165,5 +165,7 @@ class Configuracao:
             todos.append(f"{self.posicao} ({self.ponto_ref})")
         if self.expressao:
             todos.append(self.expressao)
+        if self.mao:
+            todos.append(self.mao)
 
         return " - ".join(map(str, todos))

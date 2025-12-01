@@ -76,7 +76,7 @@ Muro = (
         Dedo.ANELAR_ESTICADO,
         Dedo.MINIMO_ESTICADO,
     )
-    .orientacao_palma(Orientacao.TRAS)
+    .orientacao_palma(Orientacao.FRENTE)
     .posicao_mao(Posicao.MESMO_LADO, 5)
     .descricao("Movimentar mão esquerda para esquerda")
     .mao_direita(
