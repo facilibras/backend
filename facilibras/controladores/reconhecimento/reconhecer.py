@@ -1,5 +1,5 @@
 import time
-from itertools import pairwise
+from contextlib import nullcontext
 
 import cv2
 
@@ -9,28 +9,31 @@ from facilibras.controladores.reconhecimento.frames import (
     TipoGerador,
     Video,
 )
-from facilibras.controladores.reconhecimento.mp_modelos import modelo_mao
+from facilibras.controladores.reconhecimento.mp_modelos import (
+    modelo_corpo,
+    modelo_mao,
+    modelo_rosto,
+)
 from facilibras.controladores.reconhecimento.validadores import (
     Invalido,
-    Validando,
-    Valido,
     get_validador,
 )
-from facilibras.modelos.sinais import SinalLibras
-from facilibras.modelos.sinais.base import Inclinacao, Movimento, Orientacao, Tipo
+from facilibras.controladores.reconhecimento.validadores.utils import distancia2
+from facilibras.modelos.mao import Mao
+from facilibras.modelos.sinais import SinalLibras, Tipo
 from facilibras.schemas import Feedback, FeedbackSchema
 
-LIMIAR_CORRETO = 100
-LIMIAR_INCORRETO = 100
-DIAGONAIS = (
-    Movimento.BAIXO_DIREITA,
-    Movimento.BAIXO_ESQUERDA,
-    Movimento.CIMA_DIREITA,
-    Movimento.CIMA_ESQUERDA,
-)
-VERTICAL = (Movimento.CIMA, Movimento.BAIXO)
-HORIZONTAIS = (Movimento.DIREITA, Movimento.ESQUERDA)
+# constantes
 TEMPO_TOTAL = 5
+MAXIMO_ERRADO = 50
+
+# feedback
+INCORRETA = "Incorreta"
+CORRETA = "Correta"
+TAB = "   "
+F_MAO = TAB + "Configuração da mão: "
+F_POS = TAB + "Posição da mão: "
+F_EXP = TAB + "Expressão facial: "
 
 
 def reconhecer_webcam(sinal: SinalLibras) -> FeedbackSchema:
@@ -45,62 +48,12 @@ def reconhecer(sinal: SinalLibras, gerador: GeradorFrames) -> FeedbackSchema:
     sinal.preparar_reconhecimento()
 
     match sinal.tipo:
-        case Tipo.ESTATICO:
-            res, erros = reconhecer_estatico(sinal, gerador, TEMPO_TOTAL)
-        case Tipo.COM_MOVIMENTO:
-            res, erros = reconhecer_com_movimento(sinal, gerador, TEMPO_TOTAL)
-        case Tipo.COM_TRANSICAO:
+        case Tipo.UMA_MAO:
             res, erros = reconhecer_com_transicao(sinal, gerador, TEMPO_TOTAL)
-        case _:
-            res, erros = False, []
+        case Tipo.DUAS_MAOS:
+            res, erros = reconhecer_duas_maos(sinal, gerador, TEMPO_TOTAL)
 
     return montar_feedback(res, erros)
-
-
-def reconhecer_estatico(
-    sinal: SinalLibras, gerador: GeradorFrames, tempo_limite: int
-) -> tuple[bool, list[list]]:
-    inicio = time.time()
-    frame_idx = 0
-    resultado = False
-    melhor = float("inf")
-    feedback = [[False, ""]]
-
-    with modelo_mao.Hands(
-        min_detection_confidence=0.5, min_tracking_confidence=0.5
-    ) as modelo:
-        for frame in gerador:
-            # Pula frame
-            frame_idx += 1
-            if frame_idx % 3 != 0:
-                continue
-
-            # Processa frame
-            frame = cv2.flip(frame, 1)
-            imagem_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            pontos = extrair_pontos_mao(imagem_rgb, modelo)
-
-            # Valida sinal
-            if pontos:
-                resultado, erros = validar_sinal(sinal, pontos, 0)
-                qtd_erros = len(erros)
-                if qtd_erros <= melhor:
-                    melhor = qtd_erros
-                    feedback[0] = [False, "/".join(erros)]
-                if resultado:
-                    feedback[0] = [True, "Configuração da mão correta"]
-
-            atingiu_tempo = time.time() - inicio >= tempo_limite
-            if gerador.tipo == TipoGerador.CAMERA:
-                cv2.imshow("Reconhecendo...", frame)
-                if resultado or (cv2.waitKey(1) & 0xFF == ord("q")) or atingiu_tempo:
-                    break
-            elif resultado or atingiu_tempo:
-                break
-
-    cv2.destroyAllWindows()
-
-    return resultado, feedback
 
 
 def reconhecer_com_transicao(
@@ -109,14 +62,17 @@ def reconhecer_com_transicao(
     inicio = time.time()
     frame_idx = 0
     conf_idx = 0
+    pos_anterior = (0, 0, 0)
+    ultimo_correto = 0
     total_confs = len(sinal.confs)
-    melhor = float("inf")
-    # feedback = [[False, ""] for _ in range(total_confs)]
-    feedback = []
+    melhor = [float("inf")] * total_confs
+    feedback = [[] for _ in range(total_confs)]
 
-    with modelo_mao.Hands(
-        min_detection_confidence=0.5, min_tracking_confidence=0.5
-    ) as modelo:
+    contexto_rosto = (
+        modelo_rosto.FaceMesh() if sinal.possui_expressao_facial else nullcontext()
+    )
+
+    with modelo_mao.Hands() as mm, modelo_corpo.Pose() as mc, contexto_rosto as mr:
         for frame in gerador:
             # Pula frame
             frame_idx += 1
@@ -127,19 +83,75 @@ def reconhecer_com_transicao(
             frame = cv2.flip(frame, 1)
             imagem_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-            # Extrai os pontos
-            pontos = extrair_pontos_mao(imagem_rgb, modelo)
-            if pontos:
-                resultado, erros = validar_sinal(sinal, pontos, conf_idx)
+            # Extrai pontos
+            pontos_mao = extrair_pontos_mao(imagem_rgb, mm)
+            pontos_corpo = extrair_pontos_corpo(imagem_rgb, mc)
+
+            if pontos_mao and pontos_corpo:
+                # Identifica mão e dedo
+                mao = identificar_mao(pontos_mao, pontos_corpo)
+                pos_dedo = pontos_mao[sinal.confs[conf_idx].ponto_ref]
+
+                # Valida essencial
+                res_mao, erros = validar_mao(sinal, pontos_mao, conf_idx, mao)
+                res_posicao, feedback_posicao = validar_posicao(
+                    sinal, pos_dedo, pos_anterior, pontos_corpo, conf_idx, mao
+                )
+
+                resultado = res_mao and res_posicao
+                pos_anterior = pos_dedo
+                if not res_posicao:
+                    erros.append(feedback_posicao)
+
+                # Valida rosto (se necessãrio)
+                if sinal.confs[conf_idx].possui_expressao_facial:
+                    pontos_rosto = extrair_pontos_rosto(imagem_rgb, mr)
+                    res_rosto, feedback_rosto = validar_rosto(
+                        sinal, pontos_rosto, conf_idx
+                    )
+                    resultado = resultado and res_rosto
+                    if not res_rosto:
+                        erros.append(feedback_rosto)
+
+                # Checa se deve atualizar feedback
                 qtd_erros = len(erros)
-                if qtd_erros <= melhor:
-                    melhor = qtd_erros
-                    feedback = erros
+                if qtd_erros <= melhor[conf_idx]:
+                    melhor[conf_idx] = qtd_erros
+                    feedback[conf_idx] = []
+
+                    # Feedback mão
+                    if res_mao:
+                        feedback[conf_idx].append([True, F_MAO + CORRETA])
+                    else:
+                        feedback[conf_idx].append([False, F_MAO + INCORRETA])
+                        if sinal.simples:
+                            for erro in erros:
+                                feedback[conf_idx].append([False, TAB + erro])
+
+                    # Feedback posição
+                    if sinal.confs[conf_idx].possui_posicao:
+                        if res_posicao:
+                            feedback[conf_idx].append([True, F_POS + CORRETA])
+                        else:
+                            feedback[conf_idx].append([False, F_POS + INCORRETA])
+
+                    # Feedback expressão facial
+                    if sinal.confs[conf_idx].possui_expressao_facial:
+                        if res_rosto:
+                            feedback[conf_idx].append([True, F_EXP + CORRETA])
+                        else:
+                            feedback[conf_idx].append([False, F_EXP + INCORRETA])
 
                 # Transição ocorreu
                 if resultado:
                     conf_idx += 1
+                    ultimo_correto = frame_idx
 
+                # Não ocorreu dentro de um determinado intervalo
+                elif frame_idx - ultimo_correto > MAXIMO_ERRADO:
+                    conf_idx = 0
+
+            # Lógica exclusiva do reconhecimento por webcam
             atingiu_tempo = time.time() - inicio >= tempo_limite
             if gerador.tipo == TipoGerador.CAMERA:
                 cv2.imshow("Reconhecendo...", frame)
@@ -149,41 +161,52 @@ def reconhecer_com_transicao(
                     or atingiu_tempo
                 ):
                     break
+
+            # Se deve ou não encerrar o reconhecimento
             elif conf_idx == total_confs or atingiu_tempo:
                 break
 
     cv2.destroyAllWindows()
 
     sucesso = conf_idx == total_confs
+    feedback_final = []
+
     if sucesso:
-        return True, [
-            [True, "Configuração da mão: Correto"],
-            [True, "Movimento: Correto"],
-        ]
-    if not feedback:
-        return False, [
-            [True, "Configuração da mão: Correto"],
-            [False, "Movimento: Incorreto ou não detectado."],
-        ]
-    return False, [
-        [False, "Configuração da mão: Incorreta (" + "/".join(feedback) + ")"],
-        [False, "Movimento: Corrija a configuração da mão antes de fazer o movimento"],
-    ]
+        for idx, conf in enumerate(sinal.confs):
+            feedback_final.append([True, f"{idx+1}: " + conf.descricao])
+            feedback_final.append([True, F_MAO + CORRETA])
+
+            if conf.possui_posicao:
+                feedback_final.append([True, F_POS + CORRETA])
+
+            if conf.possui_expressao_facial:
+                feedback_final.append([True, F_EXP + CORRETA])
+
+        return True, feedback_final
+
+    for idx, feed_conf in enumerate(feedback):
+        msg = f"{idx+1}: " + sinal.confs[idx].descricao
+        print(feed_conf)
+
+        if melhor[idx] == 0:
+            feedback_final.append([True, msg])
+        else:
+            feedback_final.append([False, msg])
+            feedback_final.extend(feed_conf)
+
+    return False, feedback_final
 
 
-def reconhecer_com_movimento(
+def reconhecer_duas_maos(
     sinal: SinalLibras, gerador: GeradorFrames, tempo_limite: int
 ) -> tuple[bool, list[list]]:
     inicio = time.time()
-    frames = []
     frame_idx = 0
-    frames_bool = []
-    melhor = float("inf")
-    feedback = []
+    conf_idx = 0
+    pos_anterior = (0, 0, 0)
+    total_confs = len(sinal.confs)
 
-    with modelo_mao.Hands(
-        min_detection_confidence=0.5, min_tracking_confidence=0.5
-    ) as modelo:
+    with modelo_mao.Hands() as mm, modelo_corpo.Pose() as mc:
         for frame in gerador:
             # Pula frame
             frame_idx += 1
@@ -192,208 +215,84 @@ def reconhecer_com_movimento(
 
             # Processa frame
             frame = cv2.flip(frame, 1)
-            altura, largura, _ = frame.shape
             imagem_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-            pontos = extrair_pontos_mao(imagem_rgb, modelo)
-            if pontos:
-                # Reconhece formato da mão
-                reconheceu_formato, erros = validar_sinal(sinal, pontos, 0)
-                qtd_erros = len(erros)
-                if qtd_erros <= melhor:
-                    melhor = qtd_erros
-                    feedback = erros
+            # Extrai pontos
+            pontos_esq, pontos_dir = extrair_pontos_duas_maos(imagem_rgb, mm)
+            pontos_corpo = extrair_pontos_corpo(imagem_rgb, mc)
 
-                # Seta o frame com reconhecido ou não
-                frames_bool.append(reconheceu_formato)
-                x_px = int(pontos[8][0] * largura)
-                y_px = int(pontos[8][1] * altura)
-                frames.append((x_px, y_px, pontos[8][2]))
+            if pontos_esq and pontos_dir and pontos_corpo:
+                # Extrai ponto de referência para cada mão
+                pos_dedo_esq = pontos_esq[sinal.confs[conf_idx].ponto_ref]
+                pos_dedo_dir = pontos_dir[sinal.confs[conf_idx + 1].ponto_ref]
 
+                # Valida mão esquerda/direita
+                res_esq, _ = validar_mao(sinal, pontos_esq, conf_idx, Mao.ESQUERDA)
+                res_dir, _ = validar_mao(sinal, pontos_dir, conf_idx + 1, Mao.DIREITA)
+
+                # Valida posição das mãos
+                res_pos_esq, _ = validar_posicao(
+                    sinal,
+                    pos_dedo_esq,
+                    pos_anterior,
+                    pontos_corpo,
+                    conf_idx,
+                    Mao.ESQUERDA,
+                )
+                res_pos_dir, _ = validar_posicao(
+                    sinal,
+                    pos_dedo_dir,
+                    pos_anterior,
+                    pontos_corpo,
+                    conf_idx + 1,
+                    Mao.DIREITA,
+                )
+
+                res_mao = res_esq and res_dir
+                res_posicao = res_pos_esq and res_pos_dir
+                resultado = res_mao and res_posicao
+
+                # Transição ocorreu
+                if resultado:
+                    conf_idx += 2
+
+            # Lógica exclusiva do reconhecimento por webcam
             atingiu_tempo = time.time() - inicio >= tempo_limite
             if gerador.tipo == TipoGerador.CAMERA:
                 cv2.imshow("Reconhecendo...", frame)
-                if (cv2.waitKey(1) & 0xFF == ord("q")) or atingiu_tempo:
+                if (
+                    conf_idx == total_confs
+                    or (cv2.waitKey(1) & 0xFF == ord("q"))
+                    or atingiu_tempo
+                ):
                     break
-            elif atingiu_tempo:
+
+            # Se deve ou não encerrar o reconhecimento
+            elif conf_idx >= total_confs or atingiu_tempo:
                 break
 
     cv2.destroyAllWindows()
 
-    # Janela de frames consecutivos onde o formato da mão está correta
-    frames_com_margem = adicionar_margem_de_erro(frames_bool, 3)
-    janelas_continuas = validar_janelas_continuas(frames_com_margem, frames)
+    sucesso = conf_idx == total_confs
+    feedback_final = []
 
-    # Por fim, avalia se houve movimento
-    if not janelas_continuas:
-        return False, [
-            [False, "Configuração da mão: Incorreta (" + "/".join(feedback) + ")"],
-            [
-                False,
-                "Movimento: Corrija a configuração da mão antes de fazer o movimento",
-            ],
-        ]
+    if sucesso:
+        for conf in sinal.confs:
+            feedback_final.append([True, conf.descricao])  # noqa: PERF401
 
-    resultado = False
-    teve_movimento = False
-    for tentativa in janelas_continuas:
-        resultado = reconhecer_sequencia_movimentos(
-            posicoes=tentativa,
-            movimentos=sinal.confs[0].movimentos,
-            limiar_correto=100,
-            limiar_incorreto=100,
-        )
-        if resultado:
-            teve_movimento = True
-            break
+        return True, feedback_final
 
-    if not teve_movimento:
-        return False, [
-            [True, "Configuração da mão: Correto"],
-            [False, "Movimento: Incorreto ou não detectado."],
-        ]
-    return True, [
-        [True, "Configuração da mão: Correto"],
-        [True, "Movimento: Correto"],
-    ]
+    passo = 0
+    for idx in range(total_confs):
+        if idx % 2 == 0:
+            passo += 1
+            sucesso = idx < conf_idx
+            feedback_final.append([sucesso, f"{passo} - Simultaneamente faça:"])
+            feedback_final.append([sucesso, sinal.confs[idx].descricao])
+        else:
+            feedback_final.append([sucesso, sinal.confs[idx].descricao])
 
-
-def reconhecer_sequencia_movimentos(
-    posicoes: list[tuple[float, float, float]],
-    movimentos: list[Movimento],
-    limiar_correto: int = LIMIAR_CORRETO,
-    limiar_incorreto: int = LIMIAR_INCORRETO,
-    debug: bool = False,
-) -> bool:
-    # TODO: Refatorar essa função, tem repetição e redundância (pelo menos funciona)
-
-    if not movimentos:
-        exc = "Deve haver pelo menos um movimento"
-        raise ValueError(exc)
-
-    if len(posicoes) <= len(movimentos):
-        exc = "Deve haver um frame a mais do que a quantidade de movimentos"
-        raise ValueError(exc)
-
-    anterior = None
-    acumulado = (0, 0, 0)
-    idx_mov_atual = 0
-    ja_validado = False
-    qtd_movimentos = len(movimentos)
-
-    for pos1, pos2 in pairwise(posicoes):
-        # Checa se terminou validação
-        if idx_mov_atual == qtd_movimentos:
-            return True
-
-        # Verifica o movimento entre um par de frames
-        validador_atual = get_validador(movimentos[idx_mov_atual])
-        resultado = validador_atual(
-            pos1, pos2, acumulado, limiar_correto, limiar_incorreto
-        )
-
-        if debug:
-            pos_str = f"{pos1} -> {pos2} + {acumulado} = {resultado}"
-            print(f"DEBUG: ({idx_mov_atual}){movimentos[idx_mov_atual]}: {pos_str}")
-
-        match resultado:
-            case Valido():
-                # Checa se validou todos os movimentos
-                if idx_mov_atual + 1 == qtd_movimentos:
-                    return True
-
-                # Enquanto não ocorrer mudança de direção, continua validando
-                # a mesma direção para permitir movimento a mais na mesma direção
-                ja_validado = True
-
-                # Considerar a possibilidade de manter a acumulação?
-                acumulado = (0, 0, 0)
-
-            case Invalido():
-                # Se invalidar depois de já ter validado, ocorreu mudança de direção
-                if ja_validado:
-                    if debug:
-                        print("DEBUG: Mudança de orientação (ídx mov++)")
-
-                    # Avança para o próximo movimento
-                    anterior = movimentos[idx_mov_atual]
-                    idx_mov_atual += 1
-                    if idx_mov_atual == qtd_movimentos:
-                        return True
-
-                    # No caso de anterior ser diagonal, reseta acumulativo
-                    if anterior in DIAGONAIS:
-                        if debug:
-                            print("DEBUG: Reseta diagonal")
-                        atual = movimentos[idx_mov_atual]
-                        if atual in HORIZONTAIS:
-                            acumulado = (0, acumulado[0], 0)
-                        elif atual in VERTICAL:
-                            acumulado = (acumulado[0], 0, 0)
-                        else:
-                            acumulado = (0, 0, 0)
-
-                    # Checa se essa mudança de direção valida o próximo movimento
-                    prox_validador = get_validador(movimentos[idx_mov_atual])
-                    resultado = prox_validador(
-                        pos1, pos2, acumulado, limiar_correto, limiar_incorreto
-                    )
-
-                    if debug:
-                        debug_msg = "S" if resultado == Valido() else "Não s"
-                        print(f"DEBUG: {debug_msg}uficiente para mudança")
-
-                    match resultado:
-                        case Valido():
-                            if debug:
-                                print("DEBUG: Mudança de movimento correta (ídx mov++)")
-
-                            # Movimento correto
-                            if idx_mov_atual + 1 == qtd_movimentos:
-                                return True
-
-                            acumulado = (0, 0, 0)
-                            continue  # Não reseta o ja_validado
-
-                        case Invalido():
-                            if debug:
-                                print(
-                                    f"DEBUG: Resetando em {movimentos[idx_mov_atual]}"
-                                )
-
-                            # Mudança de movimento na dir errada -> reseta progresso
-                            idx_mov_atual = 0
-                            acumulado = (0, 0, 0)
-                            anterior = None
-
-                        case Validando(valor_acumulado):
-                            if debug:
-                                print(f"DEBUG: Novo valor acumulado {valor_acumulado}")
-
-                            # Movimento não suficiente, adiciona na próxima validação
-                            acumulado = valor_acumulado
-
-                # Falhou sem nunca ter validado
-                else:
-                    if debug:
-                        print(f"DEBUG: Resetando em {movimentos[idx_mov_atual]}")
-
-                    # Movimento na direção errada -> reseta progresso
-                    idx_mov_atual = 0
-                    acumulado = (0, 0, 0)
-                    anterior = None
-
-                # Como invalidou, valida novamente p/ continuar movimento mesma direção
-                ja_validado = False
-
-            case Validando(valor_acumulado):
-                if debug:
-                    print(f"DEBUG: Novo valor acumulado {valor_acumulado}")
-
-                # Movimento não foi o suficiente, adiciona ele na próxima validação
-                acumulado = valor_acumulado
-
-    return idx_mov_atual == qtd_movimentos
+    return False, feedback_final
 
 
 def extrair_pontos_mao(imagem_np, modelo) -> dict[int, tuple[float, float, float]]:
@@ -411,7 +310,59 @@ def extrair_pontos_mao(imagem_np, modelo) -> dict[int, tuple[float, float, float
     return pontos
 
 
-def montar_feedback(sucesso, feedbacks: list[list]) -> FeedbackSchema:
+def extrair_pontos_duas_maos(imagem_np, modelo):
+    resultados = modelo.process(imagem_np)
+
+    if not resultados.multi_hand_landmarks:
+        return {}, {}
+
+    maos_detectadas = []
+    for hand_landmarks in resultados.multi_hand_landmarks:
+        pontos = {i: (lm.x, lm.y, lm.z) for i, lm in enumerate(hand_landmarks.landmark)}
+        x_pulso = hand_landmarks.landmark[0].x
+        maos_detectadas.append((x_pulso, pontos))
+
+    maos_detectadas.sort(key=lambda m: m[0])
+    esquerda, direita = {}, {}
+
+    if len(maos_detectadas) == 2:
+        esquerda = maos_detectadas[0][1]
+        direita = maos_detectadas[1][1]
+
+    return esquerda, direita
+
+
+def extrair_pontos_corpo(imagem, modelo) -> dict[int, tuple[float, float, float]]:
+    resultado = modelo.process(imagem)
+
+    # Para o caso de não encontrar um corpo
+    if not resultado.pose_landmarks:
+        return {}
+
+    pontos = {}
+    for i, landmark in enumerate(resultado.pose_landmarks.landmark):
+        pontos[i] = (landmark.x, landmark.y, landmark.z)
+
+    return pontos
+
+
+def extrair_pontos_rosto(imagem, modelo) -> dict[int, tuple[float, float, float]]:
+    resultado = modelo.process(imagem)
+
+    # Para o caso de não encontrar nenhum rosto
+    if not resultado.multi_face_landmarks:
+        return {}
+
+    rosto = resultado.multi_face_landmarks[0]
+
+    pontos = {}
+    for i, landmark in enumerate(rosto.landmark):
+        pontos[i] = (landmark.x, landmark.y, landmark.z)
+
+    return pontos
+
+
+def montar_feedback(sucesso: bool, feedbacks: list[list]) -> FeedbackSchema:
     fs = FeedbackSchema(sucesso=sucesso)
     for correto, mensagem in feedbacks:
         fs.feedback.append(Feedback(correto=correto, mensagem=mensagem))
@@ -419,19 +370,56 @@ def montar_feedback(sucesso, feedbacks: list[list]) -> FeedbackSchema:
     return fs
 
 
-def validar_sinal(
-    sinal: SinalLibras, pontos: dict[int, tuple[float, float, float]], conf_idx: int
+def identificar_mao(mao, corpo) -> Mao:
+    from facilibras.config.env import get_variavel_ambiente_atual
+
+    if get_variavel_ambiente_atual("SOMENTE_DIREITA", int, 0):
+        identificada = Mao.DIREITA
+    else:
+        identificada = identificar_pela_pose(mao, corpo)
+
+    return identificada
+
+
+def identificar_pela_pose(pontos_mao: dict, pontos_corpo: dict) -> Mao:
+    if not pontos_mao or not pontos_corpo:
+        return Mao.DIREITA  # não importa pois vai ser ignorado
+
+    # pulso da mão detectada
+    pulso_detectado = pontos_mao[0]
+    pulso_esq = 15
+    pulso_dir = 16
+
+    # se algum desses índices não existe na pose, assume direita
+    if pulso_esq not in pontos_corpo or pulso_dir not in pontos_corpo:
+        return Mao.DIREITA
+
+    # ve qual mão está mais próxima do pulso
+    dist_esq = distancia2(pulso_detectado, pontos_corpo[pulso_esq])
+    dist_dir = distancia2(pulso_detectado, pontos_corpo[pulso_dir])
+
+    # Invertido pq o frame foi espelhado
+    if dist_esq < dist_dir:
+        return Mao.DIREITA
+    return Mao.ESQUERDA
+
+
+def validar_mao(
+    sinal: SinalLibras,
+    pontos: dict[int, tuple[float, float, float]],
+    conf_idx: int,
+    mao: Mao = Mao.DIREITA,
 ) -> tuple[bool, list[str]]:
     dedos = sinal.confs[conf_idx].dedos
-    orientacao = sinal.confs[conf_idx].orientacao or Orientacao.FRENTE
-    inclinacao = sinal.confs[conf_idx].inclinacao or Inclinacao.RETA
+    orientacao = sinal.confs[conf_idx].orientacao
+    inclinacao = sinal.confs[conf_idx].inclinacao
 
     validadores = [get_validador(dedo) for dedo in dedos]
     sucesso = True
     mensagens = []
 
     for validador in validadores:
-        resultado = validador(pontos, orientacao, inclinacao)
+        resultado = validador(pontos, orientacao, inclinacao, mao)
         if type(resultado) is Invalido:
             sucesso = False
             mensagens.append(resultado.mensagem)
@@ -439,29 +427,38 @@ def validar_sinal(
     return sucesso, mensagens
 
 
-def validar_janelas_continuas(validos: list[bool], frames: list) -> list:
-    janelas = []
-    janela = []
-    for i, fb in enumerate(validos):
-        if fb:
-            janela.append(frames[i])
-        elif janela:
-            janelas.append(janela)
-            janela = []
+def validar_posicao(
+    sinal: SinalLibras,
+    pos_dedo: tuple[float, float, float],
+    pos_anterior: tuple[float, float, float],
+    pontos_corpo: dict[int, tuple[float, float, float]],
+    conf_idx: int,
+    mao: Mao,
+) -> tuple[bool, str]:
+    validador = get_validador(sinal.confs[conf_idx].posicao)
+    resultado = validador(pos_dedo, pos_anterior, pontos_corpo, mao)
 
-    if janela:
-        janelas.append(janela)
+    sucesso = True
+    mensagem = "Posição correta"
+    if type(resultado) is Invalido:
+        sucesso = False
+        mensagem = resultado.mensagem
 
-    return janelas
+    return sucesso, mensagem
 
 
-def adicionar_margem_de_erro(frames: list[bool], qtd: int = 3):
-    n = qtd + 1
-    copia = frames.copy()
-    for i, valor in enumerate(copia):
-        if valor:
-            # Prox. N índices viram True, se existirem
-            for j in range(i + 1, min(i + n, len(frames))):
-                frames[j] = True
+def validar_rosto(
+    sinal: SinalLibras,
+    pontos: dict[int, tuple[float, float, float]],
+    conf_idx: int,
+) -> tuple[bool, str]:
+    validador = get_validador(sinal.confs[conf_idx].expressao)
+    resultado = validador(pontos)
 
-    return frames
+    sucesso = True
+    mensagem = "Expressão facial correta"
+    if type(resultado) is Invalido:
+        sucesso = False
+        mensagem = resultado.mensagem
+
+    return sucesso, mensagem

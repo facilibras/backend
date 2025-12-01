@@ -1,40 +1,33 @@
 # Sinais
-## Geral
-- [ ] Corrigir sinal da letra K (Orientacao.FRENTE -> Orientacao.LATERAL)
-- [ ] Corrigir sinal da letra P (Orientacao.LATERAL -> Orientacao.TRAS) ???
-- [ ] Variações de Sinais
+## Observações sobre sinais
+- Sempre começar com config. errada para o algoritmo de detectar mão sincronizar
+- Letra X - Por causa dos validadores PROXIMO_AO_CORPO e DISTANTE_AO_CORPO
+    - Puxar de cima do queixo para baixo do queixo
 
-## Corrigir Sinais
-= [ ] Letra P: Falsos positivos nos dedos para baixo (trocar y por x)
-- [ ] Letra Ç: Reconhece ambos sinais na lateral.
-- [ ] Letra O: Funciona mas dependendo do ângulo da mão não é instantâneo.
-- [ ] Letra X: Movimento
+- Tchau - Mînimo fora do corpo e girar o corpo de forma a trazer ele pra dentro
+- Entender - Comecar com indicador na testa e minimo fora da testa
 
-## Melhorar
-- [ ] Polegar_dentro (BAIXO): *Falso negativo*
-- [ ] Indicador_cima (LATERAL): *Falso negativo* comum nos sinais com orientação lateral
-- [ ] Indicador_flexionado (BAIXO): *Falso positivo* quando p/ indicador para baixo
-- [ ] Indicador_frente_90 (FRENTE): *Falso positivo* quando p/ indicador para baixo
-- [ ] Medio_cima: **Funcional**, porém precisa refatorar
-- [ ] Medio_enc_polegar: **Funcional**, porém pensar em uma forma melhor
-- [ ] Medio_frente_45: **Funcional**, mas precisa deixar mais estrito
-- [ ] Anelar_baixo (LATERAL): *Falso negativo* comum nos sinais com orientação lateral
-- [ ] Anelar_enc_polegar: **Funcional**, porém pensar em uma forma melhor
-- [ ] Minimo_baixo (BAIXO): **Funcional**, porém precisa refatorar
+## Sinal bom para feedback
+- Letra B - Sinal perfeito para demonstrar mão esq/dir
+    - B é o L da mão esquerda e vice-versa
+- **Letra F** - mostra profundidade
+    - Comecar com todos esticados
+    - Inclinar pra frente o indicador
+- Letra G - simples e consegue mostrar bem o feedback em vários dedos
+- **Número 9** - Sinal perfeito para demonstrar mão esq/dir enquanto mostra feedback negativo
+    - Joinha pra baixo
+- **Água** - muito bom pra mostrar transições
+- Nome: Bom para mostrar sinal que depende de lados opostos
 
-> [!IMPORTANT]
-> Possivelmente inverter lógica da orientação lateral para lidar com falsos positivos relacionados a profundidade
+## Sinais para evitar
+- Letra K - Evitar pois aceita mesmo sem movimento
+- Número 7 - Evitar pois precisa de profundidade
+- Seu - Mesmo sem movimento ele passa (usar somente se não for mostrar feedback negativo)
+- Oi - Funciona muito bem mas de vez em quando dá **falsos positivos**
 
-# Reconhecimento
-## Geral
-- [ ] Refatorar para uma classe de reconhecimento
 
-## Movimentos
-- [ ] Usar ponto de referência dependendo do sinal
-
-## Validadores
-- [ ] Integrar rotação matricial para verificar inclinação
-- [ ] Se não der certo, utilizar atan2 para verificar inclinações
-- [ ] Utilizar profundidade nas validações
-- [ ] Modularizar validadores em pacotes para cada dedo
+# TODO
+## Terminar
+- [ ] Refatorar frases para usar os modelos das palavras em vez de criar do zero
+- [ ] Outros
 
